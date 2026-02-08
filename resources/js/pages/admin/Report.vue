@@ -1,151 +1,448 @@
 <template>
-  <div class="p-6 bg-gray-100 min-h-screen">
-    <!-- Header -->
-    <div class="flex justify-between items-center mb-6">
-      <h1 class="text-2xl font-bold text-gray-800">รายงานรายได้ประจำวัน</h1>
-      <button @click="$router.push('/admin/dashboard')" class="text-blue-600 hover:underline">
-        &larr; กลับหน้าแดชบอร์ด
+  <div class="report-container">
+    <!-- Header Section -->
+    <header class="page-header">
+      <button @click="$router.push('/admin/dashboard')" class="btn-back" aria-label="Back to Dashboard">
+        <span class="icon">←</span>
       </button>
-    </div>
+      <div class="header-content">
+        <h1 class="page-title">รายงานรายได้ประจำวัน</h1>
+        <p class="page-subtitle">Daily Revenue Report</p>
+      </div>
+    </header>
 
-    <!-- Filters & Actions -->
-    <div class="bg-white p-4 rounded-lg shadow mb-6 flex flex-col md:flex-row justify-between items-center gap-4">
-      <div class="flex items-center gap-2">
-        <label class="font-medium text-gray-700">เลือกวันที่:</label>
-        <input 
-          type="date" 
-          v-model="selectedDate" 
-          @change="fetchReport"
-          class="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+    <main class="report-content">
+      <!-- Filter Bar -->
+      <section class="filter-bar">
+        <div class="date-selector">
+          <label for="report-date" class="filter-label">เลือกวันที่:</label>
+          <input 
+            id="report-date"
+            type="date" 
+            v-model="selectedDate" 
+            @change="fetchReport"
+            class="input-date"
+            :disabled="loading"
+          >
+        </div>
+        <button 
+          @click="downloadCSV"
+          class="btn-download"
+          :disabled="loading || !reportData.details.length"
         >
-      </div>
-      <button 
-        @click="downloadCSV"
-        class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 flex items-center gap-2 transition"
-      >
-        <span>📥</span> ดาวน์โหลด CSV
-      </button>
-    </div>
+          <span class="icon">⬇</span> 
+          <span class="text">ดาวน์โหลด CSV</span>
+        </button>
+      </section>
 
-    <!-- Summary Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6" v-if="reportData.summary">
-      <div class="bg-white p-4 rounded-lg shadow border-l-4 border-blue-500">
-        <p class="text-sm text-gray-500">รายได้รวม</p>
-        <p class="text-2xl font-bold text-gray-800">฿{{ formatPrice(reportData.summary.total_revenue) }}</p>
+      <!-- Summary Section -->
+      <div v-if="loading" class="loading-overlay">
+        <div class="spinner-large"></div>
+        <p>กำลังสรุปข้อมูล...</p>
       </div>
-      <div class="bg-white p-4 rounded-lg shadow border-l-4 border-purple-500">
-        <p class="text-sm text-gray-500">จำนวนโต๊ะที่เปิด</p>
-        <p class="text-2xl font-bold text-gray-800">{{ reportData.summary.total_tables }} โต๊ะ</p>
-      </div>
-      <div class="bg-white p-4 rounded-lg shadow border-l-4 border-yellow-500">
-        <p class="text-sm text-gray-500">ปิดโดยพนักงาน</p>
-        <p class="text-2xl font-bold text-gray-800">{{ reportData.summary.closed_by_staff }} รายการ</p>
-      </div>
-      <div class="bg-white p-4 rounded-lg shadow border-l-4 border-red-500">
-        <p class="text-sm text-gray-500">ระบบปิดอัตโนมัติ</p>
-        <p class="text-2xl font-bold text-gray-800">{{ reportData.summary.closed_by_system }} รายการ</p>
-      </div>
-    </div>
 
-    <!-- Table -->
-    <div class="bg-white rounded-lg shadow overflow-hidden">
-      <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
-          <tr>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">โต๊ะ</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ลูกค้า (คน)</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">เวลา</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ปิดโดย</th>
-            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">ยอดเงิน</th>
-          </tr>
-        </thead>
-        <tbody class="bg-white divide-y divide-gray-200" v-if="reportData.details && reportData.details.length > 0">
-          <tr v-for="item in reportData.details" :key="item.id" class="hover:bg-gray-50">
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">#{{ item.id }}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ item.table_name }}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ item.pax }}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              {{ item.start_time }} - {{ item.end_time }}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm">
-              <span 
-                :class="item.closed_by === 'system' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'"
-                class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
-              >
-                {{ item.closed_by === 'system' ? 'Auto System' : 'Staff' }}
-              </span>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right font-bold">
-              ฿{{ formatPrice(item.total_amount) }}
-            </td>
-          </tr>
-        </tbody>
-        <tbody v-else>
-          <tr>
-            <td colspan="6" class="px-6 py-10 text-center text-gray-500">
-              ไม่พบข้อมูลรายได้ในวันที่เลือก
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+      <template v-else>
+        <section class="summary-grid" v-if="reportData.summary">
+          <div class="summary-card border-accent">
+            <p class="summary-label">รายได้รวม</p>
+            <p class="summary-value text-accent">฿{{ formatPrice(reportData.summary.total_revenue) }}</p>
+          </div>
+          <div class="summary-card border-primary">
+            <p class="summary-label">จำนวนโต๊ะที่เปิด</p>
+            <p class="summary-value text-primary">{{ reportData.summary.total_tables }}</p>
+          </div>
+          <div class="summary-card border-warning">
+            <p class="summary-label">ปิดโดยพนักงาน</p>
+            <p class="summary-value text-warning">{{ reportData.summary.closed_by_staff }}</p>
+          </div>
+          <div class="summary-card border-danger">
+            <p class="summary-label">ระบบปิดอัตโนมัติ</p>
+            <p class="summary-value text-danger">{{ reportData.summary.closed_by_system }}</p>
+          </div>
+        </section>
+
+        <!-- Detailed Table -->
+        <section class="table-wrapper card-theme">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>โต๊ะ</th>
+                <th>ลูกค้า</th>
+                <th>ช่วงเวลา</th>
+                <th>ปิดโดย</th>
+                <th class="text-right">ยอดเงิน</th>
+              </tr>
+            </thead>
+            <tbody v-if="reportData.details && reportData.details.length > 0">
+              <tr v-for="item in reportData.details" :key="item.id">
+                <td class="id-cell">#{{ String(item.id).padStart(3, '0') }}</td>
+                <td class="font-bold">{{ item.table_name }}</td>
+                <td>{{ item.pax }} คน</td>
+                <td class="time-cell">{{ formatTime(item.start_time) }} - {{ formatTime(item.end_time) }}</td>
+                <td>
+                  <span :class="['badge', item.closed_by === 'system' ? 'badge-danger' : 'badge-warning']">
+                    {{ item.closed_by === 'system' ? 'Auto System' : 'Staff' }}
+                  </span>
+                </td>
+                <td class="text-right font-bold text-accent">
+                  ฿{{ formatPrice(item.total_amount) }}
+                </td>
+              </tr>
+            </tbody>
+            <tbody v-else>
+              <tr>
+                <td colspan="6" class="empty-row">
+                  <div class="empty-content">
+                    <span class="empty-icon">📂</span>
+                    <p>ไม่พบข้อมูลรายได้ในวันที่เลือก</p>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+      </template>
+    </main>
   </div>
 </template>
 
 <script>
+import { ref, onMounted } from 'vue';
 import axios from 'axios';
 
 export default {
-  data() {
-    return {
-      selectedDate: new Date().toISOString().substr(0, 10), // วันนี้ YYYY-MM-DD
-      reportData: {
-        summary: null,
-        details: []
-      }
-    }
-  },
-  mounted() {
-    this.fetchReport();
-  },
-  methods: {
-    async fetchReport() {
+  name: 'DailyReport',
+  setup() {
+    const selectedDate = ref(new Date().toISOString().substr(0, 10));
+    const loading = ref(false);
+    const reportData = ref({
+      summary: null,
+      details: []
+    });
+
+    const fetchReport = async () => {
+      loading.value = true;
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.get(`/api/reports/daily?date=${this.selectedDate}`, {
+        const { data } = await axios.get(`/api/reports/daily?date=${selectedDate.value}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        this.reportData = response.data;
+        reportData.value = data;
       } catch (error) {
         console.error("Error fetching report:", error);
-        alert('ไม่สามารถดึงข้อมูลรายงานได้ หรือคุณไม่มีสิทธิ์เข้าถึง');
+        // สามารถเปลี่ยน alert เป็น Toast Notification ได้ในอนาคต
+      } finally {
+        loading.value = false;
       }
-    },
-    async downloadCSV() {
+    };
+
+    const downloadCSV = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.get(`/api/reports/export-csv?date=${this.selectedDate}`, {
+        const { data } = await axios.get(`/api/reports/export-csv?date=${selectedDate.value}`, {
           headers: { Authorization: `Bearer ${token}` },
-          responseType: 'blob', // สำคัญมากสำหรับการดาวน์โหลดไฟล์
+          responseType: 'blob',
         });
         
-        // สร้าง Link จำลองเพื่อกดดาวน์โหลด
-        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const url = window.URL.createObjectURL(new Blob([data]));
         const link = document.createElement('a');
         link.href = url;
-        link.setAttribute('download', `report-${this.selectedDate}.csv`);
+        link.setAttribute('download', `report-${selectedDate.value}.csv`);
         document.body.appendChild(link);
         link.click();
         link.remove();
+        window.URL.revokeObjectURL(url);
       } catch (error) {
         console.error("Error downloading CSV:", error);
-        alert('เกิดข้อผิดพลาดในการดาวน์โหลดไฟล์');
       }
-    },
-    formatPrice(value) {
-      return parseFloat(value).toLocaleString('th-TH', { minimumFractionDigits: 2 });
-    }
+    };
+
+    const formatPrice = (value) => {
+      return parseFloat(value || 0).toLocaleString('th-TH', { 
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2 
+      });
+    };
+
+    const formatTime = (timeString) => {
+      if (!timeString) return '';
+      return timeString.substring(0, 5);
+    };
+
+    onMounted(fetchReport);
+
+    return {
+      selectedDate,
+      loading,
+      reportData,
+      fetchReport,
+      downloadCSV,
+      formatPrice,
+      formatTime
+    };
   }
 }
 </script>
+
+<style scoped>
+.report-container {
+  min-height: 100vh;
+  background-color: var(--color-bg-primary);
+}
+
+/* Header */
+.page-header {
+  background-color: var(--color-accent);
+  padding: 30px 40px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  box-shadow: var(--shadow-md);
+}
+
+.btn-back {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition-normal);
+}
+
+.btn-back:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateX(-4px);
+}
+
+.page-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin: 0;
+}
+
+.page-subtitle {
+  font-size: 14px;
+  color: var(--color-secondary-light);
+  opacity: 0.8;
+  margin: 0;
+}
+
+/* Main Content */
+.report-content {
+  padding: 30px 40px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Filter Bar */
+.filter-bar {
+  background: white;
+  padding: 20px 24px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.date-selector {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.filter-label {
+  font-weight: 600;
+  color: var(--color-accent);
+}
+
+.input-date {
+  padding: 10px 16px;
+  border: 2px solid var(--color-border-light);
+  border-radius: var(--radius-md);
+  font-size: 15px;
+  color: var(--color-text-primary);
+}
+
+.btn-download {
+  background: linear-gradient(135deg, var(--color-accent), var(--color-accent-light));
+  color: white;
+  padding: 12px 24px;
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: var(--transition-normal);
+}
+
+.btn-download:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(139, 69, 19, 0.2);
+}
+
+.btn-download:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Summary Grid */
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.summary-card {
+  background: white;
+  padding: 24px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  border-top: 5px solid;
+  transition: var(--transition-normal);
+}
+
+.summary-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-md);
+}
+
+.summary-label {
+  font-size: 14px;
+  color: var(--color-text-light);
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.summary-value {
+  font-size: 2rem;
+  font-weight: 800;
+  margin: 0;
+}
+
+/* Card Border Colors */
+.border-accent { border-color: var(--color-accent); }
+.border-primary { border-color: var(--color-primary); }
+.border-warning { border-color: var(--color-warning); }
+.border-danger { border-color: var(--color-danger); }
+
+/* Table Section */
+.table-wrapper {
+  background: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.data-table th {
+  background-color: var(--color-bg-secondary);
+  color: var(--color-accent);
+  text-align: left;
+  padding: 18px 20px;
+  font-weight: 700;
+  font-size: 14px;
+  text-transform: uppercase;
+  border-bottom: 2px solid var(--color-border-light);
+}
+
+.data-table td {
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--color-border-light);
+  color: var(--color-text-primary);
+}
+
+.data-table tr:hover {
+  background-color: var(--color-secondary-light);
+}
+
+.id-cell {
+  color: var(--color-text-light);
+  font-family: monospace;
+}
+
+.font-bold { font-weight: 700; }
+.text-right { text-align: right; }
+.text-accent { color: var(--color-accent); }
+.text-primary { color: var(--color-primary); }
+.text-warning { color: var(--color-warning); }
+.text-danger { color: var(--color-danger); }
+
+/* Badges */
+.badge {
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  font-weight: 700;
+  color: white;
+}
+
+.badge-warning { background-color: var(--color-warning); }
+.badge-danger { background-color: var(--color-danger); }
+
+/* Loading & Empty States */
+.loading-overlay {
+  text-align: center;
+  padding: 100px 0;
+  color: var(--color-accent);
+}
+
+.spinner-large {
+  width: 50px;
+  height: 50px;
+  border: 5px solid var(--color-border-light);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 20px;
+}
+
+.empty-row {
+  padding: 0;
+}
+
+.empty-content {
+  padding: 80px 0;
+  text-align: center;
+  color: var(--color-text-light);
+}
+
+.empty-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  display: block;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .page-header { padding: 20px; }
+  .report-content { padding: 20px 16px; }
+  .filter-bar { 
+    flex-direction: column; 
+    align-items: stretch; 
+  }
+  .summary-grid { grid-template-columns: 1fr; }
+  .table-wrapper { overflow-x: auto; }
+}
+</style>

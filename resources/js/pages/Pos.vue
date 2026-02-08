@@ -1,122 +1,169 @@
 <template>
-  <div class="container-fluid py-3">
-    <div class="d-flex justify-content-between align-items-center mb-3 navbar-theme p-3 rounded">
-      <div class="d-flex align-items-center gap-3">
-        <h2 class="mb-0 text-brown">☕ <span class="accent-underline">Board Game</span> Cafe POS</h2>
-        <small class="text-secondary">ระบบสั่งอาหาร & จัดการโต๊ะ</small>
-      </div>
-
-      <div class="d-flex align-items-center gap-2">
-        <button v-if="pendingOrders.length > 0" @click="showPendingModal = true" class="btn btn-danger btn-pill">
-          🔔 มี {{ pendingOrders.length }} ออเดอร์ใหม่!
-        </button>
-
-        <div class="d-flex align-items-center gap-2">
-          <button v-if="user.role === 'admin'" @click="$router.push('/admin/dashboard')" class="btn btn-outline-secondary btn-sm">📊 แดชบอร์ด</button>
-          <span class="text-brown">พนักงาน: <strong>{{ user.name }}</strong></span>
-          <button @click="logout" class="btn btn-outline-danger btn-sm">ออกจากระบบ</button>
+  <div class="pos-page">
+    <!-- Header -->
+    <div class="pos-header">
+      <div class="header-container">
+        <div class="header-left">
+          <h1 class="cafe-title">☕ Board Game Cafe</h1>
+        </div>
+        
+        <div class="header-right">
+          <button v-if="pendingOrders.length > 0" @click="showPendingModal = true" class="btn-notification">
+            🔔 <span class="notification-count">{{ pendingOrders.length }}</span> ออเดอร์ใหม่
+          </button>
+          <div class="staff-info">
+            <span class="staff-label">พนักงาน:</span>
+            <strong class="staff-name">{{ user.name }}</strong>
+          </div>
+          <button v-if="user.role === 'admin'" @click="$router.push('/admin/dashboard')" class="btn-header">
+            📊 Dashboard
+          </button>
+          <button @click="logout" class="btn-header">
+            🚪 ออกจากระบบ
+          </button>
         </div>
       </div>
     </div>
 
-    <main>
-      <h4 class="mb-3 text-brown">ผังร้าน — เลือกโต๊ะเพื่อเปิดบิล</h4>
+    <!-- Main Content -->
+    <div class="pos-content">
+      <div class="content-header">
+        <h2 class="section-title">ผังร้าน</h2>
+        <p class="section-subtitle">เลือกโต๊ะเพื่อเปิดบิลหรือจัดการออเดอร์</p>
+      </div>
 
-      <div v-if="loading" class="text-muted">กำลังโหลดข้อมูล...</div>
+      <!-- Loading State -->
+      <div v-if="loading" class="loading-state">
+        <div class="spinner"></div>
+        <p>กำลังโหลดข้อมูล...</p>
+      </div>
 
-      <div v-else class="row g-3">
-        <div v-for="table in tables" :key="table.id" class="col-6 col-sm-4 col-md-3">
+      <!-- Table Grid -->
+      <div v-else class="table-grid">
+        <div v-for="table in tables" :key="table.id" class="table-card-wrapper">
           <div
-            class="card card-theme card-themed-hover text-center p-3"
-            :class="{ 'border-brown': table.status?.toLowerCase() === 'busy' }"
+            class="table-card"
+            :class="{
+              'table-available': table.status?.toLowerCase() === 'available',
+              'table-busy': table.status?.toLowerCase() === 'busy'
+            }"
             @click="handleTableClick(table)"
-            style="cursor: pointer; min-height: 120px;"
           >
-            <div class="h5 table-name text-brown">{{ table.name }}</div>
-            <div class="text-secondary table-info">
-              {{ table.seat_count }} ที่นั่ง
-            </div>
-            <div class="mt-2">
-              <span v-if="table.status?.toLowerCase() === 'available'" class="badge bg-success">ว่าง</span>
-              <span v-else class="badge bg-danger">ไม่ว่าง</span>
+            <!-- Pending Badge -->
+            <div v-if="getTablePendingCount(table.id) > 0" class="pending-badge">
+              {{ getTablePendingCount(table.id) }}
             </div>
 
-            <div v-if="getTablePendingCount(table.id) > 0" class="position-absolute" style="top:8px; right:12px;">
-              <span class="badge bg-danger">{{ getTablePendingCount(table.id) }}</span>
+            <!-- Table Info -->
+            <div class="table-number">{{ table.name }}</div>
+            
+            <div class="table-seats">
+              <span class="seats-icon">👥</span>
+              <span>{{ table.seat_count }} ที่นั่ง</span>
             </div>
-          </div>
-        </div>
-      </div>
-    </main>
 
-    <!-- Pending Orders Modal (simple card modal) -->
-    <div v-if="showPendingModal" class="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center" style="background: rgba(0,0,0,0.45); z-index:1050;">
-      <div class="card" style="width:480px; max-width:95%;">
-        <div class="card-body">
-          <h5 class="card-title">🔔 ยืนยันรายการอาหารจากลูกค้า</h5>
-          <div class="list-group mb-3">
-            <div v-for="order in pendingOrders" :key="order.id" class="list-group-item d-flex justify-content-between align-items-start">
-              <div>
-                <div><strong>โต๊ะ {{ order.session?.table?.name }}</strong> — {{ order.product?.name }} x {{ order.quantity }}</div>
-                <small class="text-muted">เมื่อ {{ formatTime(order.created_at) }}</small>
-              </div>
-              <div class="d-flex gap-2">
-                <button @click="confirmOrder(order.id, 'cancelled')" class="btn btn-sm btn-outline-danger">ปฏิเสธ</button>
-                <button @click="confirmOrder(order.id, 'pending')" class="btn btn-sm btn-success">ยืนยัน</button>
-              </div>
+            <!-- Status Badge -->
+            <div class="table-status">
+              <span v-if="table.status?.toLowerCase() === 'available'" class="status-badge status-available">
+                ✓ ว่าง
+              </span>
+              <span v-else class="status-badge status-busy">
+                ● ไม่ว่าง
+              </span>
             </div>
-          </div>
-          <div class="text-end">
-            <button @click="showPendingModal = false" class="btn btn-secondary">ปิด</button>
+
+            <!-- Timer for Busy Tables -->
+            <div v-if="table.status?.toLowerCase() === 'busy' && table.active_session" class="table-timer">
+              <div class="timer-label">เวลาใช้งาน</div>
+              <div class="timer-value">⏱️ {{ formatDuration(table.active_session.start_time) }}</div>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Toast Notification -->
-    <div v-if="toastMsg" class="toast show position-fixed top-0 start-50 translate-middle-x mt-3" role="status" aria-live="polite">
-      <div class="toast-body bg-dark text-white rounded-pill px-4 py-2">{{ toastMsg }}</div>
+    <!-- Pending Orders Modal -->
+    <div v-if="showPendingModal" class="modal-overlay" @click.self="showPendingModal = false">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3>🔔 ยืนยันรายการอาหารจากลูกค้า</h3>
+        </div>
+        <div class="modal-body">
+          <div class="pending-orders-list">
+            <div v-for="order in pendingOrders" :key="order.id" class="pending-order-item">
+              <div class="order-info">
+                <div class="order-table">โต๊ะ {{ order.session?.table?.name }}</div>
+                <div class="order-detail">{{ order.product?.name }} × {{ order.quantity }}</div>
+                <div class="order-time">{{ formatTime(order.created_at) }}</div>
+              </div>
+              <div class="order-actions">
+                <button @click="confirmOrder(order.id, 'cancelled')" class="btn-reject">ปฏิเสธ</button>
+                <button @click="confirmOrder(order.id, 'pending')" class="btn-confirm">ยืนยัน</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button @click="showPendingModal = false" class="btn-close-modal">ปิด</button>
+        </div>
+      </div>
     </div>
 
     <!-- Open Table Modal -->
-    <div v-if="showModal" class="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center" style="background: rgba(0,0,0,0.45); z-index:1050;">
-      <div class="card" style="width:360px; max-width:95%;">
-        <div class="card-body text-center">
-          <h5 class="card-title">เปิดโต๊ะ {{ targetTable?.name }}</h5>
-          <div class="mb-3">
+    <div v-if="showModal" class="modal-overlay" @click.self="closeModal">
+      <div class="modal-card modal-small">
+        <div class="modal-header">
+          <h3>เปิดโต๊ะ {{ targetTable?.name }}</h3>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
             <label class="form-label">จำนวนลูกค้า (คน)</label>
-            <input type="number" v-model="pax" min="1" class="form-control w-50 mx-auto text-center" />
+            <div class="pax-control">
+              <button @click="pax > 1 ? pax-- : null" class="btn-pax" type="button">-</button>
+              <input type="number" v-model.number="pax" min="1" class="form-input pax-input" />
+              <button @click="pax++" class="btn-pax" type="button">+</button>
+            </div>
           </div>
-          <div class="mb-2 form-check">
-            <input class="form-check-input" type="checkbox" v-model="isDayPass" id="isDayPass">
-            <label class="form-check-label" for="isDayPass">🎟️ 1 Day Pass (เหมาวัน)</label>
+          
+          <div class="form-check">
+            <input type="checkbox" v-model="isDayPass" id="isDayPass" class="checkbox-input">
+            <label for="isDayPass" class="checkbox-label">🎟️ 1 Day Pass (เหมาวัน)</label>
           </div>
 
-          <p v-if="pax > targetTable?.seat_count" class="text-warning">⚠️ ลูกค้า {{ pax }} คน เกินจำนวนที่นั่ง ({{ targetTable?.seat_count }})</p>
-
-          <div class="d-flex gap-2 mt-3">
-            <button @click="closeModal" class="btn btn-outline-secondary flex-fill">ยกเลิก</button>
-            <button @click="confirmOpenTable" class="btn btn-success flex-fill">✅ ยืนยัน</button>
+          <div v-if="pax > targetTable?.seat_count" class="warning-message">
+            ⚠️ ลูกค้า {{ pax }} คน เกินจำนวนที่นั่ง ({{ targetTable?.seat_count }})
           </div>
+        </div>
+        <div class="modal-footer">
+          <button @click="closeModal" class="btn-secondary">ยกเลิก</button>
+          <button @click="confirmOpenTable" class="btn-primary">✅ ยืนยัน</button>
         </div>
       </div>
     </div>
 
     <!-- QR Modal -->
-    <div v-if="showQrModal" class="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center" style="background: rgba(0,0,0,0.45); z-index:1050;">
-      <div class="card" style="width:360px; max-width:95%;">
-        <div class="card-body text-center">
-          <h5 class="card-title">📱 สแกนเพื่อสั่งอาหาร</h5>
-          <p class="mb-2">โต๊ะ: {{ targetTable?.name }}</p>
-          <div class="qr-wrapper d-flex justify-content-center my-2">
-            <QrcodeVue :value="qrUrl" :size="200" level="H" />
+    <div v-if="showQrModal" class="modal-overlay" @click.self="closeQrModal">
+      <div class="modal-card modal-small">
+        <div class="modal-header">
+          <h3>📱 สแกนเพื่อสั่งอาหาร</h3>
+        </div>
+        <div class="modal-body text-center">
+          <p class="qr-table-name">โต๊ะ: <strong>{{ targetTable?.name }}</strong></p>
+          <div class="qr-code-wrapper">
+            <QrcodeVue :value="qrUrl" :size="220" level="H" />
           </div>
-          <p class="text-muted small">ให้ลูกค้าสแกนเพื่อดูเมนูและสั่งอาหาร</p>
-          <button @click="closeQrModal" class="btn btn-secondary w-100">ปิด</button>
+          <p class="qr-instruction">ให้ลูกค้าสแกนเพื่อดูเมนูและสั่งอาหาร</p>
+        </div>
+        <div class="modal-footer">
+          <button @click="closeQrModal" class="btn-primary full-width">ปิด</button>
         </div>
       </div>
     </div>
 
+    <!-- Toast Notification -->
+    <div v-if="toastMsg" class="toast-notification">
+      {{ toastMsg }}
+    </div>
   </div>
 </template>
 
@@ -124,17 +171,18 @@
 import { ref, onMounted, onUnmounted } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
-import QrcodeVue from 'qrcode.vue'; // <--- 1. Import มาใช้
+import QrcodeVue from 'qrcode.vue';
 
 export default {
   components: {
-    QrcodeVue // <--- 2. ลงทะเบียน Component
+    QrcodeVue
   },
   setup() {
     const router = useRouter();
     const user = ref({});
     const currentTime = ref(new Date());
     let timerInterval = null;
+    let pollingInterval = null;
 
     try {
         const storedUser = localStorage.getItem('user');
@@ -146,7 +194,6 @@ export default {
     const pendingOrders = ref([]);
     const showPendingModal = ref(false);
     const toastMsg = ref('');
-    let pollingInterval = null;
 
     // Modal 1: เปิดโต๊ะ
     const showModal = ref(false);
@@ -165,7 +212,6 @@ export default {
           headers: { Authorization: `Bearer ${token}` }
         });
         
-        // ถ้ามีออเดอร์ใหม่ (จำนวนมากกว่าเดิม) ให้โชว์ Toast
         if (response.data.length > pendingOrders.value.length) {
           showToast('🔔 มีออเดอร์ใหม่จากลูกค้า!');
         }
@@ -199,6 +245,7 @@ export default {
     };
 
     const formatTime = (timeStr) => {
+      if (!timeStr) return '';
       return new Date(timeStr).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
     };
 
@@ -231,24 +278,21 @@ export default {
     };
 
     const handleTableClick = (table) => {
-      if (table.status === 'busy') {
-        router.push(`/order/${table.id}`); // ถ้าไม่ว่าง ให้ไปหน้า Staff Order
+      if (table.status?.toLowerCase() === 'busy') {
+        router.push(`/order/${table.id}`);
         return;
       }
       targetTable.value = table;
       pax.value = 1;
       isDayPass.value = false;
-      showModal.value = true; // เปิด Modal ถามจำนวนคน
+      showModal.value = true;
     };
 
     const closeModal = () => {
         showModal.value = false;
-        // targetTable.value = null; // อย่าเพิ่งเคลียร์ เผื่อใช้ต่อใน QR
     };
 
-    // ✅ ฟังก์ชันสำคัญ: เปิดโต๊ะ -> ได้ Token -> สร้าง QR
     const confirmOpenTable = async () => {
-        // เพิ่ม Alert เตือนถ้าคนเกินที่นั่ง
         if (pax.value > targetTable.value.seat_count) {
             const proceed = confirm(`⚠️ จำนวนลูกค้า (${pax.value} คน) เกินที่นั่งของโต๊ะนี้ (${targetTable.value.seat_count} ที่นั่ง)\nคุณยังต้องการที่จะเปิดโต๊ะนี้ใช่หรือไม่?`);
             if (!proceed) return;
@@ -256,7 +300,6 @@ export default {
 
         try {
             const token = localStorage.getItem('token');
-            // ยิง API เปิดโต๊ะ
             const response = await axios.post(`/api/tables/${targetTable.value.id}/open`, {
                 pax: pax.value,
                 is_day_pass: isDayPass.value
@@ -264,26 +307,13 @@ export default {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
-            // 1. ปิด Modal ถามจำนวนคน
             showModal.value = false;
-            
-            // 2. ดึง guest_token จาก API Response
-            // (ต้องมั่นใจว่า TableController ส่ง session กลับมานะ)
             const sessionData = response.data.session; 
             const guestToken = sessionData.guest_token;
-
-            // 3. สร้าง URL สำหรับลูกค้า
-            // ⚠️ สำคัญ: ต้องเปลี่ยน localhost เป็น IP Address เครื่องเรา (เช่น 192.168.1.x) 
-            // ไม่งั้นมือถือลูกค้าจะเปิดไม่ได้
-            const baseUrl = window.location.origin; // หรือ Hardcode IP ไปเลย
+            const baseUrl = window.location.origin;
             qrUrl.value = `${baseUrl}/customer/menu?token=${guestToken}`;
-
-            // 4. เปิด Modal QR Code
             showQrModal.value = true;
-
-            // 5. อัปเดตสถานะโต๊ะข้างหลัง
             fetchTables(); 
-
         } catch (error) {
             alert('เกิดข้อผิดพลาด: ' + (error.response?.data?.message || error.message));
         }
@@ -291,7 +321,7 @@ export default {
 
     const closeQrModal = () => {
         showQrModal.value = false;
-        targetTable.value = null; // เคลียร์ค่าทิ้ง
+        targetTable.value = null;
     };
 
     const logout = () => {
@@ -307,7 +337,10 @@ export default {
       timerInterval = setInterval(() => {
           currentTime.value = new Date();
       }, 1000);
-      pollingInterval = setInterval(fetchPendingOrders, 5000); // เช็คทุก 5 วินาที
+      pollingInterval = setInterval(() => {
+        fetchPendingOrders();
+        fetchTables();
+      }, 5000);
     });
 
     onUnmounted(() => {
@@ -328,22 +361,728 @@ export default {
 </script>
 
 <style scoped>
-/* Minimal overrides & helpers (Bootstrap handles layout) */
-.qr-wrapper { margin: 12px 0; }
+/* ========== Global Styles ========== */
+.pos-page {
+  min-height: 100vh;
+  background: #FFF8E7;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
 
-/* Ensure card-theme uses theme variables nicely in this page */
-.card-theme { background: var(--color-bg-card); border: 1px solid var(--color-border-light); }
+/* ========== Header ========== */
+.pos-header {
+  background: linear-gradient(135deg, #8B4513 0%, #A0522D 100%);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
 
-.text-brown { color: var(--color-text-primary) !important; }
+.header-container {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 20px 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
 
-.badge.bg-success { background-color: var(--color-success) !important; color: var(--color-text-white); }
-.badge.bg-danger { background-color: var(--color-danger) !important; color: var(--color-text-white); }
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
 
-.position-absolute { position: absolute; }
+.cafe-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #FFE4B5;
+  margin: 0;
+  letter-spacing: -0.5px;
+}
 
-/* small responsive tweaks */
-@media (max-width: 576px) {
-  .card.card-theme { padding: 12px; }
-  .accent-underline { border-bottom-width: 2px; }
+
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.btn-notification {
+  background: linear-gradient(135deg, #FF6B6B 0%, #DC3545 100%);
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+  animation: pulse 2s infinite;
+}
+
+.btn-notification:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+}
+
+.notification-count {
+  background: white;
+  color: #DC3545;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-weight: 700;
+  margin: 0 4px;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.btn-header {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-header:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.staff-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 14px;
+}
+
+.staff-name {
+  color: white;
+}
+
+.btn-logout {
+  background: rgba(220, 53, 69, 0.2);
+  color: white;
+  border: 1px solid rgba(220, 53, 69, 0.4);
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-logout:hover {
+  background: #DC3545;
+  border-color: #DC3545;
+}
+
+/* ========== Main Content ========== */
+.pos-content {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 32px;
+}
+
+.content-header {
+  margin-bottom: 32px;
+}
+
+.section-title {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--color-accent);
+  margin: 0 0 8px 0;
+  position: relative;
+  display: inline-block;
+}
+
+.section-title::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 60%;
+  height: 4px;
+  background: linear-gradient(90deg, var(--color-primary) 0%, transparent 100%);
+  border-radius: 2px;
+}
+
+.section-subtitle {
+  font-size: 16px;
+  color: var(--color-accent-light);
+  margin: 0;
+}
+
+/* ========== Loading State ========== */
+.loading-state {
+  text-align: center;
+  padding: 80px 20px;
+  color: var(--color-accent-light);
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid var(--color-secondary-dark);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 16px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ========== Table Grid ========== */
+.table-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 24px;
+}
+
+/* ========== Table Cards ========== */
+.table-card {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  min-height: 180px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.table-card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-md);
+}
+
+.table-available {
+  border: 3px solid var(--color-success-light);
+}
+
+.table-available:hover {
+  border-color: var(--color-success);
+  box-shadow: 0 8px 24px rgba(102, 187, 106, 0.3);
+}
+
+.table-busy {
+  border: 3px solid var(--color-danger-light);
+}
+
+.table-busy:hover {
+  border-color: var(--color-danger);
+  box-shadow: 0 8px 24px rgba(220, 53, 69, 0.3);
+}
+
+.pending-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: var(--color-danger);
+  color: white;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 13px;
+  box-shadow: 0 2px 8px rgba(220, 53, 69, 0.4);
+  animation: bounce 1s infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+.table-number {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--color-accent);
+  margin-bottom: 4px;
+}
+
+.table-seats {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-accent-light);
+  font-size: 15px;
+}
+
+.seats-icon {
+  font-size: 18px;
+}
+
+.table-status {
+  margin-top: auto;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.status-available {
+  background: linear-gradient(135deg, var(--color-success-light) 0%, var(--color-success) 100%);
+  color: white;
+}
+
+.status-busy {
+  background: linear-gradient(135deg, var(--color-danger-light) 0%, var(--color-danger) 100%);
+  color: white;
+}
+
+.table-timer {
+  margin-top: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-secondary-dark);
+}
+
+.timer-label {
+  font-size: 11px;
+  color: var(--color-accent-light);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.timer-value {
+  font-family: 'Courier New', monospace;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-danger);
+}
+
+/* ========== Modals ========== */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal-card {
+  background: white;
+  border-radius: 16px;
+  box-shadow: var(--shadow-lg);
+  max-width: 500px;
+  width: 100%;
+  max-height: 90vh;
+  overflow: hidden;
+  animation: slideUp 0.3s ease;
+}
+
+.modal-small {
+  max-width: 400px;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modal-header {
+  padding: 24px 24px 16px;
+  border-bottom: 1px solid var(--color-secondary-dark);
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-accent);
+}
+
+.modal-body {
+  padding: 24px;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.modal-footer {
+  padding: 16px 24px;
+  border-top: 1px solid var(--color-secondary-dark);
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+/* Pending Orders List */
+.pending-orders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pending-order-item {
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-secondary-dark);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.order-info {
+  flex: 1;
+}
+
+.order-table {
+  font-weight: 700;
+  color: var(--color-accent);
+  margin-bottom: 4px;
+}
+
+.order-detail {
+  color: var(--color-text-secondary);
+  font-size: 14px;
+}
+
+.order-time {
+  color: var(--color-text-light);
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.order-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-reject,
+.btn-confirm {
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  transition: var(--transition-normal);
+  border: none;
+}
+
+.btn-reject {
+  background: #FFE4E1;
+  color: var(--color-danger);
+}
+
+.btn-reject:hover {
+  background: var(--color-danger);
+  color: white;
+}
+
+.btn-confirm {
+  background: linear-gradient(135deg, var(--color-success-light) 0%, var(--color-success) 100%);
+  color: white;
+}
+
+.btn-confirm:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 187, 106, 0.3);
+}
+
+/* Form Elements */
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: var(--color-accent);
+  font-size: 14px;
+}
+
+.form-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid var(--color-secondary-dark);
+  border-radius: 8px;
+  font-size: 16px;
+  transition: var(--transition-normal);
+  text-align: center;
+}
+
+.pax-control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-pax {
+  width: 45px;
+  height: 45px;
+  border-radius: 8px;
+  border: 2px solid var(--color-secondary-dark);
+  background: white;
+  color: var(--color-accent);
+  font-size: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-pax:hover {
+  background: var(--color-secondary);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.pax-input {
+  flex: 1;
+  margin: 0;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(255, 140, 66, 0.1);
+}
+
+.form-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.checkbox-input {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.checkbox-label {
+  cursor: pointer;
+  user-select: none;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.warning-message {
+  background: #FFF3CD;
+  border: 1px solid #FFE69C;
+  color: #856404;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  margin-top: 16px;
+}
+
+/* Modal Buttons */
+.btn-primary,
+.btn-secondary,
+.btn-close-modal {
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: var(--transition-normal);
+  border: none;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
+  color: white;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 140, 66, 0.3);
+}
+
+.btn-secondary {
+  background: var(--color-secondary-dark);
+  color: var(--color-accent);
+}
+
+.btn-secondary:hover {
+  background: #D2C4A8;
+}
+
+.btn-close-modal {
+  background: var(--color-accent);
+  color: white;
+}
+
+.btn-close-modal:hover {
+  background: var(--color-accent-light);
+}
+
+.full-width {
+  width: 100%;
+}
+
+/* QR Code */
+.qr-table-name {
+  font-size: 16px;
+  color: var(--color-text-secondary);
+  margin-bottom: 16px;
+}
+
+.qr-table-name strong {
+  color: var(--color-accent);
+  font-size: 18px;
+}
+
+.qr-code-wrapper {
+  background: white;
+  border: 3px solid var(--color-secondary-dark);
+  border-radius: 12px;
+  padding: 20px;
+  display: inline-block;
+  margin-bottom: 16px;
+}
+
+.qr-instruction {
+  color: var(--color-text-light);
+  font-size: 13px;
+  margin: 0;
+}
+
+.text-center {
+  text-align: center;
+}
+
+/* ========== Toast Notification ========== */
+.toast-notification {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--color-accent);
+  color: white;
+  padding: 16px 32px;
+  border-radius: 24px;
+  box-shadow: var(--shadow-lg);
+  z-index: 2000;
+  animation: slideDown 0.3s ease;
+  font-weight: 600;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -20px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+/* ========== Responsive ========== */
+@media (max-width: 1024px) {
+  .table-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .header-container {
+    padding: 16px 20px;
+  }
+
+  .cafe-title {
+    font-size: 22px;
+  }
+
+  .system-badge {
+    display: none;
+  }
+
+  .header-right {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .pos-content {
+    padding: 24px 16px;
+  }
+
+  .section-title {
+    font-size: 24px;
+  }
+
+  .table-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .table-card {
+    padding: 16px;
+    min-height: 160px;
+  }
+
+  .table-number {
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .btn-notification,
+  .btn-header,
+  .btn-logout {
+    font-size: 12px;
+    padding: 6px 12px;
+  }
+
+  .staff-info {
+    font-size: 12px;
+  }
+
+  .table-grid {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

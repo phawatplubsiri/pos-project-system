@@ -13,16 +13,31 @@ class TableController extends Controller
 {
     public function index()
     {
-        return response()->json(Table::with(['sessions' => function($query) {
-            $query->where('status', 'ongoing');
-        }])->get());
+        $tables = Table::with(['sessions' => function ($query) {
+            $query->where('status', 'ongoing')->with('user');
+        }])->get();
+
+        // Add active_session data for easier frontend access
+        $tables->each(function ($table) {
+            if ($table->sessions->isNotEmpty()) {
+                $session = $table->sessions->first();
+                $table->active_session = [
+                    'customer_name' => $session->user ? $session->user->name : 'ลูกค้า',
+                    'start_time' => $session->start_time,
+                    'guest_amount' => $session->guest_amount,
+                    'is_day_pass' => $session->is_day_pass
+                ];
+            }
+        });
+
+        return response()->json($tables);
     }
 
     // แก้ไขฟังก์ชันนี้ใหม่
     public function open(Request $request, $id)
     {
         $table = Table::find($id);
-        
+
         if (!$table) {
             return response()->json(['message' => 'ไม่พบโต๊ะนี้'], 404);
         }
@@ -34,7 +49,7 @@ class TableController extends Controller
         try {
             return \Illuminate\Support\Facades\DB::transaction(function () use ($table, $request) {
                 // 1. เปลี่ยนสถานะโต๊ะ
-                $table->status = 'busy'; 
+                $table->status = 'busy';
                 $table->save();
 
                 // 2. ✅ สร้าง Session ใหม่
@@ -50,7 +65,7 @@ class TableController extends Controller
                 ]);
 
                 return response()->json([
-                    'message' => 'เปิดโต๊ะและสร้าง Session สำเร็จ', 
+                    'message' => 'เปิดโต๊ะและสร้าง Session สำเร็จ',
                     'table' => $table,
                     'session' => $session
                 ]);
@@ -64,9 +79,9 @@ class TableController extends Controller
     {
         // หา Session ที่กำลังเล่นอยู่ (ongoing)
         $session = Session::where('table_id', $id)
-                          ->where('status', 'ongoing')
-                          ->with('orders.product') // ดึงรายการอาหารมาด้วย
-                          ->first();
+            ->where('status', 'ongoing')
+            ->with('orders.product') // ดึงรายการอาหารมาด้วย
+            ->first();
 
         if (!$session) {
             return response()->json(['message' => 'ไม่พบข้อมูล หรือโต๊ะนี้ว่างอยู่'], 404);
@@ -89,14 +104,14 @@ class TableController extends Controller
             if ($hours == 0) $hours = 1; // ขั้นต่ำ 1 ชม.
 
             $setting = Setting::where('key', 'hourly_rate')->first();
-            $ratePerHour = $setting ? (int)$setting->value : 40; 
+            $ratePerHour = $setting ? (int)$setting->value : 40;
             $timeCost = $hours * $ratePerHour * $pax;
         }
 
         // --- คำนวณค่าอาหาร (เฉพาะรายการที่ไม่ได้ยกเลิก) ---
         $foodCost = $session->orders()
-                            ->where('status', '!=', 'cancelled')
-                            ->sum('total_price');
+            ->where('status', '!=', 'cancelled')
+            ->sum('total_price');
 
         return response()->json([
             'session_id' => $session->id,
@@ -141,12 +156,12 @@ class TableController extends Controller
         }
 
         $foodCost = $session->orders()
-                            ->where('status', '!=', 'cancelled')
-                            ->sum('total_price');
+            ->where('status', '!=', 'cancelled')
+            ->sum('total_price');
         $grandTotal = $timeCost + $foodCost;
 
         // --- อัปเดต Database ---
-        
+
         // 1. ปิด Session
         $session->update([
             'end_time' => $now,
@@ -167,14 +182,14 @@ class TableController extends Controller
 
     public function show($id)
     {
-        $table = Table::with(['sessions' => function($query) {
+        $table = Table::with(['sessions' => function ($query) {
             $query->where('status', 'ongoing')->latest();
         }])->find($id);
 
         if (!$table) {
             return response()->json(['message' => 'ไม่พบโต๊ะนี้'], 404);
         }
-        
+
         return response()->json($table);
     }
 

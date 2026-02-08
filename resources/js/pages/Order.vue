@@ -1,102 +1,147 @@
 <template>
-  <div class="container-fluid py-3">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-      <div class="d-flex align-items-center gap-3">
-        <button @click="$router.go(-1)" class="btn btn-light btn-sm">⬅ กลับ</button>
-        <div>
-          <h4 class="mb-0 text-brown">🛒 โต๊ะ {{ tableName || tableId }}</h4>
-          <small class="text-muted">⏱️ {{ formatDuration(sessionStartTime) }}</small>
+  <div class="order-page">
+    <!-- Header -->
+    <div class="order-header">
+      <div class="header-container">
+        <div class="header-left">
+          <button @click="$router.go(-1)" class="btn-back">←</button>
+          <div class="table-info">
+            <h1 class="table-title">🛒 โต๊ะ {{ tableName || tableId }}</h1>
+            <div class="table-timer">⏱️ {{ formatDuration(sessionStartTime) }}</div>
+          </div>
         </div>
-      </div>
-
-      <div class="d-flex gap-2">
-        <button @click="showQrModal = true" class="btn btn-outline-secondary btn-sm">📱 QR Code</button>
-        <button @click="handleCheckout" class="btn btn-warning btn-sm">💰 เช็คบิล / ปิดโต๊ะ</button>
+        
+        <div class="header-actions">
+          <button @click="showQrModal = true" class="btn-qr">📱 QR Code</button>
+          <button @click="handleCheckout" class="btn-checkout">💰 เช็คบิล / ปิดโต๊ะ</button>
+        </div>
       </div>
     </div>
 
-    <div class="row g-3">
-      <div class="col-lg-8">
-        <div class="mb-3">
-          <div class="nav nav-pills flex-row gap-2 overflow-auto">
-            <button v-for="cat in categories" :key="cat.type" @click="currentTab = cat.type"
-              :class="['nav-link', { active: currentTab === cat.type } ]">
+    <!-- Main Content -->
+    <div class="order-content">
+      <div class="content-grid">
+        <!-- Products Section -->
+        <div class="products-section">
+          <!-- Category Filters -->
+          <div class="category-filters">
+            <button
+              v-for="cat in categories"
+              :key="cat.type"
+              @click="currentTab = cat.type"
+              class="category-btn"
+              :class="{ active: currentTab === cat.type }"
+            >
               {{ cat.name }}
             </button>
           </div>
-        </div>
 
-        <div class="row g-2">
-          <div v-for="product in filteredProducts" :key="product.id" class="col-6 col-md-4">
-            <div class="card card-theme h-100" @click="addToCart(product)" style="cursor:pointer;">
-              <div class="card-body p-2 text-center">
-                <div class="fw-semibold product-name">{{ product.name }}</div>
-                <div class="text-success product-price">{{ product.price }} ฿</div>
-              </div>
+          <!-- Product Grid -->
+          <div class="product-grid">
+            <div
+              v-for="product in filteredProducts"
+              :key="product.id"
+              class="product-card"
+              @click="addToCart(product)"
+            >
+              <div class="product-name">{{ product.name }}</div>
+              <div class="product-price">{{ product.price }} ฿</div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div class="col-lg-4">
-        <div class="card card-theme p-3">
-          <div v-if="awaitingConfirmOrders.length > 0" class="mb-3">
-            <div class="alert alert-warning mb-2">🔔 ออเดอร์จากลูกค้า (รอยืนยัน)</div>
-            <div class="list-group mb-2">
-              <div v-for="order in awaitingConfirmOrders" :key="order.id" class="list-group-item d-flex justify-content-between align-items-center">
-                <div>
-                  <div class="fw-semibold">{{ order.product?.name }}</div>
-                  <small class="text-muted">จำนวน: {{ order.quantity }}</small>
+        <!-- Cart & Orders Section -->
+        <div class="cart-section">
+          <!-- Awaiting Confirmation Orders -->
+          <div v-if="awaitingConfirmOrders.length > 0" class="awaiting-orders">
+            <div class="section-header alert-header">
+              🔔 ออเดอร์จากลูกค้า (รอยืนยัน)
+            </div>
+            <div class="order-list">
+              <div
+                v-for="order in awaitingConfirmOrders"
+                :key="order.id"
+                class="order-item awaiting-item"
+              >
+                <div class="order-info">
+                  <div class="order-product">{{ order.product?.name }}</div>
+                  <div class="order-qty">จำนวน: {{ order.quantity }}</div>
                 </div>
-                <div class="d-flex gap-1">
-                  <button @click="confirmCancelOrder(order.id)" class="btn btn-sm btn-outline-danger">❌</button>
-                  <button @click="updateOrderStatus(order.id, 'pending')" class="btn btn-sm btn-success">✅</button>
+                <div class="order-actions">
+                  <button @click="confirmCancelOrder(order.id)" class="btn-reject-small">❌</button>
+                  <button @click="updateOrderStatus(order.id, 'pending')" class="btn-confirm-small">✅</button>
                 </div>
               </div>
             </div>
           </div>
 
-          <h6 class="mb-2">🛒 รายการที่พนักงานเลือก</h6>
-          <div v-if="cart.length === 0" class="text-muted mb-3">ยังไม่มีรายการใหม่</div>
+          <!-- Staff Cart -->
+          <div class="cart-card">
+            <h3 class="cart-title">🛒 รายการที่พนักงานเลือก</h3>
+            
+            <div v-if="cart.length === 0" class="empty-cart">
+              ยังไม่มีรายการใหม่
+            </div>
 
-          <ul class="list-group mb-3">
-            <li v-for="(item, index) in cart" :key="index" class="list-group-item d-flex justify-content-between align-items-center">
-              <div>
-                <div class="fw-semibold">{{ item.name }}</div>
-                <small class="text-muted">{{ item.price }} x {{ item.qty }}</small>
-              </div>
-              <div class="d-flex align-items-center gap-2">
-                <button @click="decreaseQty(index)" class="btn btn-sm btn-light">-</button>
-                <span>{{ item.qty }}</span>
-                <button @click="increaseQty(index)" class="btn btn-sm btn-light">+</button>
-                <button @click="removeFromCart(index)" class="btn btn-sm btn-outline-danger ms-2">x</button>
-              </div>
-            </li>
-          </ul>
-
-          <div class="d-flex justify-content-between align-items-center mb-2">
-            <strong>รวมรายการใหม่:</strong>
-            <div class="text-success fs-5">{{ totalPrice }} ฿</div>
-          </div>
-          <button class="btn btn-success w-100" :disabled="cart.length===0" @click="submitOrder">✅ ยืนยันรายการพนักงาน</button>
-
-          <hr class="my-3">
-
-          <h6>📝 ประวัติการสั่ง</h6>
-          <div class="history-list" style="max-height:220px; overflow:auto;">
-            <div v-for="order in activeAndPastOrders" :key="order.id" class="d-flex justify-content-between align-items-start mb-2 p-2 rounded" :class="order.status === 'cancelled' ? 'bg-light text-muted' : 'bg-white'">
-              <div>
-                <div class="fw-semibold">{{ order.product?.name }}</div>
-                <div class="small">จำนวน: {{ order.quantity }}</div>
-                <div class="small mt-1">
-                  <span class="badge bg-secondary">
-                    {{ order.status === 'pending' ? '⏳ กำลังทำ' : (order.status === 'completed' ? '✅ เสร็จแล้ว' : '❌ ยกเลิกแล้ว') }}
-                  </span>
+            <div v-else class="cart-items">
+              <div v-for="(item, index) in cart" :key="index" class="cart-item">
+                <div class="item-info">
+                  <div class="item-name">{{ item.name }}</div>
+                  <div class="item-detail">{{ item.price }} × {{ item.qty }}</div>
+                </div>
+                <div class="item-controls">
+                  <button @click="decreaseQty(index)" class="btn-qty">-</button>
+                  <span class="qty-display">{{ item.qty }}</span>
+                  <button @click="increaseQty(index)" class="btn-qty">+</button>
+                  <button @click="removeFromCart(index)" class="btn-remove">×</button>
                 </div>
               </div>
-              <div class="d-flex flex-column gap-1">
-                <button v-if="order.status === 'pending'" @click="updateOrderStatus(order.id, 'completed')" class="btn btn-sm btn-success">เสร็จ</button>
-                <button v-if="order.status === 'pending'" @click="confirmCancelOrder(order.id)" class="btn btn-sm btn-outline-danger">ยกเลิก</button>
+            </div>
+
+            <div class="cart-total">
+              <span>รวมรายการใหม่:</span>
+              <span class="total-amount">{{ totalPrice }} ฿</span>
+            </div>
+
+            <button
+              class="btn-submit-order"
+              :disabled="cart.length === 0"
+              @click="submitOrder"
+            >
+              ✅ ยืนยันรายการพนักงาน
+            </button>
+          </div>
+
+          <!-- Order History -->
+          <div class="history-card">
+            <h3 class="history-title">📝 ประวัติการสั่ง</h3>
+            <div class="history-list">
+              <div
+                v-for="order in activeAndPastOrders"
+                :key="order.id"
+                class="history-item"
+                :class="{ cancelled: order.status === 'cancelled' }"
+              >
+                <div class="history-info">
+                  <div class="history-product">{{ order.product?.name }}</div>
+                  <div class="history-qty">จำนวน: {{ order.quantity }}</div>
+                  <div class="history-status">
+                    <span
+                      class="status-badge"
+                      :class="{
+                        'status-pending': order.status === 'pending',
+                        'status-completed': order.status === 'completed',
+                        'status-cancelled': order.status === 'cancelled'
+                      }"
+                    >
+                      {{ order.status === 'pending' ? '⏳ กำลังทำ' : (order.status === 'completed' ? '✅ เสร็จแล้ว' : '❌ ยกเลิกแล้ว') }}
+                    </span>
+                  </div>
+                </div>
+                <div v-if="order.status === 'pending'" class="history-actions">
+                  <button @click="updateOrderStatus(order.id, 'completed')" class="btn-complete">เสร็จ</button>
+                  <button @click="confirmCancelOrder(order.id)" class="btn-cancel">ยกเลิก</button>
+                </div>
               </div>
             </div>
           </div>
@@ -105,23 +150,22 @@
     </div>
 
     <!-- QR Modal -->
-    <div v-if="showQrModal" class="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center" style="background: rgba(0,0,0,0.45); z-index:1050;">
-      <div class="card" style="width:360px; max-width:95%;">
-        <div class="card-body text-center">
-          <h5 class="card-title">📱 สแกนเพื่อสั่งอาหาร</h5>
-          <p class="mb-2">โต๊ะ: {{ tableName || tableId }}</p>
-          <div class="qr-wrapper d-flex justify-content-center my-2">
-            <QrcodeVue :value="qrUrl" :size="200" level="H" />
+    <div v-if="showQrModal" class="modal-overlay" @click.self="showQrModal = false">
+      <div class="modal-card modal-small">
+        <div class="modal-header">
+          <h3>📱 สแกนเพื่อสั่งอาหาร</h3>
+        </div>
+        <div class="modal-body text-center">
+          <p class="qr-table-name">โต๊ะ: <strong>{{ tableName || tableId }}</strong></p>
+          <div class="qr-code-wrapper">
+            <QrcodeVue :value="qrUrl" :size="220" level="H" />
           </div>
-          <p class="text-muted small">ให้ลูกค้าสแกนเพื่อดูเมนูและสั่งอาหาร</p>
-          <button @click="showQrModal = false" class="btn btn-secondary w-100">ปิด</button>
+          <p class="qr-instruction">ให้ลูกค้าสแกนเพื่อดูเมนูและสั่งอาหาร</p>
+        </div>
+        <div class="modal-footer">
+          <button @click="showQrModal = false" class="btn-primary full-width">ปิด</button>
         </div>
       </div>
-    </div>
-
-    <!-- Toast Notification -->
-    <div v-if="toastMsg" class="toast show position-fixed top-0 start-50 translate-middle-x mt-3" role="status" aria-live="polite">
-      <div class="toast-body bg-dark text-white rounded-pill px-4 py-2">{{ toastMsg }}</div>
     </div>
   </div>
 </template>
@@ -408,18 +452,723 @@ export default {
 </script>
 
 <style scoped>
-/* Compact Bootstrap-friendly overrides */
-.card-theme { background: var(--color-bg-card); border: 1px solid var(--color-border-light); }
-.text-brown { color: var(--color-text-primary) !important; }
-.product-name { font-size: 0.95rem; }
-.product-price { font-weight: 700; }
-.qr-wrapper { margin: 12px 0; }
+/* ========== Global Styles ========== */
+.order-page {
+  min-height: 100vh;
+  background: var(--color-bg-primary);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
 
-/* Timer look */
-.order-timer { font-family: 'Courier New', monospace; font-weight: 700; color: var(--color-accent-dark); }
+/* ========== Header ========== */
+.order-header {
+  background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-light) 100%);
+  box-shadow: var(--shadow-md);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
 
-/* Small responsive tweaks */
+.header-container {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 20px 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.btn-back {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: var(--transition-normal);
+}
+
+.btn-back:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.table-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.table-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--color-secondary);
+  margin: 0;
+}
+
+.table-timer {
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 600;
+}
+
+.header-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.btn-qr,
+.btn-checkout {
+  padding: 10px 18px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: var(--transition-normal);
+  border: none;
+}
+
+.btn-qr {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.btn-qr:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.btn-checkout {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
+  color: white;
+}
+
+.btn-checkout:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 140, 66, 0.3);
+}
+
+/* ========== Main Content ========== */
+.order-content {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 32px;
+}
+
+.content-grid {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 32px;
+}
+
+/* ========== Products Section ========== */
+.products-section {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.category-filters {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+
+.category-btn {
+  padding: 10px 20px;
+  border-radius: 20px;
+  border: 2px solid var(--color-secondary-dark);
+  background: white;
+  color: var(--color-accent);
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: var(--transition-normal);
+  white-space: nowrap;
+}
+
+.category-btn:hover {
+  border-color: var(--color-primary);
+  background: var(--color-bg-primary);
+}
+
+.category-btn.active {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
+  color: white;
+  border-color: var(--color-primary);
+}
+
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 16px;
+}
+
+.product-card {
+  background: white;
+  border: 2px solid var(--color-secondary-dark);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  text-align: center;
+  min-height: 100px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+}
+
+.product-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-primary);
+}
+
+.product-name {
+  font-weight: 600;
+  color: var(--color-accent);
+  font-size: 15px;
+}
+
+.product-price {
+  font-weight: 700;
+  color: var(--color-primary);
+  font-size: 16px;
+}
+
+/* ========== Cart Section ========== */
+.cart-section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.awaiting-orders,
+.cart-card,
+.history-card {
+  background: white;
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+}
+
+.section-header {
+  font-weight: 700;
+  font-size: 14px;
+  margin-bottom: 12px;
+  padding: 12px;
+  border-radius: var(--radius-md);
+}
+
+.alert-header {
+  background: #FFF3CD;
+  color: #856404;
+  border: 1px solid #FFE69C;
+}
+
+.order-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.order-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  border-radius: var(--radius-md);
+  gap: 12px;
+}
+
+.awaiting-item {
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-secondary-dark);
+}
+
+.order-info {
+  flex: 1;
+}
+
+.order-product {
+  font-weight: 600;
+  color: var(--color-accent);
+  margin-bottom: 4px;
+}
+
+.order-qty {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.order-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.btn-reject-small,
+.btn-confirm-small {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  transition: var(--transition-normal);
+}
+
+.btn-reject-small {
+  background: #FFE4E1;
+}
+
+.btn-reject-small:hover {
+  background: var(--color-danger);
+}
+
+.btn-confirm-small {
+  background: linear-gradient(135deg, var(--color-success-light) 0%, var(--color-success) 100%);
+}
+
+.btn-confirm-small:hover {
+  transform: scale(1.1);
+}
+
+/* Cart Card */
+.cart-title,
+.history-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-accent);
+  margin: 0 0 16px 0;
+}
+
+.empty-cart {
+  text-align: center;
+  color: var(--color-text-light);
+  padding: 20px;
+  font-size: 14px;
+}
+
+.cart-items {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.cart-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-secondary-dark);
+  border-radius: var(--radius-md);
+  gap: 12px;
+}
+
+.item-info {
+  flex: 1;
+}
+
+.item-name {
+  font-weight: 600;
+  color: var(--color-accent);
+  margin-bottom: 4px;
+}
+
+.item-detail {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.item-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-qty {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid var(--color-secondary-dark);
+  background: white;
+  color: var(--color-accent);
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition-normal);
+}
+
+.btn-qty:hover {
+  background: var(--color-bg-primary);
+  border-color: var(--color-primary);
+}
+
+.qty-display {
+  min-width: 24px;
+  text-align: center;
+  font-weight: 600;
+  color: var(--color-accent);
+}
+
+.btn-remove {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: #FFE4E1;
+  color: var(--color-danger);
+  font-weight: 700;
+  font-size: 18px;
+  cursor: pointer;
+  transition: var(--transition-normal);
+  margin-left: 4px;
+}
+
+.btn-remove:hover {
+  background: var(--color-danger);
+  color: white;
+}
+
+.cart-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 0;
+  border-top: 2px solid var(--color-secondary-dark);
+  margin-bottom: 16px;
+  font-weight: 700;
+  color: var(--color-accent);
+}
+
+.total-amount {
+  font-size: 20px;
+  color: var(--color-primary);
+}
+
+.btn-submit-order {
+  width: 100%;
+  padding: 14px;
+  border-radius: 24px;
+  border: none;
+  background: linear-gradient(135deg, var(--color-success-light) 0%, var(--color-success) 100%);
+  color: white;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  transition: var(--transition-normal);
+}
+
+.btn-submit-order:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 187, 106, 0.3);
+}
+
+.btn-submit-order:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* History Card */
+.history-list {
+  max-height: 300px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.history-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 12px;
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-secondary-dark);
+  border-radius: var(--radius-md);
+  gap: 12px;
+}
+
+.history-item.cancelled {
+  opacity: 0.6;
+  background: var(--color-bg-secondary);
+}
+
+.history-info {
+  flex: 1;
+}
+
+.history-product {
+  font-weight: 600;
+  color: var(--color-accent);
+  margin-bottom: 4px;
+}
+
+.history-qty {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin-bottom: 6px;
+}
+
+.history-status {
+  margin-top: 4px;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status-pending {
+  background: #FFF3CD;
+  color: #856404;
+}
+
+.status-completed {
+  background: #D4EDDA;
+  color: #155724;
+}
+
+.status-cancelled {
+  background: #F8D7DA;
+  color: #721C24;
+}
+
+.history-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.btn-complete,
+.btn-cancel {
+  padding: 6px 12px;
+  border-radius: 12px;
+  border: none;
+  font-weight: 600;
+  font-size: 12px;
+  cursor: pointer;
+  transition: var(--transition-normal);
+  white-space: nowrap;
+}
+
+.btn-complete {
+  background: linear-gradient(135deg, var(--color-success-light) 0%, var(--color-success) 100%);
+  color: white;
+}
+
+.btn-complete:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(102, 187, 106, 0.3);
+}
+
+.btn-cancel {
+  background: #FFE4E1;
+  color: var(--color-danger);
+}
+
+.btn-cancel:hover {
+  background: var(--color-danger);
+  color: white;
+}
+
+/* ========== Modals ========== */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal-card {
+  background: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  max-width: 500px;
+  width: 100%;
+  max-height: 90vh;
+  overflow: hidden;
+  animation: slideUp 0.3s ease;
+}
+
+.modal-small {
+  max-width: 400px;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modal-header {
+  padding: 24px 24px 16px;
+  border-bottom: 1px solid var(--color-secondary-dark);
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-accent);
+}
+
+.modal-body {
+  padding: 24px;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.modal-footer {
+  padding: 16px 24px;
+  border-top: 1px solid var(--color-secondary-dark);
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.qr-table-name {
+  font-size: 16px;
+  color: var(--color-text-secondary);
+  margin-bottom: 16px;
+}
+
+.qr-table-name strong {
+  color: var(--color-accent);
+  font-size: 18px;
+}
+
+.qr-code-wrapper {
+  background: white;
+  border: 3px solid var(--color-secondary-dark);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  display: inline-block;
+  margin-bottom: 16px;
+}
+
+.qr-instruction {
+  color: var(--color-text-light);
+  font-size: 13px;
+  margin: 0;
+}
+
+.btn-primary {
+  padding: 12px 24px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: var(--transition-normal);
+  border: none;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
+  color: white;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 140, 66, 0.3);
+}
+
+.full-width {
+  width: 100%;
+}
+
+/* ========== Responsive ========== */
+@media (max-width: 1024px) {
+  .content-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cart-section {
+    order: -1;
+  }
+
+  .product-grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  }
+}
+
 @media (max-width: 768px) {
-  .history-list { max-height: 180px; }
+  .header-container {
+    padding: 16px 20px;
+  }
+
+  .table-title {
+    font-size: 20px;
+  }
+
+  .header-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .order-content {
+    padding: 24px 16px;
+  }
+
+  .product-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .history-list {
+    max-height: 200px;
+  }
+}
+
+@media (max-width: 480px) {
+  .btn-back,
+  .btn-qr,
+  .btn-checkout {
+    font-size: 12px;
+    padding: 8px 12px;
+  }
+
+  .table-title {
+    font-size: 18px;
+  }
+
+  .category-btn {
+    font-size: 13px;
+    padding: 8px 16px;
+  }
 }
 </style>

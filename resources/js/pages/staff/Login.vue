@@ -1,61 +1,64 @@
 <template>
   <div class="login-container">
     <div class="login-card">
-      <!-- Dice Icon -->
-      <div class="icon-container">
-        <div class="dice-icon">🎲</div>
+      <!-- Icon Section -->
+      <div class="icon-section">
+        <div class="dice-badge">🎲</div>
       </div>
 
-      <!-- Title -->
-      <h1 class="title">Board Game Cafe</h1>
-
-      <!-- Subtitle -->
-      <p class="subtitle">
-        <span class="dice-emoji">🎲</span>
-        Staff Login • POS System
-      </p>
+      <!-- Header Section -->
+      <header class="login-header">
+        <h1 class="brand-title">Board Game Cafe</h1>
+        <p class="brand-subtitle">
+          <span class="emoji">🎲</span>
+          Staff Login • POS System
+        </p>
+      </header>
 
       <!-- Login Form -->
-      <form @submit.prevent="handleLogin">
-        <!-- Username Field -->
+      <form @submit.prevent="handleLogin" class="login-form">
         <div class="form-group">
-          <label class="form-label">Username</label>
+          <label for="email" class="form-label">Username</label>
           <input 
+            id="email"
             type="email" 
             v-model="form.email" 
-            placeholder="Enter your username" 
+            placeholder="Enter your email" 
             required 
             class="form-input"
+            :disabled="loading"
           />
         </div>
 
-        <!-- Password Field -->
         <div class="form-group">
-          <label class="form-label">Password</label>
+          <label for="password" class="form-label">Password</label>
           <input 
+            id="password"
             type="password" 
             v-model="form.password" 
             placeholder="Enter your password" 
             required 
             class="form-input"
+            :disabled="loading"
           />
         </div>
 
-        <!-- Login Button -->
         <button 
           type="submit" 
           :disabled="loading"
-          class="login-button"
+          class="btn-login"
         >
           <div v-if="loading" class="spinner"></div>
           <span v-else>Login to POS</span>
         </button>
       </form>
 
-      <!-- Error Message -->
-      <p v-if="errorMessage" class="error-message">
-        {{ errorMessage }}
-      </p>
+      <!-- Feedback Section -->
+      <transition name="fade">
+        <p v-if="errorMessage" class="error-alert" role="alert">
+          {{ errorMessage }}
+        </p>
+      </transition>
     </div>
   </div>
 </template>
@@ -66,50 +69,39 @@ import axios from 'axios';
 import { useRouter } from 'vue-router';
 
 export default {
+  name: 'Login',
   setup() {
     const router = useRouter();
-    
-    // ตัวแปรรับค่าจากฟอร์ม
+    const errorMessage = ref('');
+    const loading = ref(false);
+
     const form = reactive({
       email: '',
       password: ''
     });
-    
-    const errorMessage = ref('');
-    const loading = ref(false);
 
     const handleLogin = async () => {
-        // เคลียร์ Error เก่าก่อนกด
-        errorMessage.value = '';
-        loading.value = true;
+      errorMessage.value = '';
+      loading.value = true;
 
-        try {
-            const response = await axios.post('/api/login', {
-                email: form.email,      // ✅ แก้ตรงนี้: ใช้ form.email
-                password: form.password // ✅ แก้ตรงนี้: ใช้ form.password
-            });
+      try {
+        const { data } = await axios.post('/api/login', form);
 
-            // 1. เก็บ Token และ User Info
-            localStorage.setItem('token', response.data.token);
-            localStorage.setItem('user', JSON.stringify(response.data.user)); // บันทึก user object ทั้งหมด
-            
-            const role = response.data.user.role || 'staff';
-            localStorage.setItem('role', role);
-            
-            // 2. เช็ค Role เพื่อเปลี่ยนหน้า
-            if (role.toLowerCase() === 'admin') {
-                router.push('/admin/dashboard'); // ไปหน้า Admin
-            } else {
-                router.push('/pos'); // ไปหน้าขายของ
-            }
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        
+        const role = data.user.role?.toLowerCase() || 'staff';
+        localStorage.setItem('role', role);
+        
+        const redirectPath = role === 'admin' ? '/admin/dashboard' : '/pos';
+        router.push(redirectPath);
 
-        } catch (error) {
-            console.error(error);
-            // แสดงข้อความ Error ที่หน้าจอ แทนการ Alert
-            errorMessage.value = error.response?.data?.message || 'อีเมลหรือรหัสผ่านไม่ถูกต้อง';
-        } finally {
-            loading.value = false;
-        }
+      } catch (error) {
+        console.error('Login error:', error);
+        errorMessage.value = error.response?.data?.message || 'อีเมลหรือรหัสผ่านไม่ถูกต้อง';
+      } finally {
+        loading.value = false;
+      }
     };
 
     return { form, handleLogin, errorMessage, loading };
@@ -118,60 +110,55 @@ export default {
 </script>
 
 <style scoped>
-/* Login Container - Full Screen with Cream Background */
 .login-container {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background-color: #fff8e7; /* Cream background from theme */
-  padding: 20px;
+  background-color: var(--color-bg-primary);
+  padding: var(--spacing-md);
 }
 
-/* Login Card - Centered White Card */
 .login-card {
-  background-color: #ffffff;
-  border: 2px solid #deb887; /* Tan border */
-  border-radius: 16px;
-  padding: 40px 50px;
-  max-width: 450px;
+  background-color: var(--color-bg-card);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 40px;
+  max-width: 400px;
   width: 100%;
-  box-shadow: 0 4px 12px rgba(139, 69, 19, 0.1);
+  box-shadow: var(--shadow-md);
   text-align: center;
 }
 
-/* Dice Icon Container */
-.icon-container {
+.icon-section {
   display: flex;
   justify-content: center;
-  margin-bottom: 24px;
+  margin-bottom: var(--spacing-lg);
 }
 
-.dice-icon {
-  width: 120px;
-  height: 120px;
-  background: linear-gradient(135deg, #ff8c42, #ff7a29);
+.dice-badge {
+  width: 100px;
+  height: 100px;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-hover));
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 60px;
+  font-size: 50px;
   box-shadow: 0 4px 12px rgba(255, 140, 66, 0.3);
+  color: white;
 }
 
-/* Title */
-.title {
-  font-size: 32px;
+.brand-title {
+  font-size: 28px;
   font-weight: 700;
-  color: #8b4513; /* Brown from theme */
-  margin: 0 0 12px 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: var(--color-accent);
+  margin: 0 0 8px 0;
 }
 
-/* Subtitle */
-.subtitle {
-  font-size: 16px;
-  color: #a0522d; /* Light brown */
+.brand-subtitle {
+  font-size: 14px;
+  color: var(--color-text-light);
   margin: 0 0 32px 0;
   display: flex;
   align-items: center;
@@ -179,21 +166,19 @@ export default {
   gap: 6px;
 }
 
-.dice-emoji {
-  font-size: 14px;
+.login-form {
+  text-align: left;
 }
 
-/* Form Groups */
 .form-group {
-  margin-bottom: 20px;
-  text-align: left;
+  margin-bottom: var(--spacing-md);
 }
 
 .form-label {
   display: block;
   font-size: 14px;
   font-weight: 600;
-  color: #654321; /* Dark brown */
+  color: var(--color-text-primary);
   margin-bottom: 8px;
 }
 
@@ -201,64 +186,57 @@ export default {
   width: 100%;
   padding: 12px 16px;
   font-size: 15px;
-  border: 1px solid #deb887;
-  border-radius: 8px;
-  background-color: #ffffff;
-  color: #654321;
-  transition: all 0.3s ease;
-  box-sizing: border-box;
-}
-
-.form-input::placeholder {
-  color: #c19a6b;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  transition: var(--transition-normal);
+  background-color: white;
 }
 
 .form-input:focus {
   outline: none;
-  border-color: #ff8c42;
+  border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(255, 140, 66, 0.1);
 }
 
-/* Login Button */
-.login-button {
+.form-input:disabled {
+  background-color: var(--color-bg-secondary);
+  cursor: not-allowed;
+}
+
+.btn-login {
   width: 100%;
-  padding: 14px 24px;
+  padding: 14px;
   font-size: 16px;
   font-weight: 600;
-  color: #ffffff;
-  background: linear-gradient(135deg, #ff8c42, #ff7a29);
+  color: white;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-hover));
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: var(--transition-normal);
   margin-top: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.login-button:hover:not(:disabled) {
-  background: linear-gradient(135deg, #ff7a29, #e67e22);
+.btn-login:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(255, 140, 66, 0.3);
+  box-shadow: 0 4px 12px rgba(255, 140, 66, 0.3);
 }
 
-.login-button:active:not(:disabled) {
-  transform: translateY(0);
-}
-
-.login-button:disabled {
+.btn-login:disabled {
   opacity: 0.7;
   cursor: not-allowed;
 }
 
-/* Loading Spinner */
 .spinner {
   width: 20px;
   height: 20px;
   border: 3px solid rgba(255, 255, 255, 0.3);
   border-radius: 50%;
-  border-top-color: #fff;
+  border-top-color: white;
   animation: spin 0.8s linear infinite;
 }
 
@@ -266,32 +244,29 @@ export default {
   to { transform: rotate(360deg); }
 }
 
-/* Error Message */
-.error-message {
-  color: #c85a54; /* Terracotta from theme */
+.error-alert {
+  color: white;
+  background-color: var(--color-danger);
   font-size: 14px;
   font-weight: 600;
-  margin-top: 20px;
+  margin-top: 24px;
   padding: 12px;
-  background-color: #ffe4e1;
-  border-radius: 8px;
-  border-left: 4px solid #c85a54;
+  border-radius: var(--radius-md);
 }
 
-/* Responsive Design */
-@media (max-width: 500px) {
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.3s;
+}
+.fade-enter-from, .fade-leave-to {
+  opacity: 0;
+}
+
+@media (max-width: 480px) {
   .login-card {
-    padding: 30px 24px;
-  }
-
-  .title {
-    font-size: 28px;
-  }
-
-  .dice-icon {
-    width: 100px;
-    height: 100px;
-    font-size: 50px;
+    padding: 30px 20px;
+    border: none;
+    box-shadow: none;
+    background: transparent;
   }
 }
 </style>

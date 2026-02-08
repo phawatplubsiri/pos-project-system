@@ -21,11 +21,11 @@
     --color-accent-dark: #654321;
 
     /* Status Colors */
-    --color-success: #d4a574; /* Tan/Gold - Available, Completed */
-    --color-success-dark: #c19a6b;
-    --color-warning: #ff8c42; /* Orange - Pending */
-    --color-danger: #c85a54; /* Terracotta - Busy, Cancelled */
-    --color-danger-dark: #b44a3e;
+    --color-success: #66BB6A; /* Clear Green */
+    --color-success-light: #90C695;
+    --color-warning: #FF8C42; /* Orange - Pending */
+    --color-danger: #DC3545; /* Clear Red */
+    --color-danger-light: #FF6B6B;
     --color-info: #deb887; /* Burlywood - Info badges */
 
     /* Text Colors */

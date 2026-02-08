@@ -11,6 +11,18 @@ class ProductController extends Controller
 {
     public function index(Request $request)
     {
+        // --- Sync Service Prices from Settings before returning ---
+        $hourlyRate = \App\Models\Setting::where('key', 'hourly_rate')->first();
+        if ($hourlyRate) {
+            Product::where('name', '1 Hour Play')->update(['price' => $hourlyRate->value]);
+        }
+
+        $dayPassRate = \App\Models\Setting::where('key', 'day_pass_rate')->first();
+        if ($dayPassRate) {
+            Product::where('name', 'Day Pass (Buffet)')->update(['price' => $dayPassRate->value]);
+        }
+        // ---------------------------------------------------------
+
         $query = Product::with('category');
 
         if (!$request->has('all')) {

@@ -11,7 +11,6 @@ import StaffManage from '../pages/admin/StaffManage.vue';
 import ProductManage from '../pages/admin/ProductManage.vue';
 import Report from '../pages/admin/Report.vue'; // <--- Import หน้า Report
 import LandingPage from '../pages/customer/LandingPage.vue';
-import ThemeExample from '../pages/ThemeExample.vue';
 
 const routes = [
     // 1. หน้าแรก เป็น Login เลย
@@ -19,11 +18,6 @@ const routes = [
         path: '/', 
         name: 'login',
         component: Login 
-    },
-    { 
-        path: '/theme-example', 
-        name: 'theme-example',
-        component: ThemeExample 
     },
     {                                                                                                                               
         path: '/pos',                                                                                                               

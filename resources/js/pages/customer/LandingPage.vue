@@ -1,153 +1,165 @@
 <template>
-  <div class="container my-3" style="max-width:540px;">
-    <header class="d-flex flex-column align-items-center mb-3">
-      <div class="w-100 text-center py-3 rounded" style="background:var(--color-accent); color:var(--color-text-white);">
-        <div class="h5 mb-0">☕ Board Game Cafe</div>
-        <div v-if="sessionValid && tableInfo" class="badge bg-warning text-dark mt-2">โต๊ะ {{ tableInfo.number }}: พร้อมสั่งอาหาร</div>
+  <div class="landing-page">
+    <!-- Header -->
+    <div class="page-header">
+      <button @click="goBack" class="back-button">
+        ←
+      </button>
+      <div class="header-content">
+        <h1 class="page-title">Our Menu</h1>
+        <p class="page-subtitle">Coffee • Snacks • Games</p>
       </div>
-    </header>
+    </div>
 
-    <main>
+    <div class="container">
       <div v-if="loading" class="text-center py-4 text-muted">กำลังตรวจสอบความถูกต้อง...</div>
 
-      <div v-else-if="!sessionValid" class="text-center py-4">
-        <div class="display-6">🚫</div>
+      <div v-else-if="!sessionValid" class="error-state">
+        <div class="error-icon">🚫</div>
         <h5>ขออภัย</h5>
         <p>{{ errorMessage }}</p>
         <p class="text-muted">หากต้องการสั่งอาหารเพิ่มเติม กรุณาติดต่อพนักงาน</p>
       </div>
 
       <div v-else>
-        <h5 class="mb-3">📜 เมนูของเรา</h5>
-
-        <div class="d-flex gap-2 mb-3 overflow-auto">
-          <button v-for="cat in categories" :key="cat.type" @click="currentTab = cat.type"
-            :class="['btn btn-sm', currentTab === cat.type ? 'btn-dark' : 'btn-outline-secondary']">
+        <!-- Category Filters -->
+        <div class="category-filters">
+          <button 
+            v-for="cat in categories" 
+            :key="cat.type" 
+            @click="currentTab = cat.type"
+            :class="['category-btn', { 'active': currentTab === cat.type }]"
+          >
+            <span class="category-icon">{{ cat.icon }}</span>
             {{ cat.name }}
           </button>
         </div>
 
-        <div class="list-group">
-          <div v-for="product in filteredProducts" :key="product.id" class="list-group-item d-flex align-items-center justify-content-between">
-            <div class="d-flex gap-2 align-items-center" style="min-width:0;">
-              <img v-if="product.image_url" :src="product.image_url" class="rounded me-2" style="width:64px; height:64px; object-fit:cover;" />
-              <div class="flex-grow-1">
-                <div class="fw-semibold text-truncate">{{ product.name }}</div>
-                <div class="text-muted small">{{ product.description || 'ดูรายละเอียดเพิ่มเติม' }}</div>
-              </div>
+        <!-- Menu Items -->
+        <div class="menu-items">
+          <div v-for="product in filteredProducts" :key="product.id" class="menu-card">
+            <!-- Product Image -->
+            <div class="product-image">
+              <img v-if="product.image_url" :src="product.image_url" alt="" />
+              <div v-else class="placeholder-image">{{ product.category?.type === 'drink' ? '☕' : product.category?.type === 'food' ? '🍽️' : '🎮' }}</div>
             </div>
-            <div class="text-end">
-              <div class="fw-bold text-success">{{ product.price }} ฿</div>
-              <div class="mt-2">
-                <template v-if="product.category?.type === 'retail'">
-                  <button class="btn btn-outline-secondary btn-sm" @click="showProductDetail(product)">🔍</button>
-                </template>
-                <template v-else>
-                  <div v-if="getItemQty(product.id) > 0" class="d-flex gap-1 align-items-center justify-content-end">
-                    <button @click="decreaseQty(product.id)" class="btn btn-sm btn-light">-</button>
-                    <span class="px-2">{{ getItemQty(product.id) }}</span>
-                    <button @click="addToCart(product)" class="btn btn-sm btn-light">+</button>
-                  </div>
-                  <button v-else class="btn btn-dark btn-sm" @click="addToCart(product)">+</button>
-                </template>
-              </div>
+
+            <!-- Product Info -->
+            <div class="product-info">
+              <h3 class="product-name">{{ product.name }}</h3>
+              <p class="product-description">{{ product.description || 'Rich, bold Italian espresso shot' }}</p>
+              <span class="category-badge">{{ getCategoryLabel(product.category?.type) }}</span>
+            </div>
+
+            <!-- Price Badge -->
+            <div class="price-badge">
+              ฿{{ product.price }}
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="product-actions">
+              <template v-if="product.category?.type === 'retail'">
+                <button class="btn-view-details" @click="showProductDetail(product)">🔍</button>
+              </template>
+              <template v-else>
+                <div v-if="getItemQty(product.id) > 0" class="quantity-controls">
+                  <button @click="decreaseQty(product.id)" class="btn-qty">-</button>
+                  <span class="qty-display">{{ getItemQty(product.id) }}</span>
+                  <button @click="addToCart(product)" class="btn-qty">+</button>
+                </div>
+                <button v-else class="btn-add" @click="addToCart(product)">+</button>
+              </template>
             </div>
           </div>
         </div>
       </div>
-    </main>
+    </div>
 
     <!-- Product Detail Modal -->
-    <div v-if="detailProduct" class="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center" style="background: rgba(0,0,0,0.45); z-index:1050;">
-      <div class="card" style="width:90%; max-width:420px;">
-        <div class="card-body">
-          <button class="btn-close float-end" @click="detailProduct=null"></button>
-          <img v-if="detailProduct.image_url" :src="detailProduct.image_url" class="img-fluid rounded mb-3" />
-          <h5>{{ detailProduct.name }}</h5>
-          <div class="text-success mb-2">ราคา: {{ detailProduct.price }} ฿</div>
-          <p class="text-muted">{{ detailProduct.description || 'ไม่มีรายละเอียดเพิ่มเติม' }}</p>
-          <div v-if="detailProduct.category?.type === 'retail'" class="alert alert-warning">ติดต่อพนักงานสำหรับสินค้านี้</div>
-          <div v-else>
-            <button class="btn btn-success w-100" @click="addToCart(detailProduct); detailProduct=null">🛒 เพิ่มลงตะกร้า</button>
-          </div>
+    <div v-if="detailProduct" class="modal-overlay" @click.self="detailProduct = null">
+      <div class="modal-content">
+        <button class="btn-close" @click="detailProduct = null">×</button>
+        <img v-if="detailProduct.image_url" :src="detailProduct.image_url" class="modal-image" />
+        <h3 class="modal-title">{{ detailProduct.name }}</h3>
+        <div class="modal-price">ราคา: ฿{{ detailProduct.price }}</div>
+        <p class="modal-description">{{ detailProduct.description || 'ไม่มีรายละเอียดเพิ่มเติม' }}</p>
+        <div class="alert-contact">
+          📞 กรุณาติดต่อพนักงานที่เคาท์เตอร์สำหรับสินค้านี้
         </div>
       </div>
     </div>
 
     <!-- Cart Bar -->
-    <div v-if="cart.length > 0" class="fixed-bottom mb-3 d-flex justify-content-center">
-      <div class="card w-100" style="max-width:540px;">
-        <div class="card-body d-flex justify-content-between align-items-center">
-          <div>
-            <div class="small">{{ totalItems }} รายการ</div>
-            <div class="fw-bold">รวม {{ totalPrice }} ฿</div>
-          </div>
-          <div>
-            <button class="btn btn-outline-secondary me-2" @click="showCartModal=true">ดูตะกร้า</button>
-            <button class="btn btn-success" @click="submitOrder">✅ ยืนยัน</button>
-          </div>
-        </div>
+    <div v-if="cart.length > 0" class="cart-bar">
+      <div class="cart-info">
+        <div class="cart-items">{{ totalItems }} รายการ</div>
+        <div class="cart-total">รวม ฿{{ totalPrice }}</div>
+      </div>
+      <div class="cart-actions">
+        <button class="btn-view-cart" @click="showCartModal = true">ดูตะกร้า</button>
+        <button class="btn-confirm" @click="submitOrder">✅ ยืนยัน</button>
       </div>
     </div>
 
     <!-- Cart Modal -->
-    <div v-if="showCartModal" class="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-end" style="background: rgba(0,0,0,0.45); z-index:1050;">
-      <div class="card w-100" style="max-width:540px; border-radius:12px 12px 0 0;">
-        <div class="card-body">
-          <h5>🛒 รายการอาหารของคุณ</h5>
-          <div class="list-group mb-3">
-            <div v-for="item in cart" :key="item.id" class="list-group-item d-flex justify-content-between align-items-center">
-              <div class="fw-semibold">{{ item.name }}</div>
-              <div class="d-flex align-items-center gap-2">
-                <button @click="decreaseQty(item.id)" class="btn btn-sm btn-light">-</button>
-                <span>{{ item.qty }}</span>
-                <button @click="addToCart(item)" class="btn btn-sm btn-light">+</button>
-                <div class="fw-bold ms-3">{{ item.price * item.qty }} ฿</div>
-              </div>
+    <div v-if="showCartModal" class="modal-overlay" @click.self="showCartModal = false">
+      <div class="cart-modal">
+        <h3 class="cart-modal-title">🛒 รายการอาหารของคุณ</h3>
+        <div class="cart-items-list">
+          <div v-for="item in cart" :key="item.id" class="cart-item">
+            <div class="cart-item-name">{{ item.name }}</div>
+            <div class="cart-item-controls">
+              <button @click="decreaseQty(item.id)" class="btn-qty-small">-</button>
+              <span class="qty-display-small">{{ item.qty }}</span>
+              <button @click="addToCart(item)" class="btn-qty-small">+</button>
+              <div class="cart-item-price">฿{{ item.price * item.qty }}</div>
             </div>
           </div>
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <div class="fw-bold">ยอดรวมทั้งหมด:</div>
-            <div class="fw-bold">{{ totalPrice }} ฿</div>
-          </div>
-          <div class="d-flex gap-2">
-            <button class="btn btn-outline-secondary flex-fill" @click="showCartModal=false">ปิด</button>
-            <button class="btn btn-success flex-fill" @click="submitOrder">{{ submitting ? 'กำลังส่ง...' : '✅ ยืนยันการสั่งอาหาร' }}</button>
-          </div>
+        </div>
+        <div class="cart-summary">
+          <div class="summary-label">ยอดรวมทั้งหมด:</div>
+          <div class="summary-total">฿{{ totalPrice }}</div>
+        </div>
+        <div class="cart-modal-actions">
+          <button class="btn-cancel" @click="showCartModal = false">ปิด</button>
+          <button class="btn-submit" @click="submitOrder">
+            {{ submitting ? 'กำลังส่ง...' : '✅ ยืนยันการสั่งอาหาร' }}
+          </button>
         </div>
       </div>
     </div>
 
-    <footer class="text-center text-muted mt-4">เพลิดเพลินกับเกมและอาหารในร้านเรานะครับ</footer>
+    <footer class="page-footer">เพลิดเพลินกับเกมและอาหารในร้านเรานะครับ</footer>
   </div>
 </template>
 
 <script>
 import { ref, computed, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import axios from 'axios';
 
 export default {
   setup() {
     const route = useRoute();
+    const router = useRouter();
     const token = ref(route.query.token); 
     const products = ref([]);
     const loading = ref(true);
     const sessionValid = ref(false);
     const errorMessage = ref('');
     const tableInfo = ref(null);
-    const currentTab = ref('drink');
+    const currentTab = ref('all');
     
-    // Cart logic
     const cart = ref([]);
     const showCartModal = ref(false);
     const submitting = ref(false);
     const detailProduct = ref(null);
 
     const categories = [
-      { name: '🥤 เครื่องดื่ม', type: 'drink' },
-      { name: '🍟 อาหาร', type: 'food' },
-      { name: '📦 บอร์ดเกม', type: 'retail' },
+      { name: 'All', type: 'all', icon: '🔥' },
+      { name: 'Coffee', type: 'drink', icon: '☕' },
+      { name: 'Snacks', type: 'food', icon: '🍪' },
+      { name: 'Games', type: 'retail', icon: '🎮' },
     ];
 
     const validateSession = async () => {
@@ -183,8 +195,23 @@ export default {
     };
 
     const filteredProducts = computed(() => {
-      return products.value.filter(p => p.category?.type === currentTab.value);
+      // กรองเอาสินค้าที่เป็นประเภท service (เช่น ค่าชั่วโมง) ออกไป ไม่ให้ลูกค้ากดสั่งเอง
+      const visibleProducts = products.value.filter(p => p.category?.type !== 'service');
+      
+      if (currentTab.value === 'all') {
+        return visibleProducts;
+      }
+      return visibleProducts.filter(p => p.category?.type === currentTab.value);
     });
+
+    const getCategoryLabel = (type) => {
+      const labels = {
+        'drink': 'Coffee',
+        'food': 'Snacks',
+        'retail': 'Games'
+      };
+      return labels[type] || type;
+    };
 
     const addToCart = (product) => {
       const item = cart.value.find(i => i.id === product.id);
@@ -236,34 +263,627 @@ export default {
       detailProduct.value = product;
     };
 
+    const goBack = () => {
+      router.go(-1);
+    };
+
     onMounted(validateSession);
 
     return { 
-      token, categories, currentTab, filteredProducts, 
+      token, categories, currentTab, filteredProducts, getCategoryLabel,
       loading, sessionValid, errorMessage, tableInfo,
       cart, addToCart, decreaseQty, getItemQty, totalItems, totalPrice,
       showCartModal, submitOrder, submitting,
-      detailProduct, showProductDetail
+      detailProduct, showProductDetail, goBack
     };
   }
 };
 </script>
 
 <style scoped>
-/* Compact mobile-friendly overrides using theme variables */
-.card-theme { background: var(--color-bg-card); border: 1px solid var(--color-border-light); }
-.text-brown { color: var(--color-text-primary) !important; }
-.menu-card, .list-group-item { border-radius: 10px; }
-.badge.bg-warning { background: var(--color-warning) !important; color: var(--color-text-white); }
-.btn-dark { background: var(--color-accent); color: var(--color-text-white); border: none; }
-
-/* Cart bar spacing */
-.fixed-bottom .card { box-shadow: 0 6px 20px rgba(0,0,0,0.12); }
-
-@media (max-width: 480px) {
-  .container { padding-left:10px; padding-right:10px; }
+/* Landing Page Container */
+.landing-page {
+  min-height: 100vh;
+  background: #FFF8E7;
+  padding-bottom: 100px;
 }
 
-/* Small helpers */
-.menu-card img { width:64px; height:64px; object-fit:cover; }
+/* Header */
+.page-header {
+  background: #FFF8DC;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid #E8D5B7;
+}
+
+.back-button {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(139, 69, 19, 0.1);
+  border: 1px solid #D2691E;
+  color: #8B4513;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.back-button:hover {
+  background: #D2691E;
+  color: white;
+}
+
+.header-content {
+  flex: 1;
+}
+
+.page-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #8B4513;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.page-subtitle {
+  font-size: 12px;
+  color: #A0522D;
+  margin: 2px 0 0 0;
+}
+
+/* Container */
+.container {
+  max-width: 540px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+/* Error State */
+.error-state {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.error-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.error-state h5 {
+  color: #8B4513;
+  margin-bottom: 12px;
+}
+
+.error-state p {
+  color: #666;
+  margin-bottom: 8px;
+}
+
+/* Category Filters */
+.category-filters {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.category-btn {
+  padding: 10px 16px;
+  border-radius: 20px;
+  border: 2px solid #E8D5B7;
+  background: white;
+  color: #8B4513;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.category-btn.active {
+  background: linear-gradient(135deg, #FF8C42 0%, #FF7A29 100%);
+  border-color: #FF8C42;
+  color: white;
+}
+
+.category-btn:hover:not(.active) {
+  border-color: #D2691E;
+  background: #FFFAF0;
+}
+
+.category-icon {
+  font-size: 16px;
+}
+
+/* Menu Items */
+.menu-items {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.menu-card {
+  background: white;
+  border: 2px solid #E8D5B7;
+  border-radius: 16px;
+  padding: 16px;
+  display: grid;
+  grid-template-columns: 60px 1fr auto;
+  grid-template-rows: auto auto;
+  gap: 12px;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.menu-card:hover {
+  border-color: #D2691E;
+  box-shadow: 0 4px 12px rgba(210, 105, 30, 0.15);
+}
+
+/* Product Image */
+.product-image {
+  grid-row: 1 / 3;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #FFF8DC;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.product-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.placeholder-image {
+  font-size: 28px;
+}
+
+/* Product Info */
+.product-info {
+  grid-column: 2;
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.product-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: #8B4513;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.product-description {
+  font-size: 13px;
+  color: #A0522D;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.category-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  background: #FFF8DC;
+  border: 1px solid #E8D5B7;
+  border-radius: 12px;
+  font-size: 11px;
+  color: #8B4513;
+  font-weight: 600;
+  width: fit-content;
+  margin-top: 4px;
+}
+
+/* Price Badge */
+.price-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: linear-gradient(135deg, #FF8C42 0%, #FF7A29 100%);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+/* Product Actions */
+.product-actions {
+  grid-column: 2 / 4;
+  grid-row: 2;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.btn-add {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #FF8C42 0%, #FF7A29 100%);
+  border: none;
+  color: white;
+  font-size: 20px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-add:hover {
+  background: linear-gradient(135deg, #FF7A29 0%, #E67E22 100%);
+  transform: scale(1.05);
+}
+
+.btn-view-details {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #FFF8DC;
+  border: 2px solid #D2691E;
+  color: #8B4513;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-view-details:hover {
+  background: #D2691E;
+  color: white;
+}
+
+.quantity-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #FFF8DC;
+  border-radius: 20px;
+  padding: 4px 8px;
+}
+
+.btn-qty {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: white;
+  border: 1px solid #D2691E;
+  color: #8B4513;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-qty:hover {
+  background: #D2691E;
+  color: white;
+}
+
+.qty-display {
+  min-width: 24px;
+  text-align: center;
+  font-weight: 700;
+  color: #8B4513;
+}
+
+/* Cart Bar */
+.cart-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  border-top: 2px solid #E8D5B7;
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+}
+
+.cart-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cart-items {
+  font-size: 13px;
+  color: #666;
+}
+
+.cart-total {
+  font-size: 18px;
+  font-weight: 700;
+  color: #8B4513;
+}
+
+.cart-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-view-cart {
+  padding: 10px 16px;
+  background: white;
+  border: 2px solid #D2691E;
+  color: #8B4513;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-view-cart:hover {
+  background: #FFF8DC;
+}
+
+.btn-confirm {
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #90C695 0%, #66BB6A 100%);
+  border: none;
+  color: white;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-confirm:hover {
+  background: linear-gradient(135deg, #66BB6A 0%, #4CAF50 100%);
+}
+
+/* Modal Overlay */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+/* Product Detail Modal */
+.modal-content {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  max-width: 420px;
+  width: 100%;
+  position: relative;
+}
+
+.btn-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #F5E6D3;
+  border: none;
+  color: #8B4513;
+  font-size: 24px;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.btn-close:hover {
+  background: #E8D5B7;
+}
+
+.modal-image {
+  width: 100%;
+  border-radius: 12px;
+  margin-bottom: 16px;
+}
+
+.modal-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #8B4513;
+  margin: 0 0 8px 0;
+}
+
+.modal-price {
+  font-size: 18px;
+  font-weight: 700;
+  color: #FF8C42;
+  margin-bottom: 12px;
+}
+
+.modal-description {
+  color: #666;
+  margin-bottom: 16px;
+  line-height: 1.6;
+}
+
+.alert-contact {
+  background: #FFF3CD;
+  border: 1px solid #FFE69C;
+  border-radius: 8px;
+  padding: 12px;
+  color: #8B4513;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* Cart Modal */
+.cart-modal {
+  background: white;
+  border-radius: 16px 16px 0 0;
+  padding: 24px;
+  max-width: 540px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.cart-modal-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #8B4513;
+  margin: 0 0 16px 0;
+}
+
+.cart-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.cart-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background: #FFFAF0;
+  border-radius: 8px;
+}
+
+.cart-item-name {
+  font-weight: 600;
+  color: #8B4513;
+}
+
+.cart-item-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-qty-small {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: white;
+  border: 1px solid #D2691E;
+  color: #8B4513;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.qty-display-small {
+  min-width: 20px;
+  text-align: center;
+  font-weight: 600;
+  color: #8B4513;
+}
+
+.cart-item-price {
+  font-weight: 700;
+  color: #8B4513;
+  min-width: 60px;
+  text-align: right;
+}
+
+.cart-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 0;
+  border-top: 2px solid #E8D5B7;
+  margin-bottom: 16px;
+}
+
+.summary-label {
+  font-weight: 700;
+  color: #8B4513;
+}
+
+.summary-total {
+  font-size: 20px;
+  font-weight: 700;
+  color: #FF8C42;
+}
+
+.cart-modal-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.btn-cancel {
+  flex: 1;
+  padding: 12px;
+  background: #F5E6D3;
+  border: none;
+  color: #8B4513;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-submit {
+  flex: 2;
+  padding: 12px;
+  background: linear-gradient(135deg, #90C695 0%, #66BB6A 100%);
+  border: none;
+  color: white;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Footer */
+.page-footer {
+  text-align: center;
+  color: #A0522D;
+  padding: 20px;
+  font-size: 14px;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .container {
+    padding: 12px;
+  }
+
+  .menu-card {
+    padding: 12px;
+  }
+
+  .product-name {
+    font-size: 15px;
+  }
+
+  .product-description {
+    font-size: 12px;
+  }
+
+  .cart-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .btn-view-cart,
+  .btn-confirm {
+    width: 100%;
+  }
+}
 </style>
