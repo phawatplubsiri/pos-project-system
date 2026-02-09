@@ -364,13 +364,13 @@ export default {
 /* ========== Global Styles ========== */
 .pos-page {
   min-height: 100vh;
-  background: #FFF8E7;
+  background: var(--color-bg-primary);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
 /* ========== Header ========== */
 .pos-header {
-  background: linear-gradient(135deg, #8B4513 0%, #A0522D 100%);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   position: sticky;
   top: 0;
@@ -397,7 +397,7 @@ export default {
 .cafe-title {
   font-size: 28px;
   font-weight: 700;
-  color: #FFE4B5;
+  color: var(--color-highlight-light);
   margin: 0;
   letter-spacing: -0.5px;
 }
@@ -412,7 +412,7 @@ export default {
 }
 
 .btn-notification {
-  background: linear-gradient(135deg, #FF6B6B 0%, #DC3545 100%);
+  background: linear-gradient(135deg, var(--color-danger) 0%, var(--color-primary-dark) 100%);
   color: white;
   border: none;
   padding: 10px 18px;
@@ -421,18 +421,18 @@ export default {
   font-size: 14px;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+  box-shadow: 0 2px 8px rgba(229, 83, 61, 0.3);
   animation: pulse 2s infinite;
 }
 
 .btn-notification:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+  box-shadow: 0 4px 12px rgba(229, 83, 61, 0.4);
 }
 
 .notification-count {
   background: white;
-  color: #DC3545;
+  color: var(--color-danger);
   padding: 2px 8px;
   border-radius: 10px;
   font-weight: 700;
@@ -556,7 +556,7 @@ export default {
 
 /* ========== Table Cards ========== */
 .table-card {
-  background: white;
+  background: var(--color-table-row);
   border-radius: 16px;
   padding: 24px;
   cursor: pointer;
@@ -580,7 +580,7 @@ export default {
 
 .table-available:hover {
   border-color: var(--color-success);
-  box-shadow: 0 8px 24px rgba(102, 187, 106, 0.3);
+  box-shadow: 0 8px 24px rgba(34, 197, 94, 0.3);
 }
 
 .table-busy {
@@ -589,7 +589,7 @@ export default {
 
 .table-busy:hover {
   border-color: var(--color-danger);
-  box-shadow: 0 8px 24px rgba(220, 53, 69, 0.3);
+  box-shadow: 0 8px 24px rgba(229, 83, 61, 0.3);
 }
 
 .pending-badge {
@@ -806,7 +806,7 @@ export default {
 }
 
 .btn-reject {
-  background: #FFE4E1;
+  background: var(--color-danger-light);
   color: var(--color-danger);
 }
 
@@ -816,13 +816,13 @@ export default {
 }
 
 .btn-confirm {
-  background: linear-gradient(135deg, var(--color-success-light) 0%, var(--color-success) 100%);
+  background: linear-gradient(135deg, var(--color-action) 0%, var(--color-action-hover) 100%);
   color: white;
 }
 
 .btn-confirm:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(102, 187, 106, 0.3);
+  box-shadow: 0 4px 12px rgba(76, 175, 142, 0.3);
 }
 
 /* Form Elements */

@@ -71,7 +71,7 @@ export default {
 /* Dashboard Container - Full Screen with Cream Background */
 .dashboard-container {
   min-height: 100vh;
-  background-color: #fff8e7; /* Cream background from theme */
+  background-color: var(--color-bg-primary);
   padding: 60px 40px;
   display: flex;
   flex-direction: column;
@@ -93,13 +93,13 @@ export default {
 .admin-title {
   font-size: 36px;
   font-weight: 700;
-  color: #8b4513; /* Brown from theme */
+  color: var(--color-primary);
   margin: 0 0 12px 0;
 }
 
 .admin-subtitle {
   font-size: 18px;
-  color: #a0522d; /* Light brown */
+  color: var(--color-text-secondary);
   margin: 0;
 }
 
@@ -116,14 +116,14 @@ export default {
 
 /* Feature Card */
 .feature-card {
-  background-color: #ffffff;
-  border: 2px solid #deb887; /* Tan border */
+  background-color: var(--color-table-row);
+  border: 2px solid var(--color-table-border);
   border-radius: 16px;
   padding: 40px 24px;
   text-align: center;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(139, 69, 19, 0.08);
+  box-shadow: var(--shadow-sm);
   min-height: 240px;
   display: flex;
   flex-direction: column;
@@ -133,8 +133,8 @@ export default {
 
 .feature-card:hover {
   transform: translateY(-6px);
-  box-shadow: 0 8px 20px rgba(139, 69, 19, 0.15);
-  border-color: #ff8c42; /* Orange border on hover */
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-action);
 }
 
 /* Card Icons with Different Colors */
@@ -145,26 +145,26 @@ export default {
 }
 
 .cart-icon {
-  color: #8b4513; /* Brown */
+  color: var(--color-primary);
 }
 
 .staff-icon {
-  color: #6a5acd; /* Purple-ish */
+  color: var(--color-action);
 }
 
 .inventory-icon {
-  color: #d4a574; /* Tan/Gold */
+  color: var(--color-highlight);
 }
 
 .reports-icon {
-  color: #ff8c42; /* Orange */
+  color: var(--color-warning);
 }
 
 /* Card Title */
 .card-title {
   font-size: 18px;
   font-weight: 700;
-  color: #654321; /* Dark brown */
+  color: var(--color-text-primary);
   margin: 0 0 12px 0;
   line-height: 1.4;
 }
@@ -172,7 +172,7 @@ export default {
 /* Card Description */
 .card-description {
   font-size: 14px;
-  color: #a0522d; /* Light brown */
+  color: var(--color-text-secondary);
   margin: 0;
   line-height: 1.5;
 }
@@ -183,19 +183,19 @@ export default {
   font-size: 16px;
   font-weight: 600;
   color: #ffffff;
-  background-color: #8b4513; /* Brown from theme */
+  background-color: var(--color-primary);
   border: none;
   border-radius: 24px;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(139, 69, 19, 0.2);
+  box-shadow: var(--shadow-md);
   margin-top: 20px;
 }
 
 .logout-button:hover {
-  background-color: #a0522d;
+  background-color: var(--color-primary-dark);
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(139, 69, 19, 0.3);
+  box-shadow: var(--shadow-lg);
 }
 
 .logout-button:active {

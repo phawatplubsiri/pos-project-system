@@ -3,56 +3,65 @@
    ======================================== */
 
 :root {
-    /* Primary Colors - Orange */
-    --color-primary: #ff8c42;
-    --color-primary-dark: #e67e22;
-    --color-primary-light: #ffb380;
-    --color-primary-hover: #ff7a29;
+    /* Background */
+    --color-bg-primary: #F6F5F2;    /* ครีมอ่อน */
+    --color-bg-card: #ECEAE6;       /* ครีมเทา */
+    --color-divider: #D1D5DB;       /* เทาอ่อน */
 
-    /* Secondary Colors - Cream */
-    --color-secondary: #fff8e7;
-    --color-secondary-dark: #f5e6d3;
-    --color-secondary-light: #fffef9;
-    --color-cream-accent: #ffe4b5;
+    /* Primary / Brand (Navbar, Header, Total) */
+    --color-primary: #6B4F3F;       /* น้ำตาลกาแฟ */
+    --color-primary-dark: #4B3621;
+    --color-primary-light: #8B6B5D;
+    --color-primary-hover: #5A4235;
 
-    /* Accent Colors - Brown */
-    --color-accent: #8b4513;
-    --color-accent-light: #a0522d;
-    --color-accent-dark: #654321;
+    /* Action / Accent (Buttons, Active) */
+    --color-action: #4CAF8E;        /* เขียวหมากรุก */
+    --color-action-hover: #3F9B7A;  /* เขียวเข้ม */
+    --color-action-active: #4CAF8E;
 
-    /* Status Colors */
-    --color-success: #66BB6A; /* Clear Green */
-    --color-success-light: #90C695;
-    --color-warning: #FF8C42; /* Orange - Pending */
-    --color-danger: #DC3545; /* Clear Red */
-    --color-danger-light: #FF6B6B;
-    --color-info: #deb887; /* Burlywood - Info badges */
+    /* Highlight (Promotion, Badge) */
+    --color-highlight: #F2C94C;     /* เหลืองมัสตาร์ด */
+    --color-highlight-light: #FFF3C4; /* เหลืองอ่อน */
 
-    /* Text Colors */
-    --color-text-primary: #654321; /* Dark Brown */
-    --color-text-secondary: #8b4513; /* Brown */
-    --color-text-light: #a0522d; /* Light Brown */
-    --color-text-white: #ffffff;
+    /* Text */
+    --color-text-primary: #2E2E2E;   /* เทาเข้ม */
+    --color-text-secondary: #6B7280; /* เทา */
+    --color-text-white: #FFFFFF;    /* ขาว */
+    --color-text-price: #4B3621;    /* น้ำตาลเข้ม */
 
-    /* Background Colors */
-    --color-bg-primary: #fff8e7; /* Cream */
-    --color-bg-secondary: #f5e6d3; /* Beige */
-    --color-bg-card: #ffffff;
-    --color-bg-hover: #ffe4b5;
+    /* Status */
+    --color-success: #22C55E;       /* เขียว */
+    --color-success-light: #D1FAE5;
+    --color-warning: #F59E0B;       /* ส้ม */
+    --color-warning-light: #FFF3C4;
+    --color-danger: #E5533D;        /* แดง */
+    --color-danger-light: #FEE2E2;
+    --color-disabled: #9CA3AF;      /* เทา */
 
-    /* Border Colors */
-    --color-border: #deb887;
-    --color-border-light: #f5e6d3;
-    --color-border-dark: #a0522d;
+    /* Table / List */
+    --color-table-row: #FFFFFF;     /* ขาวครีม */
+    --color-table-row-alt: #F3F4F6; /* เทาอ่อน */
+    --color-table-row-selected: #D1FAE5; /* เขียวอ่อน */
+    --color-table-border: #E5E7EB;  /* เทาอ่อน */
+
+    /* Legacy mapping for compatibility */
+    --color-secondary: var(--color-bg-card);
+    --color-secondary-dark: #D1D5DB;
+    --color-secondary-light: var(--color-table-row);
+    --color-accent: var(--color-primary);
+    --color-border: var(--color-table-border);
+    --color-border-light: var(--color-table-border);
+    --color-border-dark: var(--color-primary-dark);
+    --color-info: var(--color-highlight);
 
     /* Shadow */
-    --shadow-sm: 0 1px 3px rgba(139, 69, 19, 0.1);
-    --shadow-md: 0 4px 6px rgba(139, 69, 19, 0.15);
-    --shadow-lg: 0 10px 20px rgba(139, 69, 19, 0.2);
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.1);
 
     /* Fun highlight for teen board-game vibe */
-    --color-accent-glow: linear-gradient(90deg, rgba(255,140,66,0.15), rgba(139,69,19,0.08));
-    --color-neon: #ffb86b;
+    --color-accent-glow: linear-gradient(90deg, rgba(107, 79, 63, 0.1), rgba(107, 79, 63, 0.05));
+    --color-neon: var(--color-highlight);
 
     /* Spacing (optional - for consistency) */
     --spacing-xs: 4px;
@@ -82,10 +91,10 @@
     background-color: var(--color-primary) !important;
 }
 .bg-secondary {
-    background-color: var(--color-secondary) !important;
+    background-color: var(--color-bg-card) !important;
 }
 .bg-accent {
-    background-color: var(--color-accent) !important;
+    background-color: var(--color-action) !important;
 }
 .bg-success {
     background-color: var(--color-success) !important;
@@ -97,7 +106,7 @@
     background-color: var(--color-warning) !important;
 }
 .bg-cream {
-    background-color: var(--color-secondary) !important;
+    background-color: var(--color-bg-primary) !important;
 }
 
 /* Text Colors */
@@ -108,29 +117,29 @@
     color: var(--color-text-secondary) !important;
 }
 .text-accent {
-    color: var(--color-accent) !important;
+    color: var(--color-action) !important;
 }
 .text-white {
     color: var(--color-text-white) !important;
 }
-.text-brown {
-    color: var(--color-text-primary) !important;
+.text-price {
+    color: var(--color-text-price) !important;
 }
 
 /* Border Colors */
 .border-primary {
     border-color: var(--color-primary) !important;
 }
-.border-cream {
-    border-color: var(--color-border-light) !important;
+.border-divider {
+    border-color: var(--color-divider) !important;
 }
-.border-brown {
-    border-color: var(--color-border-dark) !important;
+.border-table {
+    border-color: var(--color-table-border) !important;
 }
 
 /* Button Variants */
 .btn-theme-primary {
-    background-color: var(--color-primary);
+    background-color: var(--color-action);
     color: var(--color-text-white);
     border: none;
     padding: 10px 20px;
@@ -141,15 +150,15 @@
 }
 
 .btn-theme-primary:hover {
-    background-color: var(--color-primary-hover);
+    background-color: var(--color-action-hover);
     transform: translateY(-2px);
     box-shadow: var(--shadow-md);
 }
 
 .btn-theme-secondary {
-    background-color: var(--color-secondary-dark);
+    background-color: var(--color-bg-card);
     color: var(--color-text-primary);
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--color-divider);
     padding: 10px 20px;
     border-radius: var(--radius-md);
     cursor: pointer;
@@ -157,7 +166,7 @@
 }
 
 .btn-theme-secondary:hover {
-    background-color: var(--color-cream-accent);
+    background-color: var(--color-bg-primary);
 }
 
 .btn-theme-success {
@@ -233,8 +242,8 @@
 
 /* Additional helpers for Bootstrap integration and modern layout */
 .navbar-theme {
-    background: var(--color-accent-glow);
-    border-bottom: 2px solid var(--color-border);
+    background: var(--color-primary);
+    border-bottom: 2px solid var(--color-primary-dark);
 }
 
 .btn-pill {
@@ -243,7 +252,7 @@
 
 .accent-underline {
     display: inline-block;
-    border-bottom: 3px solid var(--color-neon);
+    border-bottom: 3px solid var(--color-highlight);
     padding-bottom: 2px;
 }
 

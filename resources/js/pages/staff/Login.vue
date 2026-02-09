@@ -139,13 +139,13 @@ export default {
 .dice-badge {
   width: 100px;
   height: 100px;
-  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-hover));
+  background: linear-gradient(135deg, var(--color-action), var(--color-action-hover));
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 50px;
-  box-shadow: 0 4px 12px rgba(255, 140, 66, 0.3);
+  box-shadow: 0 4px 12px rgba(76, 175, 142, 0.3);
   color: white;
 }
 
@@ -210,7 +210,7 @@ export default {
   font-size: 16px;
   font-weight: 600;
   color: white;
-  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-hover));
+  background: linear-gradient(135deg, var(--color-action), var(--color-action-hover));
   border: none;
   border-radius: var(--radius-md);
   cursor: pointer;
@@ -223,7 +223,7 @@ export default {
 
 .btn-login:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(255, 140, 66, 0.3);
+  box-shadow: 0 4px 12px rgba(76, 175, 142, 0.3);
 }
 
 .btn-login:disabled {

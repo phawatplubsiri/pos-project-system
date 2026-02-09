@@ -193,7 +193,7 @@ export default {
 
 /* Header */
 .page-header {
-  background-color: var(--color-accent);
+  background-color: var(--color-primary);
   padding: 30px 40px;
   display: flex;
   align-items: center;
@@ -224,14 +224,13 @@ export default {
 .page-title {
   font-size: 28px;
   font-weight: 700;
-  color: var(--color-primary);
+  color: var(--color-highlight-light);
   margin: 0;
 }
 
 .page-subtitle {
   font-size: 14px;
-  color: var(--color-secondary-light);
-  opacity: 0.8;
+  color: rgba(255, 255, 255, 0.8);
   margin: 0;
 }
 

@@ -461,7 +461,7 @@ export default {
 
 /* ========== Header ========== */
 .order-header {
-  background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-light) 100%);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
   box-shadow: var(--shadow-md);
   position: sticky;
   top: 0;
@@ -510,7 +510,7 @@ export default {
 .table-title {
   font-size: 24px;
   font-weight: 700;
-  color: var(--color-secondary);
+  color: var(--color-highlight-light);
   margin: 0;
 }
 
@@ -548,13 +548,13 @@ export default {
 }
 
 .btn-checkout {
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
+  background: linear-gradient(135deg, var(--color-action) 0%, var(--color-action-hover) 100%);
   color: white;
 }
 
 .btn-checkout:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(255, 140, 66, 0.3);
+  box-shadow: 0 4px 12px rgba(76, 175, 142, 0.3);
 }
 
 /* ========== Main Content ========== */
@@ -604,9 +604,9 @@ export default {
 }
 
 .category-btn.active {
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
+  background: linear-gradient(135deg, var(--color-action) 0%, var(--color-action-hover) 100%);
   color: white;
-  border-color: var(--color-primary);
+  border-color: var(--color-action);
 }
 
 .product-grid {
@@ -616,8 +616,8 @@ export default {
 }
 
 .product-card {
-  background: white;
-  border: 2px solid var(--color-secondary-dark);
+  background: var(--color-table-row);
+  border: 2px solid var(--color-table-border);
   border-radius: var(--radius-lg);
   padding: 20px;
   cursor: pointer;
@@ -633,18 +633,18 @@ export default {
 .product-card:hover {
   transform: translateY(-4px);
   box-shadow: var(--shadow-md);
-  border-color: var(--color-primary);
+  border-color: var(--color-action);
 }
 
 .product-name {
   font-weight: 600;
-  color: var(--color-accent);
+  color: var(--color-text-primary);
   font-size: 15px;
 }
 
 .product-price {
   font-weight: 700;
-  color: var(--color-primary);
+  color: var(--color-text-price);
   font-size: 16px;
 }
 
@@ -856,7 +856,7 @@ export default {
 
 .total-amount {
   font-size: 20px;
-  color: var(--color-primary);
+  color: var(--color-text-price);
 }
 
 .btn-submit-order {
@@ -864,7 +864,7 @@ export default {
   padding: 14px;
   border-radius: 24px;
   border: none;
-  background: linear-gradient(135deg, var(--color-success-light) 0%, var(--color-success) 100%);
+  background: linear-gradient(135deg, var(--color-action) 0%, var(--color-action-hover) 100%);
   color: white;
   font-weight: 700;
   font-size: 15px;
@@ -874,7 +874,7 @@ export default {
 
 .btn-submit-order:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(102, 187, 106, 0.3);
+  box-shadow: 0 4px 12px rgba(76, 175, 142, 0.3);
 }
 
 .btn-submit-order:disabled {

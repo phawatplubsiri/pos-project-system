@@ -187,13 +187,13 @@ export default {
 /* Staff Management Container */
 .staff-manage-container {
   min-height: 100vh;
-  background-color: #fff8e7; /* Cream background */
+  background-color: var(--color-bg-primary);
   font-family: 'Sarabun', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
 /* Page Header - Brown Section */
 .page-header {
-  background-color: #8b4513; /* Brown */
+  background-color: var(--color-primary);
   padding: 24px 40px;
   display: flex;
   align-items: center;
@@ -228,7 +228,7 @@ export default {
 .page-title {
   font-size: 28px;
   font-weight: 700;
-  color: #ff8c42; /* Orange */
+  color: var(--color-highlight-light);
   margin: 0 0 4px 0;
 }
 
@@ -243,10 +243,10 @@ export default {
   max-width: 1200px;
   margin: 40px auto;
   background-color: #ffffff;
-  border: 2px solid #deb887;
+  border: 2px solid var(--color-table-border);
   border-radius: 16px;
   padding: 32px;
-  box-shadow: 0 4px 12px rgba(139, 69, 19, 0.08);
+  box-shadow: var(--shadow-sm);
 }
 
 /* Section Header */
@@ -260,10 +260,10 @@ export default {
 .section-title {
   font-size: 20px;
   font-weight: 700;
-  color: #8b4513; /* Brown */
+  color: var(--color-primary);
   margin: 0;
   padding-bottom: 8px;
-  border-bottom: 3px solid #ff8c42; /* Orange underline */
+  border-bottom: 3px solid var(--color-action);
   display: inline-block;
 }
 
@@ -272,18 +272,18 @@ export default {
   font-size: 15px;
   font-weight: 600;
   color: #ffffff;
-  background: linear-gradient(135deg, #ff8c42, #ff7a29);
+  background: linear-gradient(135deg, var(--color-action), var(--color-action-hover));
   border: none;
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(255, 140, 66, 0.3);
+  box-shadow: 0 2px 8px rgba(76, 175, 142, 0.3);
 }
 
 .add-staff-button:hover {
-  background: linear-gradient(135deg, #ff7a29, #e67e22);
+  background: linear-gradient(135deg, var(--color-action-hover), #3F9B7A);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(255, 140, 66, 0.4);
+  box-shadow: 0 4px 12px rgba(76, 175, 142, 0.4);
 }
 
 /* Table Container */
@@ -307,24 +307,24 @@ export default {
   text-align: left;
   font-size: 14px;
   font-weight: 700;
-  color: #8b4513; /* Brown */
-  border-bottom: 2px solid #f5e6d3;
+  color: var(--color-text-primary);
+  border-bottom: 2px solid var(--color-table-border);
   background-color: transparent;
 }
 
 .staff-table tbody tr {
-  border-bottom: 1px solid #f5e6d3;
+  border-bottom: 1px solid var(--color-table-border);
   transition: background-color 0.2s ease;
 }
 
 .staff-table tbody tr:hover {
-  background-color: #fffef9;
+  background-color: var(--color-table-row-alt);
 }
 
 .staff-table tbody td {
   padding: 16px 12px;
   font-size: 15px;
-  color: #654321; /* Dark brown */
+  color: var(--color-text-primary);
 }
 
 /* Action Cell */
@@ -338,8 +338,8 @@ export default {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  border: 1px solid #deb887;
-  background-color: #fff8e7;
+  border: 1px solid var(--color-table-border);
+  background-color: var(--color-table-row);
   cursor: pointer;
   font-size: 16px;
   display: flex;
@@ -350,17 +350,17 @@ export default {
 
 .action-btn:hover {
   transform: scale(1.1);
-  box-shadow: 0 2px 8px rgba(139, 69, 19, 0.15);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .edit-btn:hover {
-  background-color: #ffe4b5;
-  border-color: #ff8c42;
+  background-color: var(--color-success-light);
+  border-color: var(--color-success);
 }
 
 .delete-btn:hover {
-  background-color: #ffe4e1;
-  border-color: #c85a54;
+  background-color: var(--color-danger-light);
+  border-color: var(--color-danger);
 }
 
 /* Modal Overlay */
@@ -386,13 +386,13 @@ export default {
   width: 90%;
   max-width: 480px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-  border: 2px solid #deb887;
+  border: 2px solid var(--color-table-border);
 }
 
 .modal-title {
   font-size: 22px;
   font-weight: 700;
-  color: #8b4513;
+  color: var(--color-text-primary);
   margin: 0 0 24px 0;
 }
 
@@ -405,7 +405,7 @@ export default {
   display: block;
   font-size: 14px;
   font-weight: 600;
-  color: #654321;
+  color: var(--color-text-primary);
   margin-bottom: 8px;
 }
 
@@ -414,24 +414,24 @@ export default {
   width: 100%;
   padding: 12px 16px;
   font-size: 15px;
-  border: 1px solid #deb887;
+  border: 1px solid var(--color-table-border);
   border-radius: 8px;
   background-color: #ffffff;
-  color: #654321;
+  color: var(--color-text-primary);
   transition: all 0.3s ease;
   box-sizing: border-box;
   font-family: 'Sarabun', sans-serif;
 }
 
 .form-group input::placeholder {
-  color: #c19a6b;
+  color: var(--color-text-secondary);
 }
 
 .form-group input:focus,
 .form-group select:focus {
   outline: none;
-  border-color: #ff8c42;
-  box-shadow: 0 0 0 3px rgba(255, 140, 66, 0.1);
+  border-color: var(--color-action);
+  box-shadow: 0 0 0 3px rgba(76, 175, 142, 0.1);
 }
 
 /* Modal Actions */
@@ -453,24 +453,24 @@ export default {
 }
 
 .cancel-btn {
-  background-color: #f5e6d3;
-  color: #8b4513;
+  background-color: var(--color-bg-card);
+  color: var(--color-text-secondary);
 }
 
 .cancel-btn:hover {
-  background-color: #ffe4b5;
+  background-color: var(--color-bg-primary);
 }
 
 .save-btn {
-  background: linear-gradient(135deg, #ff8c42, #ff7a29);
+  background: linear-gradient(135deg, var(--color-action), var(--color-action-hover));
   color: #ffffff;
-  box-shadow: 0 2px 8px rgba(255, 140, 66, 0.3);
+  box-shadow: 0 2px 8px rgba(76, 175, 142, 0.3);
 }
 
 .save-btn:hover {
-  background: linear-gradient(135deg, #ff7a29, #e67e22);
+  background: linear-gradient(135deg, var(--color-action-hover), #3F9B7A);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(255, 140, 66, 0.4);
+  box-shadow: 0 4px 12px rgba(76, 175, 142, 0.4);
 }
 
 /* Responsive Design */

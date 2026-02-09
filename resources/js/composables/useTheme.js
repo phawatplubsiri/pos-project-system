@@ -8,47 +8,42 @@
 export function useTheme() {
   // Color palette object
   const colors = {
-    // Primary - Orange
-    primary: '#FF8C42',
-    primaryDark: '#E67E22',
-    primaryLight: '#FFB380',
-    primaryHover: '#FF7A29',
+    // Primary / Brand (Navbar, Header, Total)
+    primary: '#6B4F3F',
+    primaryDark: '#4B3621',
+    primaryLight: '#8B6B5D',
+    primaryHover: '#5A4235',
 
-    // Secondary - Cream
-    secondary: '#FFF8E7',
-    secondaryDark: '#F5E6D3',
-    secondaryLight: '#FFFEF9',
-    creamAccent: '#FFE4B5',
+    // Action / Accent (Buttons, Active)
+    action: '#4CAF8E',
+    actionHover: '#3F9B7A',
 
-    // Accent - Brown
-    accent: '#8B4513',
-    accentLight: '#A0522D',
-    accentDark: '#654321',
+    // Highlight
+    highlight: '#F2C94C',
+    highlightLight: '#FFF3C4',
 
     // Status Colors
-    success: '#D4A574',      // Tan/Gold
-    successDark: '#C19A6B',
-    warning: '#FF8C42',      // Orange
-    danger: '#C85A54',       // Terracotta
-    dangerDark: '#B44A3E',
-    info: '#DEB887',         // Burlywood
+    success: '#22C55E',
+    warning: '#F59E0B',
+    danger: '#E5533D',
+    disabled: '#9CA3AF',
+    info: '#F2C94C',
 
     // Text
-    textPrimary: '#654321',
-    textSecondary: '#8B4513',
-    textLight: '#A0522D',
+    textPrimary: '#2E2E2E',
+    textSecondary: '#6B7280',
     textWhite: '#FFFFFF',
+    textPrice: '#4B3621',
 
     // Backgrounds
-    bgPrimary: '#FFF8E7',
-    bgSecondary: '#F5E6D3',
-    bgCard: '#FFFFFF',
-    bgHover: '#FFE4B5',
+    bgPrimary: '#F6F5F2',
+    bgCard: '#ECEAE6',
+    bgHover: '#D1FAE5', // Selected row color
 
     // Borders
-    border: '#DEB887',
-    borderLight: '#F5E6D3',
-    borderDark: '#A0522D',
+    divider: '#D1D5DB',
+    border: '#E5E7EB',
+    borderLight: '#F3F4F6',
   };
 
   // Button style classes
