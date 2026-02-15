@@ -19,6 +19,7 @@ use App\Http\Controllers\ReportController;
 
 // <--- 2. เพิ่ม Route Login ตรงนี้ครับ (Public Route)
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/login-pin', [AuthController::class, 'loginWithPin']);
 
 Route::get('/products', [ProductController::class, 'index']);
 Route::get('/categories', [ProductController::class, 'categories']);

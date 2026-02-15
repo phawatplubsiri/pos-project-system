@@ -45,7 +45,7 @@
               @click="addToCart(product)"
             >
               <div class="product-name">{{ product.name }}</div>
-              <div class="product-price">{{ product.price }} ฿</div>
+              <div class="product-price">{{ formatPrice(product.price) }} ฿</div>
             </div>
           </div>
         </div>
@@ -100,7 +100,7 @@
 
             <div class="cart-total">
               <span>รวมรายการใหม่:</span>
-              <span class="total-amount">{{ totalPrice }} ฿</span>
+              <span class="total-amount">{{ formatPrice(totalPrice) }} ฿</span>
             </div>
 
             <button
@@ -175,6 +175,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router'; // ✅ เพิ่ม useRouter
 import axios from 'axios';
 import QrcodeVue from 'qrcode.vue';
+import { useAlert } from '../composables/useAlert';
 
 export default {
   components: {
@@ -183,6 +184,7 @@ export default {
   setup() {
     const route = useRoute();
     const router = useRouter(); // ✅ เรียกใช้ router
+    const { success, error, warning, confirm, loading: showAlertLoading, close: closeAlert } = useAlert();
     const tableId = route.params.id;
     const tableName = ref('');
     const products = ref([]);
@@ -193,7 +195,6 @@ export default {
     const showQrModal = ref(false);
     const currentTime = ref(new Date());
     const sessionStartTime = ref(null);
-    const toastMsg = ref('');
     let timerInterval = null;
     let pollingInterval = null;
 
@@ -202,11 +203,6 @@ export default {
       { name: '🍟 อาหาร', type: 'food' },
       { name: '📦 สินค้า', type: 'retail' },
     ];
-
-    const showToast = (msg) => {
-      toastMsg.value = msg;
-      setTimeout(() => { toastMsg.value = ''; }, 3000);
-    };
 
     const formatDuration = (startTime) => {
         if (!startTime) return '00:00:00';
@@ -220,6 +216,13 @@ export default {
         const s = diff % 60;
 
         return [h, m, s].map(v => v.toString().padStart(2, '0')).join(':');
+    };
+
+    const formatPrice = (value) => {
+        return new Intl.NumberFormat('th-TH', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }).format(value || 0);
     };
 
     const qrUrl = computed(() => {
@@ -294,12 +297,12 @@ export default {
 
             // ถ้ามีออเดอร์ใหม่ที่รอยืนยันเพิ่มขึ้น ให้โชว์ Alert
             if (newConfirmingCount > currentConfirmingCount) {
-                showToast('🔔 มีออเดอร์ใหม่จากลูกค้าโต๊ะนี้!');
+                success('🔔 มีออเดอร์ใหม่จากลูกค้า!');
             }
 
             orderHistory.value = newOrders;
-        } catch (error) {
-            console.error('Fetch history error:', error);
+        } catch (err) {
+            console.error('Fetch history error:', err);
         }
     };
 
@@ -311,15 +314,24 @@ export default {
             }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            showToast(newStatus === 'pending' ? '✅ ยืนยันรายการแล้ว' : '❌ ยกเลิกรายการแล้ว');
+
+            if (newStatus === 'pending') {
+                success('✅ ยืนยันรายการแล้ว');
+            } else if (newStatus === 'completed') {
+                success('✅ รายการเสร็จสมบูรณ์');
+            } else {
+                warning('❌ ยกเลิกรายการแล้ว');
+            }
+
             fetchOrderHistory(); // โหลดใหม่หลังอัปเดต
-        } catch (error) {
-            alert('ไม่สามารถอัปเดตสถานะได้');
+        } catch (err) {
+            error('ไม่สามารถอัปเดตสถานะได้', err.response?.data?.message || err.message);
         }
     };
 
-    const confirmCancelOrder = (orderId) => {
-        if (confirm('⚠️ ยืนยันการยกเลิกรายการนี้? \n(สต็อกจะถูกคืน และยอดเงินจะถูกหักออกจากบิล)')) {
+    const confirmCancelOrder = async (orderId) => {
+        const isConfirmed = await confirm('⚠️ ยืนยันการยกเลิกรายการนี้?', '(สต็อกจะถูกคืน และยอดเงินจะถูกหักออกจากบิล)');
+        if (isConfirmed) {
             updateOrderStatus(orderId, 'cancelled');
         }
     };
@@ -327,10 +339,12 @@ export default {
     const submitOrder = async () => {
         if (cart.value.length === 0) return;
         
-        if(!confirm(`ยืนยันสั่งอาหาร รวม ${totalPrice.value} บาท?`)) return;
+        const isConfirmed = await confirm('ยืนยันการสั่ง?', `สั่งอาหาร รวม ${totalPrice.value} บาท?`);
+        if(!isConfirmed) return;
 
         try {
             const token = localStorage.getItem('token');
+            showAlertLoading('กำลังส่งออเดอร์...');
             await axios.post('/api/orders', {
                 table_id: tableId, 
                 items: cart.value.map(item => ({
@@ -341,18 +355,30 @@ export default {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
-            alert('✅ สั่งอาหารสำเร็จ!');
+            success('✅ สั่งอาหารสำเร็จ!');
             cart.value = []; 
             fetchOrderHistory(); // <--- เพิ่มให้โหลดประวัติใหม่ทันที
             
-        } catch (error) {
-            console.error(error);
-            alert('❌ สั่งอาหารไม่สำเร็จ: ' + (error.response?.data?.message || 'โปรดลองใหม่'));
+        } catch (err) {
+            error('❌ สั่งอาหารไม่สำเร็จ', err.response?.data?.message || 'โปรดลองใหม่');
         }
     };
 
     // ✅ ฟังก์ชันเช็คบิล / ปิดโต๊ะ (เพิ่มใหม่)
     const handleCheckout = async () => {
+      // ตรวจสอบออเดอร์ตกค้าง (ที่ยังไม่เสร็จหรือยังไม่ถูกยกเลิก)
+      const outstandingOrders = orderHistory.value.filter(o => 
+        o.status.toLowerCase() === 'confirming' || o.status.toLowerCase() === 'pending'
+      );
+
+      if (outstandingOrders.length > 0) {
+        warning(
+          'มีออเดอร์ตกค้าง!', 
+          `กรุณาจัดการออเดอร์ที่ยังค้างอยู่ (${outstandingOrders.length} รายการ) ให้เรียบร้อยก่อนเช็คบิล`
+        );
+        return;
+      }
+
       try {
         const token = localStorage.getItem('token');
         
@@ -365,34 +391,53 @@ export default {
         
         // 2. เตรียมข้อความสรุป
         const timeLabel = data.is_day_pass ? '🎟️ ประเภท: 1 Day Pass (เหมาวัน)' : `⏱️ เวลาที่เล่น: ${data.duration_minutes} นาที`;
-        const msg = `
-        🧾 สรุปยอดเงิน (โต๊ะ ${tableName.value || tableId})
-        --------------------------------
-        👥 ลูกค้า: ${data.pax} คน
-        ${timeLabel}
-        
-        💵 ค่าบริการ: ${data.costs.time} บาท
-        🍔 ค่าอาหาร/น้ำ: ${data.costs.food} บาท
-        --------------------------------
-        💰 ยอดสุทธิ: ${data.costs.total} บาท
-        
-        ยืนยันการ "ปิดโต๊ะ" เลยหรือไม่?
+        const htmlContent = `
+            <div style="text-align: left; font-family: 'Sarabun', sans-serif;">
+                <p><strong>👥 ลูกค้า:</strong> ${data.pax} คน</p>
+                <p><strong>${timeLabel}</strong></p>
+                <hr>
+                <div style="display: flex; justify-content: space-between;">
+                    <span>💵 ค่าบริการ:</span>
+                    <strong>${formatPrice(data.costs.time)} ฿</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span>🍔 ค่าอาหาร/น้ำ:</span>
+                    <strong>${formatPrice(data.costs.food)} ฿</strong>
+                </div>
+                <hr>
+                <div style="display: flex; justify-content: space-between; font-size: 1.2em; color: #4B3621;">
+                    <span>💰 ยอดสุทธิ:</span>
+                    <strong>${formatPrice(data.costs.total)} ฿</strong>
+                </div>
+            </div>
         `;
 
         // 3. ถามยืนยัน
-        if (confirm(msg)) {
+        const result = await import('sweetalert2').then(Swal => Swal.default.fire({
+            title: `🧾 สรุปยอดเงิน (โต๊ะ ${tableName.value || tableId})`,
+            html: htmlContent,
+            icon: 'info',
+            showCancelButton: true,
+            confirmButtonColor: '#4CAF8E',
+            cancelButtonColor: '#E5533D',
+            confirmButtonText: '💰 เช็คบิล & ปิดโต๊ะ',
+            cancelButtonText: 'กลับไปแก้ไข',
+            background: '#F6F5F2'
+        }));
+
+        if (result.isConfirmed) {
+            showAlertLoading('กำลังปิดโต๊ะ...');
             // 4. ยิง API ปิดโต๊ะ
             await axios.post(`/api/tables/${tableId}/checkout`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
-            alert('✅ ปิดโต๊ะเรียบร้อย ขอบคุณครับ!');
+            success('✅ ปิดโต๊ะเรียบร้อย ขอบคุณครับ!');
             router.push('/pos'); // เด้งกลับหน้าผังร้าน
         }
 
-      } catch (error) {
-        console.error(error);
-        alert('เกิดข้อผิดพลาด: ' + (error.response?.data?.message || error.message));
+      } catch (err) {
+        error('เกิดข้อผิดพลาด', err.response?.data?.message || err.message);
       }
     };
     const checkTableStatus = async () => {
@@ -407,7 +452,7 @@ export default {
         tableName.value = tableData.name;
 
         if (status !== 'busy' && status !== 'occupied') {
-            alert(`❌ โต๊ะนี้ยังไม่ได้เปิด (สถานะ: ${status})`);
+            error('โต๊ะนี้ยังไม่ได้เปิด', `สถานะปัจจุบัน: ${status}`);
             router.push('/pos'); 
         } else {
             // เก็บ Token ไว้ใช้ทำ QR
@@ -417,8 +462,8 @@ export default {
             }
         }
 
-      } catch (error) {
-        console.error(error);
+      } catch (err) {
+        console.error(err);
         router.push('/pos'); 
       }
     };
@@ -443,7 +488,7 @@ export default {
       addToCart, decreaseQty, increaseQty, removeFromCart, submitOrder,
       handleCheckout, guestToken, showQrModal, qrUrl, formatDuration, sessionStartTime,
       orderHistory, updateOrderStatus, confirmCancelOrder,
-      awaitingConfirmOrders, activeAndPastOrders, toastMsg // <--- เพิ่ม toastMsg
+      awaitingConfirmOrders, activeAndPastOrders, formatPrice
     };
 
     

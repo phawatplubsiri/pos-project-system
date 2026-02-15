@@ -82,12 +82,11 @@ export default {
 /* Admin Header */
 .admin-header {
   text-align: center;
-  margin-bottom: 60px;
+  margin-bottom: 30px;
 }
 
 .admin-icon {
   font-size: 64px;
-  margin-bottom: 16px;
 }
 
 .admin-title {
@@ -189,7 +188,6 @@ export default {
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: var(--shadow-md);
-  margin-top: 20px;
 }
 
 .logout-button:hover {

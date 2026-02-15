@@ -16,6 +16,7 @@ class UserSeeder extends Seeder
             'email' => 'admin@example.com',
             'password' => Hash::make('admin1234'),
             'role' => 'admin',
+            'pin' => Hash::make('123456'), // กำหนดเลขคงที่ให้จำง่ายสำหรับเทส
         ]);
 
         // สร้าง User: Staff (เอาไว้เทสอีกคน)
@@ -24,6 +25,7 @@ class UserSeeder extends Seeder
             'email' => 'staff@example.com',
             'password' => Hash::make('staff1234'),
             'role' => 'staff',
+            'pin' => Hash::make('111111'),
         ]);
     }
 }

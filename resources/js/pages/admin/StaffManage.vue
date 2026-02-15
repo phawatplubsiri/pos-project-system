@@ -3,7 +3,7 @@
     <!-- Header Section -->
     <div class="page-header">
       <button class="back-button" @click="$router.push('/admin/dashboard')">
-        ←
+        <ChevronLeft :size="28" />
       </button>
       <div class="header-content">
         <h1 class="page-title">จัดการพนักงาน</h1>
@@ -17,7 +17,7 @@
       <div class="section-header">
         <h2 class="section-title">รายชื่อพนักงาน</h2>
         <button class="add-staff-button" @click="openModal()">
-          + เพิ่มพนักงาน
+          <Plus :size="18" /> เพิ่มพนักงานใหม่
         </button>
       </div>
 
@@ -29,6 +29,7 @@
               <th>ชื่อ-นามสกุล</th>
               <th>ตำแหน่ง</th>
               <th>อีเมล</th>
+              <th>PIN</th>
               <th>จัดการ</th>
             </tr>
           </thead>
@@ -37,12 +38,13 @@
               <td>{{ user.name }}</td>
               <td>{{ user.role }}</td>
               <td>{{ user.email }}</td>
+              <td><span v-if="user.has_pin || user.pin" title="PIN is hidden for security">******</span><span v-else>-</span></td>
               <td class="action-cell">
                 <button @click="openModal(user)" class="action-btn edit-btn" title="แก้ไข">
-                  ✏️
+                  <Pencil :size="16" />
                 </button>
                 <button @click="deleteUser(user.id)" class="action-btn delete-btn" title="ลบ">
-                  🗑️
+                  <Trash2 :size="16" />
                 </button>
               </td>
             </tr>
@@ -91,13 +93,24 @@
 <script>
 import { ref, onMounted, nextTick, onBeforeUnmount, watch } from 'vue';
 import axios from 'axios';
+import { 
+  ChevronLeft, 
+  Plus, 
+  Pencil, 
+  Trash2 
+} from 'lucide-vue-next';
 
 export default {
+  components: {
+    ChevronLeft,
+    Plus,
+    Pencil,
+    Trash2
+  },
   setup() {
     const users = ref([]);
     const showModal = ref(false);
     const isEdit = ref(false);
-    // ✅ เปลี่ยนจาก username เป็น email ใน form เริ่มต้น
     const form = ref({ id: null, name: '', email: '', password: '', role: 'staff' });
     let dataTable = null;
 
@@ -116,49 +129,46 @@ export default {
         });
     };
 
-    // โหลดข้อมูลทั้งหมด
     const fetchUsers = async () => {
         const token = localStorage.getItem('token');
         const res = await axios.get('/api/users', { headers: { Authorization: `Bearer ${token}` } });
         users.value = res.data;
     };
 
-    // เปิด Modal
     const openModal = (user = null) => {
         if (user) {
             isEdit.value = true;
-            form.value = { ...user, password: '' }; // ไม่เอารหัสเดิมมาโชว์
+            form.value = { ...user, password: '' };
         } else {
             isEdit.value = false;
-            // ✅ รีเซ็ตค่า form เป็น email
-            form.value = { name: '', email: '', password: '', role: 'STAFF' };
+            form.value = { name: '', email: '', password: '', role: 'staff' };
         }
         showModal.value = true;
     };
 
-    // บันทึก (แยกเคส Create / Update)
     const saveUser = async () => {
         const token = localStorage.getItem('token');
         const headers = { Authorization: `Bearer ${token}` };
 
         try {
             if (isEdit.value) {
-                // Update
                 await axios.put(`/api/users/${form.value.id}`, form.value, { headers });
+                alert('อัปเดตข้อมูลสำเร็จ');
             } else {
-                // Create
-                await axios.post('/api/users', form.value, { headers });
+                const res = await axios.post('/api/users', form.value, { headers });
+                if (res.data.pin) {
+                    alert('สร้างพนักงานสำเร็จ! PIN คือ: ' + res.data.pin);
+                } else {
+                    alert('สร้างพนักงานสำเร็จ');
+                }
             }
             showModal.value = false;
-            fetchUsers(); // โหลดใหม่
-            alert('บันทึกสำเร็จ');
+            fetchUsers();
         } catch (error) {
-            // แสดง Error จาก Backend
             alert('เกิดข้อผิดพลาด: ' + (error.response?.data?.message || error.message));
         }
     };
 
-    // ลบ
     const deleteUser = async (id) => {
         if (!confirm('ยืนยันที่จะลบพนักงานคนนี้?')) return;
         const token = localStorage.getItem('token');
@@ -189,6 +199,7 @@ export default {
   min-height: 100vh;
   background-color: var(--color-bg-primary);
   font-family: 'Sarabun', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: #000000;
 }
 
 /* Page Header - Brown Section */
@@ -234,19 +245,19 @@ export default {
 
 .page-subtitle {
   font-size: 14px;
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(255, 255, 255, 0.9);
   margin: 0;
 }
 
-/* Main Content Card */
+/* Main ัContent Card */
 .content-card {
   max-width: 1200px;
   margin: 40px auto;
   background-color: #ffffff;
-  border: 2px solid var(--color-table-border);
+  border: 1px solid #eee;
   border-radius: 16px;
   padding: 32px;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
 }
 
 /* Section Header */
@@ -254,11 +265,11 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
+  margin-bottom: 30px;
 }
 
 .section-title {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 700;
   color: var(--color-primary);
   margin: 0;
@@ -272,34 +283,32 @@ export default {
   font-size: 15px;
   font-weight: 600;
   color: #ffffff;
-  background: linear-gradient(135deg, var(--color-action), var(--color-action-hover));
+  background: var(--color-action);
   border: none;
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(76, 175, 142, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .add-staff-button:hover {
-  background: linear-gradient(135deg, var(--color-action-hover), #3F9B7A);
+  background-color: var(--color-action-hover);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(76, 175, 142, 0.4);
+  box-shadow: 0 4px 12px rgba(76, 175, 142, 0.3);
 }
 
 /* Table Container */
 .table-container {
   overflow-x: auto;
+  color: #000000;
 }
 
 /* Staff Table */
 .staff-table {
   width: 100% !important;
-  border-collapse: separate;
-  border-spacing: 0;
-}
-
-.staff-table thead tr {
-  background-color: transparent;
+  border-collapse: collapse;
 }
 
 .staff-table thead th {
@@ -307,60 +316,72 @@ export default {
   text-align: left;
   font-size: 14px;
   font-weight: 700;
-  color: var(--color-text-primary);
-  border-bottom: 2px solid var(--color-table-border);
-  background-color: transparent;
+  color: #333333;
+  border-bottom: 2px solid #f0f0f0;
+  background-color: #fafafa;
 }
 
 .staff-table tbody tr {
-  border-bottom: 1px solid var(--color-table-border);
+  border-bottom: 1px solid #f5f5f5;
   transition: background-color 0.2s ease;
 }
 
 .staff-table tbody tr:hover {
-  background-color: var(--color-table-row-alt);
+  background-color: #fffaf5;
 }
 
 .staff-table tbody td {
   padding: 16px 12px;
   font-size: 15px;
-  color: var(--color-text-primary);
+  color: #000000;
 }
 
 /* Action Cell */
 .action-cell {
   display: flex;
-  gap: 8px;
+  gap: 10px;
   align-items: center;
 }
 
 .action-btn {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: 1px solid var(--color-table-border);
-  background-color: var(--color-table-row);
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  background-color: #ffffff;
   cursor: pointer;
-  font-size: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
 }
 
 .action-btn:hover {
   transform: scale(1.1);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
-.edit-btn:hover {
-  background-color: var(--color-success-light);
-  border-color: var(--color-success);
-}
+.edit-btn:hover { color: #1976D2; border-color: #1976D2; background-color: #E3F2FD; }
+.delete-btn:hover { color: #D32F2F; border-color: #D32F2F; background-color: #FFEBEE; }
 
-.delete-btn:hover {
-  background-color: var(--color-danger-light);
-  border-color: var(--color-danger);
+/* DataTable Overrides */
+:deep(.dataTables_wrapper) { color: #000000 !important; }
+:deep(.dataTables_filter input) {
+  border: 1px solid #ddd !important;
+  border-radius: 6px !important;
+  padding: 6px 12px !important;
+  color: #000000 !important;
+  margin-bottom: 10px !important;
+}
+:deep(.dataTables_length select) {
+  border: 1px solid #ddd !important;
+  border-radius: 6px !important;
+  padding: 4px !important;
+  color: #000000 !important;
+}
+:deep(.dataTables_info), :deep(.dataTables_paginate) {
+  color: #000000 !important;
+  margin-top: 20px !important;
 }
 
 /* Modal Overlay */
@@ -381,19 +402,19 @@ export default {
 /* Modal */
 .modal-content-custom {
   background: #ffffff;
-  padding: 32px;
+  padding: 35px;
   border-radius: 16px;
   width: 90%;
   max-width: 480px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-  border: 2px solid var(--color-table-border);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  color: #000000;
 }
 
 .modal-title {
   font-size: 22px;
   font-weight: 700;
-  color: var(--color-text-primary);
-  margin: 0 0 24px 0;
+  color: var(--color-primary);
+  margin: 0 0 25px 0;
 }
 
 /* Form Group */
@@ -405,7 +426,7 @@ export default {
   display: block;
   font-size: 14px;
   font-weight: 600;
-  color: var(--color-text-primary);
+  color: #444444;
   margin-bottom: 8px;
 }
 
@@ -414,17 +435,16 @@ export default {
   width: 100%;
   padding: 12px 16px;
   font-size: 15px;
-  border: 1px solid var(--color-table-border);
+  border: 1px solid #ddd;
   border-radius: 8px;
   background-color: #ffffff;
-  color: var(--color-text-primary);
+  color: #000000 !important;
   transition: all 0.3s ease;
   box-sizing: border-box;
-  font-family: 'Sarabun', sans-serif;
 }
 
 .form-group input::placeholder {
-  color: var(--color-text-secondary);
+  color: #999999;
 }
 
 .form-group input:focus,
@@ -439,11 +459,11 @@ export default {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
-  margin-top: 28px;
+  margin-top: 30px;
 }
 
 .modal-actions button {
-  padding: 12px 24px;
+  padding: 12px 28px;
   font-size: 15px;
   font-weight: 600;
   border: none;
@@ -453,60 +473,28 @@ export default {
 }
 
 .cancel-btn {
-  background-color: var(--color-bg-card);
-  color: var(--color-text-secondary);
+  background-color: #f5f5f5;
+  color: #666666;
 }
 
-.cancel-btn:hover {
-  background-color: var(--color-bg-primary);
-}
+.cancel-btn:hover { background-color: #eeeeee; }
 
 .save-btn {
-  background: linear-gradient(135deg, var(--color-action), var(--color-action-hover));
+  background: var(--color-action);
   color: #ffffff;
-  box-shadow: 0 2px 8px rgba(76, 175, 142, 0.3);
 }
 
 .save-btn:hover {
-  background: linear-gradient(135deg, var(--color-action-hover), #3F9B7A);
+  background-color: var(--color-action-hover);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(76, 175, 142, 0.4);
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  .page-header {
-    padding: 20px 24px;
-  }
-
-  .page-title {
-    font-size: 24px;
-  }
-
-  .content-card {
-    margin: 24px 16px;
-    padding: 24px 20px;
-  }
-
-  .section-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 16px;
-  }
-
-  .add-staff-button {
-    width: 100%;
-  }
-
-  .staff-table thead th,
-  .staff-table tbody td {
-    padding: 12px 8px;
-    font-size: 14px;
-  }
-
-  .modal-content-custom {
-    padding: 24px;
-    margin: 16px;
-  }
+  .page-header { padding: 20px 24px; }
+  .page-title { font-size: 24px; }
+  .content-card { margin: 24px 16px; padding: 24px 20px; }
+  .section-header { flex-direction: column; align-items: flex-start; gap: 16px; }
+  .add-staff-button { width: 100%; }
 }
 </style>

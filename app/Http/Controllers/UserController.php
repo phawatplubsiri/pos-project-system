@@ -22,12 +22,21 @@ class UserController extends Controller
             'role' => 'required'
         ]);
 
-        return User::create([
+        $pin = User::generateUniquePin(6);
+
+        $user = User::create([
             'name' => $request->name,
             'email' => $request->email, // ✅ บันทึก email
             'password' => Hash::make($request->password),
-            'role' => $request->role
+            'role' => $request->role,
+            'pin' => Hash::make($pin)
         ]);
+
+        return response()->json([
+            'user' => $user,
+            'pin' => $pin, // ส่ง PIN แบบธรรมดาไปให้ดูแค่ครั้งแรก
+            'message' => 'สร้างพนักงานและเจน PIN สำเร็จ'
+        ], 201);
     }
 
     public function update(Request $request, $id)

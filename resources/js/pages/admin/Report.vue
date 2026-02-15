@@ -2,61 +2,92 @@
   <div class="report-container">
     <!-- Header Section -->
     <header class="page-header">
-      <button @click="$router.push('/admin/dashboard')" class="btn-back" aria-label="Back to Dashboard">
-        <span class="icon">←</span>
+      <button class="back-button" @click="$router.push('/admin/dashboard')">
+        <ChevronLeft :size="28" />
       </button>
       <div class="header-content">
-        <h1 class="page-title">รายงานรายได้ประจำวัน</h1>
-        <p class="page-subtitle">Daily Revenue Report</p>
+        <h1 class="page-title">รายงานรายได้</h1>
+        <p class="page-subtitle">Revenue Report</p>
       </div>
     </header>
 
     <main class="report-content">
       <!-- Filter Bar -->
       <section class="filter-bar">
-        <div class="date-selector">
-          <label for="report-date" class="filter-label">เลือกวันที่:</label>
-          <input 
-            id="report-date"
-            type="date" 
-            v-model="selectedDate" 
-            @change="fetchReport"
-            class="input-date"
-            :disabled="loading"
-          >
+        <div class="date-range-selector">
+          <!-- Start Date -->
+          <div class="date-input-group">
+            <label class="filter-label">ตั้งแต่:</label>
+            <div class="date-input-wrapper">
+              <Calendar class="date-icon-inside" :size="18" />
+              <input 
+                type="date" 
+                v-model="startDate" 
+                @change="fetchReport"
+                class="custom-native-date"
+              >
+            </div>
+          </div>
+          <!-- End Date -->
+          <div class="date-input-group">
+            <label class="filter-label">ถึง:</label>
+            <div class="date-input-wrapper">
+              <Calendar class="date-icon-inside" :size="18" />
+              <input 
+                type="date" 
+                v-model="endDate" 
+                @change="fetchReport"
+                :min="startDate"
+                class="custom-native-date"
+              >
+            </div>
+          </div>
         </div>
+        
         <button 
           @click="downloadCSV"
           class="btn-download"
           :disabled="loading || !reportData.details.length"
         >
-          <span class="icon">⬇</span> 
+          <Download :size="20" />
           <span class="text">ดาวน์โหลด CSV</span>
         </button>
       </section>
 
       <!-- Summary Section -->
       <div v-if="loading" class="loading-overlay">
-        <div class="spinner-large"></div>
+        <Loader2 class="spinner-icon animate-spin" :size="48" />
         <p>กำลังสรุปข้อมูล...</p>
       </div>
 
       <template v-else>
         <section class="summary-grid" v-if="reportData.summary">
-          <div class="summary-card border-accent">
-            <p class="summary-label">รายได้รวม</p>
+          <div class="summary-card border-action">
+            <div class="summary-header">
+              <p class="summary-label">รายได้รวม</p>
+              <CircleDollarSign class="text-accent" :size="20" />
+            </div>
             <p class="summary-value text-accent">฿{{ formatPrice(reportData.summary.total_revenue) }}</p>
           </div>
           <div class="summary-card border-primary">
-            <p class="summary-label">จำนวนโต๊ะที่เปิด</p>
+            <div class="summary-header">
+              <p class="summary-label">จำนวนโต๊ะที่เปิด</p>
+              <LayoutGrid class="text-primary" :size="20" />
+            </div>
             <p class="summary-value text-primary">{{ reportData.summary.total_tables }}</p>
           </div>
           <div class="summary-card border-warning">
-            <p class="summary-label">ปิดโดยพนักงาน</p>
+            <div class="summary-header">
+              <p class="summary-label">ปิดโดยพนักงาน</p>
+              <UserCheck class="text-warning" :size="20" />
+            </div>
             <p class="summary-value text-warning">{{ reportData.summary.closed_by_staff }}</p>
           </div>
           <div class="summary-card border-danger">
-            <p class="summary-label">ระบบปิดอัตโนมัติ</p>
+            <div class="summary-header">
+              <p class="summary-label">ระบบปิดอัตโนมัติ</p>
+              <MonitorOff class="text-danger" :size="20" />
+            </div>
             <p class="summary-value text-danger">{{ reportData.summary.closed_by_system }}</p>
           </div>
         </section>
@@ -69,7 +100,7 @@
                 <th>ID</th>
                 <th>โต๊ะ</th>
                 <th>ลูกค้า</th>
-                <th>ช่วงเวลา</th>
+                <th class="text-center">วัน-เวลา</th>
                 <th>ปิดโดย</th>
                 <th class="text-right">ยอดเงิน</th>
               </tr>
@@ -78,10 +109,22 @@
               <tr v-for="item in reportData.details" :key="item.id">
                 <td class="id-cell">#{{ String(item.id).padStart(3, '0') }}</td>
                 <td class="font-bold">{{ item.table_name }}</td>
-                <td>{{ item.pax }} คน</td>
-                <td class="time-cell">{{ formatTime(item.start_time) }} - {{ formatTime(item.end_time) }}</td>
                 <td>
-                  <span :class="['badge', item.closed_by === 'system' ? 'badge-danger' : 'badge-warning']">
+                   <div class="pax-info">
+                     <Users :size="14" class="opacity-50" />
+                     <span>{{ item.pax }} คน</span>
+                   </div>
+                </td>
+                <td class="time-cell text-center">
+                   <div class="time-range text-xs">
+                     <span class="font-medium text-gray-700">{{ item.start_time }}</span>
+                     <span class="time-divider">to</span>
+                     <span class="font-medium text-gray-700">{{ item.end_time }}</span>
+                   </div>
+                </td>
+                <td>
+                  <span :class="['badge-icon', item.closed_by === 'system' ? 'badge-danger' : 'badge-warning']">
+                    <component :is="item.closed_by === 'system' ? 'MonitorOff' : 'User'" :size="12" />
                     {{ item.closed_by === 'system' ? 'Auto System' : 'Staff' }}
                   </span>
                 </td>
@@ -94,8 +137,8 @@
               <tr>
                 <td colspan="6" class="empty-row">
                   <div class="empty-content">
-                    <span class="empty-icon">📂</span>
-                    <p>ไม่พบข้อมูลรายได้ในวันที่เลือก</p>
+                    <FolderOpen :size="48" class="empty-icon" />
+                    <p>ไม่พบข้อมูลรายได้ในช่วงวันที่เลือก</p>
                   </div>
                 </td>
               </tr>
@@ -110,11 +153,21 @@
 <script>
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
+import { 
+  ChevronLeft, Calendar, Download, Loader2, CircleDollarSign, 
+  LayoutGrid, UserCheck, MonitorOff, Users, User, FolderOpen 
+} from 'lucide-vue-next';
 
 export default {
   name: 'DailyReport',
+  components: {
+    ChevronLeft, Calendar, Download, Loader2, CircleDollarSign, 
+    LayoutGrid, UserCheck, MonitorOff, Users, User, FolderOpen
+  },
   setup() {
-    const selectedDate = ref(new Date().toISOString().substr(0, 10));
+    const todayStr = new Date().toISOString().split('T')[0];
+    const startDate = ref(todayStr);
+    const endDate = ref(todayStr);
     const loading = ref(false);
     const reportData = ref({
       summary: null,
@@ -125,13 +178,13 @@ export default {
       loading.value = true;
       try {
         const token = localStorage.getItem('token');
-        const { data } = await axios.get(`/api/reports/daily?date=${selectedDate.value}`, {
+        const { data } = await axios.get(`/api/reports/daily`, {
+          params: { start_date: startDate.value, end_date: endDate.value },
           headers: { Authorization: `Bearer ${token}` }
         });
         reportData.value = data;
       } catch (error) {
         console.error("Error fetching report:", error);
-        // สามารถเปลี่ยน alert เป็น Toast Notification ได้ในอนาคต
       } finally {
         loading.value = false;
       }
@@ -140,7 +193,8 @@ export default {
     const downloadCSV = async () => {
       try {
         const token = localStorage.getItem('token');
-        const { data } = await axios.get(`/api/reports/export-csv?date=${selectedDate.value}`, {
+        const { data } = await axios.get(`/api/reports/export-csv`, {
+          params: { start_date: startDate.value, end_date: endDate.value },
           headers: { Authorization: `Bearer ${token}` },
           responseType: 'blob',
         });
@@ -148,7 +202,7 @@ export default {
         const url = window.URL.createObjectURL(new Blob([data]));
         const link = document.createElement('a');
         link.href = url;
-        link.setAttribute('download', `report-${selectedDate.value}.csv`);
+        link.setAttribute('download', `report-${startDate.value}-to-${endDate.value}.csv`);
         document.body.appendChild(link);
         link.click();
         link.remove();
@@ -160,26 +214,15 @@ export default {
 
     const formatPrice = (value) => {
       return parseFloat(value || 0).toLocaleString('th-TH', { 
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2 
+        minimumFractionDigits: 2, maximumFractionDigits: 2 
       });
-    };
-
-    const formatTime = (timeString) => {
-      if (!timeString) return '';
-      return timeString.substring(0, 5);
     };
 
     onMounted(fetchReport);
 
     return {
-      selectedDate,
-      loading,
-      reportData,
-      fetchReport,
-      downloadCSV,
-      formatPrice,
-      formatTime
+      startDate, endDate, loading, reportData,
+      fetchReport, downloadCSV, formatPrice
     };
   }
 }
@@ -201,31 +244,30 @@ export default {
   box-shadow: var(--shadow-md);
 }
 
-.btn-back {
-  width: 48px;
-  height: 48px;
+.back-button {
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.15);
+  background-color: rgba(255, 255, 255, 0.2);
   border: none;
-  color: white;
-  font-size: 24px;
+  color: #ffffff;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: var(--transition-normal);
+  transition: all 0.3s ease;
 }
 
-.btn-back:hover {
-  background: rgba(255, 255, 255, 0.25);
-  transform: translateX(-4px);
+.back-button:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
 }
 
 .page-title {
   font-size: 28px;
   font-weight: 700;
   color: var(--color-highlight-light);
-  margin: 0;
+  margin: 0 0 4px 0;
 }
 
 .page-subtitle {
@@ -254,47 +296,93 @@ export default {
   gap: 20px;
 }
 
-.date-selector {
+.date-range-selector {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
+}
+
+.date-input-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .filter-label {
   font-weight: 600;
-  color: var(--color-accent);
+  color: var(--color-primary);
+  font-size: 14px;
 }
 
-.input-date {
-  padding: 10px 16px;
-  border: 2px solid var(--color-border-light);
-  border-radius: var(--radius-md);
-  font-size: 15px;
+/* Styled Native Date Input Wrapper */
+.date-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.date-icon-inside {
+  position: absolute;
+  left: 12px;
+  color: var(--color-primary);
+  pointer-events: none; /* เพื่อให้คลิกผ่านไอคอนไปยัง input ได้ */
+}
+
+.custom-native-date {
+  width: 170px;
+  padding: 10px 12px 10px 38px;
+  border: 2px solid var(--color-table-border);
+  border-radius: 12px;
+  font-family: 'Sarabun', sans-serif;
+  font-size: 14px;
   color: var(--color-text-primary);
+  background-color: #ffffff;
+  outline: none;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.custom-native-date:hover {
+  border-color: var(--color-primary-light);
+}
+
+.custom-native-date:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(107, 79, 63, 0.1);
+}
+
+/* ซ่อนไอคอนเดิมของบราวเซอร์และขยายพื้นที่คลิก */
+.custom-native-date::-webkit-calendar-picker-indicator {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+  opacity: 0; /* ซ่อนไอคอนจริงแต่ยังรับคลิกได้ทั่วทั้งช่อง */
 }
 
 .btn-download {
-  background: linear-gradient(135deg, var(--color-accent), var(--color-accent-light));
-  color: white;
   padding: 12px 24px;
-  border: none;
-  border-radius: var(--radius-md);
+  font-size: 15px;
   font-weight: 600;
+  color: #ffffff;
+  background: linear-gradient(135deg, var(--color-action), var(--color-action-hover));
+  border: none;
+  border-radius: 12px;
   cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(76, 175, 142, 0.3);
   display: flex;
   align-items: center;
   gap: 10px;
-  transition: var(--transition-normal);
 }
 
 .btn-download:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(139, 69, 19, 0.2);
-}
-
-.btn-download:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+  box-shadow: 0 4px 12px rgba(76, 175, 142, 0.4);
 }
 
 /* Summary Grid */
@@ -314,16 +402,18 @@ export default {
   transition: var(--transition-normal);
 }
 
-.summary-card:hover {
-  transform: translateY(-5px);
-  box-shadow: var(--shadow-md);
+.summary-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
 }
 
 .summary-label {
   font-size: 14px;
-  color: var(--color-text-light);
-  margin-bottom: 10px;
+  color: var(--color-text-secondary);
   font-weight: 600;
+  margin: 0;
 }
 
 .summary-value {
@@ -332,8 +422,7 @@ export default {
   margin: 0;
 }
 
-/* Card Border Colors */
-.border-accent { border-color: var(--color-accent); }
+.border-action{ border-color: var(--color-action); }
 .border-primary { border-color: var(--color-primary); }
 .border-warning { border-color: var(--color-warning); }
 .border-danger { border-color: var(--color-danger); }
@@ -352,43 +441,55 @@ export default {
 }
 
 .data-table th {
-  background-color: var(--color-bg-secondary);
-  color: var(--color-accent);
+  background-color: #F9FAFB;
+  color: var(--color-primary);
   text-align: left;
   padding: 18px 20px;
   font-weight: 700;
-  font-size: 14px;
+  font-size: 13px;
   text-transform: uppercase;
-  border-bottom: 2px solid var(--color-border-light);
+  border-bottom: 2px solid var(--color-table-border);
 }
 
 .data-table td {
   padding: 18px 20px;
-  border-bottom: 1px solid var(--color-border-light);
+  border-bottom: 1px solid var(--color-table-border);
   color: var(--color-text-primary);
 }
 
-.data-table tr:hover {
-  background-color: var(--color-secondary-light);
-}
-
-.id-cell {
-  color: var(--color-text-light);
-  font-family: monospace;
-}
-
-.font-bold { font-weight: 700; }
+.text-center { text-align: center; }
 .text-right { text-align: right; }
-.text-accent { color: var(--color-accent); }
+.font-bold { font-weight: 700; }
+.text-accent { color: var(--color-action); }
 .text-primary { color: var(--color-primary); }
 .text-warning { color: var(--color-warning); }
 .text-danger { color: var(--color-danger); }
 
-/* Badges */
-.badge {
+.pax-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.time-range {
+  display: flex;
+  flex-direction: column;
+  color: var(--color-text-secondary);
+}
+
+.time-divider {
+  font-size: 10px;
+  opacity: 0.5;
+  margin: 2px 0;
+}
+
+.badge-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   padding: 6px 12px;
   border-radius: var(--radius-full);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
   color: white;
 }
@@ -396,52 +497,34 @@ export default {
 .badge-warning { background-color: var(--color-warning); }
 .badge-danger { background-color: var(--color-danger); }
 
-/* Loading & Empty States */
+/* Loading & Empty */
 .loading-overlay {
   text-align: center;
   padding: 100px 0;
-  color: var(--color-accent);
+  color: var(--color-primary);
 }
 
-.spinner-large {
-  width: 50px;
-  height: 50px;
-  border: 5px solid var(--color-border-light);
-  border-top-color: var(--color-primary);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
+.spinner-icon {
   margin: 0 auto 20px;
-}
-
-.empty-row {
-  padding: 0;
 }
 
 .empty-content {
   padding: 80px 0;
   text-align: center;
-  color: var(--color-text-light);
+  color: #D1D5DB;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .empty-icon {
-  font-size: 48px;
   margin-bottom: 16px;
-  display: block;
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-/* Mobile Responsive */
 @media (max-width: 768px) {
   .page-header { padding: 20px; }
-  .report-content { padding: 20px 16px; }
-  .filter-bar { 
-    flex-direction: column; 
-    align-items: stretch; 
-  }
-  .summary-grid { grid-template-columns: 1fr; }
-  .table-wrapper { overflow-x: auto; }
+  .report-content { padding: 20px; }
+  .filter-bar { flex-direction: column; align-items: stretch; }
+  .date-range-selector { flex-direction: column; align-items: flex-start; gap: 12px; }
 }
 </style>

@@ -20,28 +20,33 @@ class ReportController extends Controller
             return response()->json(['message' => 'ไม่มีสิทธิ์เข้าถึงข้อมูลนี้'], 403);
         }
 
-        $date = $request->input('date', Carbon::today()->toDateString());
+        $startDate = $request->input('start_date', Carbon::today()->toDateString());
+        $endDate = $request->input('end_date', $startDate);
 
-        $sessions = Session::whereDate('end_time', $date)
+        $sessions = Session::whereBetween('end_time', [
+                               Carbon::parse($startDate)->startOfDay(),
+                               Carbon::parse($endDate)->endOfDay()
+                           ])
                            ->where('status', 'completed')
                            ->get();
 
         $summary = [
-            'date' => $date,
+            'start_date' => $startDate,
+            'end_date' => $endDate,
             'total_revenue' => $sessions->sum('total_amount'),
             'total_tables' => $sessions->count(),
             'closed_by_system' => $sessions->where('closed_by', 'system')->count(),
             'closed_by_staff' => $sessions->where('closed_by', 'staff')->count(),
         ];
 
-        // รายละเอียด Sessions ทั้งหมดของวันนั้น
+        // รายละเอียด Sessions ทั้งหมดในช่วงเวลานั้น
         $details = $sessions->map(function ($session) {
             return [
                 'id' => $session->id,
                 'table_name' => $session->table->name ?? 'N/A',
                 'pax' => $session->guest_amount,
-                'start_time' => $session->start_time->format('H:i'),
-                'end_time' => $session->end_time->format('H:i'),
+                'start_time' => $session->start_time->format('Y-m-d H:i'),
+                'end_time' => $session->end_time->format('Y-m-d H:i'),
                 'total_amount' => $session->total_amount,
                 'closed_by' => $session->closed_by,
             ];
@@ -54,7 +59,7 @@ class ReportController extends Controller
     }
 
     /**
-     * ส่งออกข้อมูลเป็น CSV เพื่อใช้กับ Google Sheets
+     * ส่งออกข้อมูลเป็น CSV เพื่อใช้กับ Google Sheets ตามช่วงวันที่
      */
     public function exportCSV(Request $request)
     {
@@ -62,13 +67,18 @@ class ReportController extends Controller
             return response()->json(['message' => 'ไม่มีสิทธิ์'], 403);
         }
 
-        $date = $request->input('date', Carbon::today()->toDateString());
-        $sessions = Session::whereDate('end_time', $date)
+        $startDate = $request->input('start_date', Carbon::today()->toDateString());
+        $endDate = $request->input('end_date', $startDate);
+
+        $sessions = Session::whereBetween('end_time', [
+                               Carbon::parse($startDate)->startOfDay(),
+                               Carbon::parse($endDate)->endOfDay()
+                           ])
                            ->where('status', 'completed')
                            ->with('table')
                            ->get();
 
-        $filename = "report-{$date}.csv";
+        $filename = "report-{$startDate}-to-{$endDate}.csv";
         $headers = [
             "Content-type"        => "text/csv; charset=UTF-8",
             "Content-Disposition" => "attachment; filename=$filename",

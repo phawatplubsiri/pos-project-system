@@ -97,8 +97,7 @@
                 <div class="order-time">{{ formatTime(order.created_at) }}</div>
               </div>
               <div class="order-actions">
-                <button @click="confirmOrder(order.id, 'cancelled')" class="btn-reject">ปฏิเสธ</button>
-                <button @click="confirmOrder(order.id, 'pending')" class="btn-confirm">ยืนยัน</button>
+                <button @click="goToTable(order.session?.table_id)" class="btn-confirm">ไปยังโต๊ะ</button>
               </div>
             </div>
           </div>
@@ -159,11 +158,6 @@
         </div>
       </div>
     </div>
-
-    <!-- Toast Notification -->
-    <div v-if="toastMsg" class="toast-notification">
-      {{ toastMsg }}
-    </div>
   </div>
 </template>
 
@@ -172,6 +166,7 @@ import { ref, onMounted, onUnmounted } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
 import QrcodeVue from 'qrcode.vue';
+import { useAlert } from '../composables/useAlert';
 
 export default {
   components: {
@@ -179,6 +174,7 @@ export default {
   },
   setup() {
     const router = useRouter();
+    const { success, error, warning, confirm, loading: showAlertLoading } = useAlert();
     const user = ref({});
     const currentTime = ref(new Date());
     let timerInterval = null;
@@ -193,7 +189,6 @@ export default {
     const loading = ref(true);
     const pendingOrders = ref([]);
     const showPendingModal = ref(false);
-    const toastMsg = ref('');
 
     // Modal 1: เปิดโต๊ะ
     const showModal = ref(false);
@@ -212,18 +207,11 @@ export default {
           headers: { Authorization: `Bearer ${token}` }
         });
         
-        if (response.data.length > pendingOrders.value.length) {
-          showToast('🔔 มีออเดอร์ใหม่จากลูกค้า!');
-        }
+        // ลบส่วนที่เรียก success('🔔 มีออเดอร์ใหม่จากลูกค้า!') ออกตามคำขอ
         pendingOrders.value = response.data;
       } catch (error) {
         console.error("Fetch pending error", error);
       }
-    };
-
-    const showToast = (msg) => {
-      toastMsg.value = msg;
-      setTimeout(() => { toastMsg.value = ''; }, 3000);
     };
 
     const confirmOrder = async (orderId, status) => {
@@ -232,16 +220,28 @@ export default {
         await axios.put(`/api/orders/${orderId}/status`, { status }, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        showToast(status === 'pending' ? '✅ ยืนยันออเดอร์แล้ว' : '❌ ปฏิเสธออเดอร์แล้ว');
+        
+        if (status === 'pending') {
+            success('✅ ยืนยันออเดอร์แล้ว');
+        } else {
+            warning('❌ ปฏิเสธออเดอร์แล้ว');
+        }
+
         fetchPendingOrders();
         fetchTables();
-      } catch (error) {
-        alert('เกิดข้อผิดพลาด: ' + (error.response?.data?.message || error.message));
+      } catch (err) {
+        error('เกิดข้อผิดพลาด', err.response?.data?.message || err.message);
       }
     };
 
     const getTablePendingCount = (tableId) => {
       return pendingOrders.value.filter(o => o.session?.table_id === tableId).length;
+    };
+
+    const goToTable = (tableId) => {
+      if (!tableId) return;
+      showPendingModal.value = false;
+      router.push(`/order/${tableId}`);
     };
 
     const formatTime = (timeStr) => {
@@ -294,7 +294,10 @@ export default {
 
     const confirmOpenTable = async () => {
         if (pax.value > targetTable.value.seat_count) {
-            const proceed = confirm(`⚠️ จำนวนลูกค้า (${pax.value} คน) เกินที่นั่งของโต๊ะนี้ (${targetTable.value.seat_count} ที่นั่ง)\nคุณยังต้องการที่จะเปิดโต๊ะนี้ใช่หรือไม่?`);
+            const proceed = await confirm(
+                '⚠️ ยืนยันการเปิดโต๊ะ?',
+                `จำนวนลูกค้า (${pax.value} คน) เกินที่นั่งของโต๊ะนี้ (${targetTable.value.seat_count} ที่นั่ง)\nคุณยังต้องการที่จะเปิดโต๊ะนี้ใช่หรือไม่?`
+            );
             if (!proceed) return;
         }
 
@@ -314,8 +317,9 @@ export default {
             qrUrl.value = `${baseUrl}/customer/menu?token=${guestToken}`;
             showQrModal.value = true;
             fetchTables(); 
-        } catch (error) {
-            alert('เกิดข้อผิดพลาด: ' + (error.response?.data?.message || error.message));
+            success('เปิดโต๊ะสำเร็จ');
+        } catch (err) {
+            error('เกิดข้อผิดพลาด', err.response?.data?.message || err.message);
         }
     };
 
@@ -354,7 +358,7 @@ export default {
         showModal, targetTable, pax, isDayPass, closeModal,
         showQrModal, qrUrl, closeQrModal,
         formatDuration, 
-        pendingOrders, showPendingModal, confirmOrder, getTablePendingCount, formatTime, toastMsg
+        pendingOrders, showPendingModal, confirmOrder, getTablePendingCount, formatTime, goToTable
     };
   }
 };
@@ -941,21 +945,23 @@ export default {
 }
 
 .btn-secondary {
-  background: var(--color-secondary-dark);
-  color: var(--color-accent);
+  background: var(--color-divider);
+  color: var(--color-text-primary);
 }
 
 .btn-secondary:hover {
-  background: #D2C4A8;
+  background: #C1C5CB;
+  transform: translateY(-2px);
 }
 
 .btn-close-modal {
-  background: var(--color-accent);
+  background: var(--color-primary);
   color: white;
 }
 
 .btn-close-modal:hover {
-  background: var(--color-accent-light);
+  background: var(--color-primary-hover);
+  transform: translateY(-2px);
 }
 
 .full-width {
