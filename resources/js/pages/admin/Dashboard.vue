@@ -2,7 +2,9 @@
   <div class="dashboard-container">
     <!-- Admin Header -->
     <div class="admin-header">
-      <div class="admin-icon">👷</div>
+      <div class="admin-icon">
+        <UserCog :size="64" />
+      </div>
       <h1 class="admin-title">ผู้ดูแลระบบ (Admin)</h1>
       <p class="admin-subtitle">กรุณาเลือกรายการที่ต้องการทำงาน</p>
     </div>
@@ -11,43 +13,70 @@
     <div class="cards-grid">
       <!-- POS Card -->
       <div class="feature-card" @click="$router.push('/pos')">
-        <div class="card-icon cart-icon">🛒</div>
+        <div class="card-icon cart-icon">
+          <ShoppingCart :size="72" />
+        </div>
         <h3 class="card-title">ระบบขายหน้าร้าน (POS)</h3>
         <p class="card-description">เปิดโต๊ะ สั่งอาหาร เช็คบิล</p>
       </div>
 
       <!-- Staff Management Card -->
       <div class="feature-card" @click="$router.push('/admin/staff')">
-        <div class="card-icon staff-icon">👥</div>
+        <div class="card-icon staff-icon">
+          <Users :size="72" />
+        </div>
         <h3 class="card-title">จัดการพนักงาน</h3>
         <p class="card-description">เพิ่ม ลบ แก้ไข รายชื่อ Staff</p>
       </div>
 
       <!-- Inventory Card -->
       <div class="feature-card" @click="$router.push('/admin/products')">
-        <div class="card-icon inventory-icon">📦</div>
+        <div class="card-icon inventory-icon">
+          <Package :size="72" />
+        </div>
         <h3 class="card-title">จัดการสินค้า & ราคา</h3>
         <p class="card-description">เมนูอาหาร สินค้า และค่าบริการ</p>
       </div>
 
       <!-- Reports Card -->
       <div class="feature-card" @click="$router.push('/admin/reports')">
-        <div class="card-icon reports-icon">📊</div>
+        <div class="card-icon reports-icon">
+          <BarChart3 :size="72" />
+        </div>
         <h3 class="card-title">รายงานรายได้</h3>
         <p class="card-description">สรุปยอดรายวัน & Export CSV</p>
       </div>
     </div>
     
     <!-- Logout Button -->
-    <button class="logout-button" @click="logout">ออกจากระบบ</button>
+    <button class="logout-button" @click="logout">
+      <LogOut :size="18" class="logout-icon" />
+      ออกจากระบบ
+    </button>
   </div>
 </template>
 
 <script>
 import { useRouter } from 'vue-router';
 import axios from 'axios';
+import { 
+  UserCog, 
+  ShoppingCart, 
+  Users, 
+  Package, 
+  BarChart3, 
+  LogOut 
+} from 'lucide-vue-next';
 
 export default {
+  components: {
+    UserCog,
+    ShoppingCart,
+    Users,
+    Package,
+    BarChart3,
+    LogOut
+  },
   setup() {
     const router = useRouter();
 
@@ -188,6 +217,14 @@ export default {
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: var(--shadow-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.logout-icon {
+  margin-right: 2px;
 }
 
 .logout-button:hover {

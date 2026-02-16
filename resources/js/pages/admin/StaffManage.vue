@@ -3,7 +3,7 @@
     <!-- Header Section -->
     <div class="page-header">
       <button class="back-button" @click="$router.push('/admin/dashboard')">
-        <ChevronLeft :size="28" />
+        <ArrowLeft :size="24" />
       </button>
       <div class="header-content">
         <h1 class="page-title">จัดการพนักงาน</h1>
@@ -94,7 +94,7 @@
 import { ref, onMounted, nextTick, onBeforeUnmount, watch } from 'vue';
 import axios from 'axios';
 import { 
-  ChevronLeft, 
+  ArrowLeft, 
   Plus, 
   Pencil, 
   Trash2 
@@ -102,7 +102,7 @@ import {
 
 export default {
   components: {
-    ChevronLeft,
+    ArrowLeft,
     Plus,
     Pencil,
     Trash2
@@ -205,21 +205,22 @@ export default {
 /* Page Header - Brown Section */
 .page-header {
   background-color: var(--color-primary);
-  padding: 24px 40px;
+  padding: 20px 40px;
   display: flex;
   align-items: center;
   gap: 20px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  min-height: 100px;
+  box-sizing: border-box;
 }
 
 .back-button {
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   background-color: rgba(255, 255, 255, 0.2);
   border: none;
   color: #ffffff;
-  font-size: 24px;
   cursor: pointer;
   display: flex;
   align-items: center;

@@ -3,7 +3,7 @@
     <!-- Header Section -->
     <div class="page-header">
       <button class="back-button" @click="$router.push('/admin/dashboard')">
-        <ChevronLeft :size="28" />
+        <ArrowLeft :size="24" />
       </button>
       <div class="header-content">
         <h1 class="page-title">จัดการสินค้า & ค่าบริการ</h1>
@@ -249,13 +249,13 @@ import { ref, onMounted, computed, nextTick, onBeforeUnmount, watch } from 'vue'
 import axios from 'axios';
 import { useAlert } from '../../composables/useAlert';
 import { 
-  ChevronLeft, Timer, LayoutGrid, Package, Save, Plus, Pencil, Trash2, ImageOff
+  ArrowLeft, Timer, LayoutGrid, Package, Save, Plus, Pencil, Trash2, ImageOff
 } from 'lucide-vue-next';
 
 export default {
   name: 'ProductManage',
   components: {
-    ChevronLeft, Timer, LayoutGrid, Package, Save, Plus, Pencil, Trash2, ImageOff
+    ArrowLeft, Timer, LayoutGrid, Package, Save, Plus, Pencil, Trash2, ImageOff
   },
   setup() {
     const { success, error, confirm } = useAlert();
@@ -483,6 +483,8 @@ input, select, textarea {
   align-items: center;
   gap: 20px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  min-height: 100px;
+  box-sizing: border-box;
 }
 
 .back-button {

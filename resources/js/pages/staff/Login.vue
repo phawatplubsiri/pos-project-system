@@ -3,14 +3,16 @@
     <div class="login-card">
       <!-- Icon Section -->
       <div class="icon-section">
-        <div class="dice-badge">🎲</div>
+        <div class="dice-badge">
+          <Dices :size="50" />
+        </div>
       </div>
 
       <!-- Header Section -->
       <header class="login-header">
         <h1 class="brand-title">Board Game Cafe</h1>
         <p class="brand-subtitle">
-          <span class="emoji">🎲</span>
+          <Dices :size="16" class="brand-icon" />
           Staff Login • POS System
         </p>
       </header>
@@ -112,9 +114,13 @@
 import { reactive, ref, watch } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
+import { Dices } from 'lucide-vue-next';
 
 export default {
   name: 'Login',
+  components: {
+    Dices
+  },
   setup() {
     const router = useRouter();
     const errorMessage = ref('');
@@ -237,6 +243,7 @@ export default {
   width: 100%;
   box-shadow: var(--shadow-md);
   text-align: center;
+  color: #000000;
 }
 
 .icon-section {
@@ -261,13 +268,13 @@ export default {
 .brand-title {
   font-size: 28px;
   font-weight: 700;
-  color: var(--color-accent);
+  color: #000000;
   margin: 0 0 8px 0;
 }
 
 .brand-subtitle {
   font-size: 14px;
-  color: var(--color-text-light);
+  color: #000000;
   margin: 0 0 32px 0;
   display: flex;
   align-items: center;
@@ -311,7 +318,7 @@ export default {
   justify-content: center;
   font-size: 14px;
   font-weight: 700;
-  color: var(--color-primary);
+  color: #000000;
 }
 
 .pin-dot.filled {
@@ -378,7 +385,7 @@ export default {
   background-color: white;
   font-size: 18px;
   font-weight: 600;
-  color: var(--color-text-primary);
+  color: #000000;
   cursor: pointer;
   transition: all 0.2s;
 }
@@ -399,7 +406,7 @@ export default {
 }
 
 .backspace-btn {
-  color: var(--color-text-secondary);
+  color: #000000;
 }
 
 .form-group {
@@ -410,7 +417,7 @@ export default {
   display: block;
   font-size: 14px;
   font-weight: 600;
-  color: var(--color-text-primary);
+  color: #000000;
   margin-bottom: 8px;
 }
 
@@ -420,7 +427,7 @@ export default {
   font-size: 15px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  color: var(--color-text-primary);
+  color: #000000;
   transition: var(--transition-normal);
   background-color: white;
 }

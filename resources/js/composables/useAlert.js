@@ -18,7 +18,8 @@ export function useAlert() {
         Toast.fire({
             icon: 'success',
             title: title,
-            text: message
+            text: message,
+            iconColor: '#4CAF8E'
         });
     };
 
@@ -26,7 +27,8 @@ export function useAlert() {
         Toast.fire({
             icon: 'error',
             title: title,
-            text: message
+            text: message,
+            iconColor: '#E5533D'
         });
     };
 
@@ -34,7 +36,8 @@ export function useAlert() {
         Toast.fire({
             icon: 'warning',
             title: title,
-            text: message
+            text: message,
+            iconColor: '#F59E0B'
         });
     };
 
@@ -42,14 +45,15 @@ export function useAlert() {
         const result = await Swal.fire({
             title: title,
             text: text,
-            icon: 'warning',
+            icon: 'question',
             showCancelButton: true,
-            confirmButtonColor: '#4CAF8E', // --color-action
-            cancelButtonColor: '#E5533D',  // --color-danger
+            confirmButtonColor: '#4CAF8E', 
+            cancelButtonColor: '#E5533D',  
             confirmButtonText: confirmButtonText,
             cancelButtonText: 'ยกเลิก',
-            background: '#F6F5F2', // --color-bg-primary
-            color: '#2E2E2E',     // --color-text-primary
+            background: '#F6F5F2', 
+            color: '#000000',     
+            iconColor: '#6B4F3F'
         });
         return result.isConfirmed;
     };

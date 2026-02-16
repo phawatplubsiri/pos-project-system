@@ -4,16 +4,27 @@
     <div class="order-header">
       <div class="header-container">
         <div class="header-left">
-          <button @click="$router.go(-1)" class="btn-back">←</button>
+          <button @click="$router.go(-1)" class="btn-back">
+            <ArrowLeft :size="18" />
+          </button>
           <div class="table-info">
-            <h1 class="table-title">🛒 โต๊ะ {{ tableName || tableId }}</h1>
-            <div class="table-timer">⏱️ {{ formatDuration(sessionStartTime) }}</div>
+            <h1 class="table-title">โต๊ะ {{ tableName || tableId }}</h1>
+            <div class="table-timer">
+              <Clock :size="14" />
+              {{ formatDuration(sessionStartTime) }}
+            </div>
           </div>
         </div>
         
         <div class="header-actions">
-          <button @click="showQrModal = true" class="btn-qr">📱 QR Code</button>
-          <button @click="handleCheckout" class="btn-checkout">💰 เช็คบิล / ปิดโต๊ะ</button>
+          <button @click="showQrModal = true" class="btn-qr">
+            <QrCode :size="18" />
+            QR Code
+          </button>
+          <button @click="handleCheckout" class="btn-checkout">
+            <Banknote :size="18" />
+            เช็คบิล / ปิดโต๊ะ
+          </button>
         </div>
       </div>
     </div>
@@ -32,6 +43,7 @@
               class="category-btn"
               :class="{ active: currentTab === cat.type }"
             >
+              <component :is="cat.icon" :size="16" />
               {{ cat.name }}
             </button>
           </div>
@@ -55,7 +67,8 @@
           <!-- Awaiting Confirmation Orders -->
           <div v-if="awaitingConfirmOrders.length > 0" class="awaiting-orders">
             <div class="section-header alert-header">
-              🔔 ออเดอร์จากลูกค้า (รอยืนยัน)
+              <Bell :size="18" />
+              ออเดอร์จากลูกค้า (รอยืนยัน)
             </div>
             <div class="order-list">
               <div
@@ -68,8 +81,12 @@
                   <div class="order-qty">จำนวน: {{ order.quantity }}</div>
                 </div>
                 <div class="order-actions">
-                  <button @click="confirmCancelOrder(order.id)" class="btn-reject-small">❌</button>
-                  <button @click="updateOrderStatus(order.id, 'pending')" class="btn-confirm-small">✅</button>
+                  <button @click="confirmCancelOrder(order.id)" class="btn-reject-small">
+                    <X :size="16" />
+                  </button>
+                  <button @click="updateOrderStatus(order.id, 'pending')" class="btn-confirm-small">
+                    <Check :size="16" />
+                  </button>
                 </div>
               </div>
             </div>
@@ -77,7 +94,10 @@
 
           <!-- Staff Cart -->
           <div class="cart-card">
-            <h3 class="cart-title">🛒 รายการที่พนักงานเลือก</h3>
+            <h3 class="cart-title">
+              <ShoppingCart :size="20" />
+              รายการที่พนักงานเลือก
+            </h3>
             
             <div v-if="cart.length === 0" class="empty-cart">
               ยังไม่มีรายการใหม่
@@ -90,10 +110,16 @@
                   <div class="item-detail">{{ item.price }} × {{ item.qty }}</div>
                 </div>
                 <div class="item-controls">
-                  <button @click="decreaseQty(index)" class="btn-qty">-</button>
+                  <button @click="decreaseQty(index)" class="btn-qty">
+                    <Minus :size="14" />
+                  </button>
                   <span class="qty-display">{{ item.qty }}</span>
-                  <button @click="increaseQty(index)" class="btn-qty">+</button>
-                  <button @click="removeFromCart(index)" class="btn-remove">×</button>
+                  <button @click="increaseQty(index)" class="btn-qty">
+                    <Plus :size="14" />
+                  </button>
+                  <button @click="removeFromCart(index)" class="btn-remove">
+                    <Trash2 :size="16" />
+                  </button>
                 </div>
               </div>
             </div>
@@ -108,13 +134,17 @@
               :disabled="cart.length === 0"
               @click="submitOrder"
             >
-              ✅ ยืนยันรายการพนักงาน
+              <Check :size="18" />
+              ยืนยันรายการพนักงาน
             </button>
           </div>
 
           <!-- Order History -->
           <div class="history-card">
-            <h3 class="history-title">📝 ประวัติการสั่ง</h3>
+            <h3 class="history-title">
+              <ClipboardList :size="20" />
+              ประวัติการสั่ง
+            </h3>
             <div class="history-list">
               <div
                 v-for="order in activeAndPastOrders"
@@ -134,13 +164,20 @@
                         'status-cancelled': order.status === 'cancelled'
                       }"
                     >
-                      {{ order.status === 'pending' ? '⏳ กำลังทำ' : (order.status === 'completed' ? '✅ เสร็จแล้ว' : '❌ ยกเลิกแล้ว') }}
+                      <Clock v-if="order.status === 'pending'" :size="12" />
+                      <Check v-if="order.status === 'completed'" :size="12" />
+                      <X v-if="order.status === 'cancelled'" :size="12" />
+                      {{ order.status === 'pending' ? 'กำลังทำ' : (order.status === 'completed' ? 'เสร็จแล้ว' : 'ยกเลิกแล้ว') }}
                     </span>
                   </div>
                 </div>
                 <div v-if="order.status === 'pending'" class="history-actions">
-                  <button @click="updateOrderStatus(order.id, 'completed')" class="btn-complete">เสร็จ</button>
-                  <button @click="confirmCancelOrder(order.id)" class="btn-cancel">ยกเลิก</button>
+                  <button @click="updateOrderStatus(order.id, 'completed')" class="btn-complete">
+                    <Check :size="12" /> เสร็จ
+                  </button>
+                  <button @click="confirmCancelOrder(order.id)" class="btn-cancel">
+                    <RotateCcw :size="12" /> ยกเลิก
+                  </button>
                 </div>
               </div>
             </div>
@@ -153,7 +190,10 @@
     <div v-if="showQrModal" class="modal-overlay" @click.self="showQrModal = false">
       <div class="modal-card modal-small">
         <div class="modal-header">
-          <h3>📱 สแกนเพื่อสั่งอาหาร</h3>
+          <h3>
+            <QrCode :size="20" class="modal-header-icon" />
+            สแกนเพื่อสั่งอาหาร
+          </h3>
         </div>
         <div class="modal-body text-center">
           <p class="qr-table-name">โต๊ะ: <strong>{{ tableName || tableId }}</strong></p>
@@ -162,8 +202,35 @@
           </div>
           <p class="qr-instruction">ให้ลูกค้าสแกนเพื่อดูเมนูและสั่งอาหาร</p>
         </div>
+
+        <!-- Use Teleport to move receipt to body -->
+        <teleport to="body">
+          <div v-if="showQrModal" id="receipt-print-area" class="print-only">
+            <div class="receipt-header">
+              <h2 class="receipt-shop-name">☕ Board Game Cafe</h2>
+              <div class="receipt-divider">--------------------------------</div>
+              <h1 class="receipt-table-num">โต๊ะ: {{ tableName || tableId }}</h1>
+              <div class="receipt-divider">--------------------------------</div>
+            </div>
+            <div class="receipt-body">
+              <div class="receipt-qr-wrapper">
+                <QrcodeVue :value="qrUrl" :size="180" level="H" />
+              </div>
+              <p class="receipt-instruction">สแกนเพื่อสั่งอาหารและดูรายการ</p>
+            </div>
+            <div class="receipt-footer">
+              <div class="receipt-divider">--------------------------------</div>
+              <p>{{ new Date().toLocaleString('th-TH') }}</p>
+              <p>ขอให้สนุกกับการเล่นเกมนะคะ!</p>
+            </div>
+          </div>
+        </teleport>
+
         <div class="modal-footer">
-          <button @click="showQrModal = false" class="btn-primary full-width">ปิด</button>
+          <button @click="printQr" class="btn-secondary">
+            พิมพ์
+          </button>
+          <button @click="showQrModal = false" class="btn-primary">ปิด</button>
         </div>
       </div>
     </div>
@@ -176,10 +243,46 @@ import { useRoute, useRouter } from 'vue-router'; // ✅ เพิ่ม useRout
 import axios from 'axios';
 import QrcodeVue from 'qrcode.vue';
 import { useAlert } from '../composables/useAlert';
+import { 
+  ArrowLeft, 
+  ShoppingCart, 
+  Clock, 
+  QrCode, 
+  Banknote, 
+  Coffee, 
+  Utensils, 
+  Package, 
+  Bell, 
+  Trash2, 
+  Plus, 
+  Minus, 
+  Check, 
+  X, 
+  ClipboardList, 
+  RotateCcw,
+  Printer
+} from 'lucide-vue-next';
 
 export default {
   components: {
-    QrcodeVue
+    QrcodeVue,
+    ArrowLeft,
+    ShoppingCart,
+    Clock,
+    QrCode,
+    Banknote,
+    Coffee,
+    Utensils,
+    Package,
+    Bell,
+    Trash2,
+    Plus,
+    Minus,
+    Check,
+    X,
+    ClipboardList,
+    RotateCcw,
+    Printer
   },
   setup() {
     const route = useRoute();
@@ -199,9 +302,9 @@ export default {
     let pollingInterval = null;
 
     const categories = [
-      { name: '🥤 เครื่องดื่ม', type: 'drink' },
-      { name: '🍟 อาหาร', type: 'food' },
-      { name: '📦 สินค้า', type: 'retail' },
+      { name: 'เครื่องดื่ม', type: 'drink', icon: 'Coffee' },
+      { name: 'อาหาร', type: 'food', icon: 'Utensils' },
+      { name: 'สินค้า', type: 'retail', icon: 'Package' },
     ];
 
     const formatDuration = (startTime) => {
@@ -414,15 +517,17 @@ export default {
 
         // 3. ถามยืนยัน
         const result = await import('sweetalert2').then(Swal => Swal.default.fire({
-            title: `🧾 สรุปยอดเงิน (โต๊ะ ${tableName.value || tableId})`,
+            title: `สรุปยอดเงิน (โต๊ะ ${tableName.value || tableId})`,
             html: htmlContent,
-            icon: 'info',
+            icon: 'question',
             showCancelButton: true,
             confirmButtonColor: '#4CAF8E',
             cancelButtonColor: '#E5533D',
-            confirmButtonText: '💰 เช็คบิล & ปิดโต๊ะ',
+            confirmButtonText: 'เช็คบิล & ปิดโต๊ะ',
             cancelButtonText: 'กลับไปแก้ไข',
-            background: '#F6F5F2'
+            background: '#F6F5F2',
+            color: '#000000',
+            iconColor: '#6B4F3F'
         }));
 
         if (result.isConfirmed) {
@@ -468,6 +573,10 @@ export default {
       }
     };
 
+    const printQr = () => {
+      window.print();
+    };
+
     onMounted(() => {
       checkTableStatus();
       fetchProducts();
@@ -488,7 +597,7 @@ export default {
       addToCart, decreaseQty, increaseQty, removeFromCart, submitOrder,
       handleCheckout, guestToken, showQrModal, qrUrl, formatDuration, sessionStartTime,
       orderHistory, updateOrderStatus, confirmCancelOrder,
-      awaitingConfirmOrders, activeAndPastOrders, formatPrice
+      awaitingConfirmOrders, activeAndPastOrders, formatPrice, printQr
     };
 
     
@@ -497,10 +606,95 @@ export default {
 </script>
 
 <style scoped>
+/* ========== Print Styles ========== */
+@media screen {
+  .print-only { display: none; }
+}
+
+@media print {
+  @page {
+    size: 80mm auto;
+    margin: 0;
+  }
+
+  html, body {
+    width: 80mm !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+
+  /* ซ่อนโครงสร้างหลักของหน้าเว็บทั้งหมด และ SweetAlert */
+  .order-page, .modal-overlay, .swal2-container, #app > div:not(#receipt-print-area) {
+    display: none !important;
+  }
+  
+  /* แสดงเฉพาะส่วนใบเสร็จที่ถูก Teleport ไปยัง body */
+  #receipt-print-area {
+    display: block !important;
+    width: 80mm !important;
+    margin: 0 auto !important;
+    padding: 10mm 5mm !important;
+    background: white !important;
+    color: black !important;
+    font-family: 'Courier New', Courier, monospace;
+    text-align: center;
+    position: static !important;
+    visibility: visible !important;
+  }
+
+  #receipt-print-area * {
+    visibility: visible !important;
+  }
+
+  .receipt-header {
+    margin-bottom: 5mm;
+  }
+
+  .receipt-shop-name {
+    font-size: 18pt;
+    margin: 0;
+  }
+
+  .receipt-table-num {
+    font-size: 24pt;
+    margin: 5mm 0;
+    font-weight: bold;
+  }
+
+  .receipt-divider {
+    font-size: 10pt;
+    margin: 2mm 0;
+  }
+
+  .receipt-qr-wrapper {
+    margin: 5mm auto;
+    display: flex;
+    justify-content: center;
+  }
+
+  .receipt-instruction {
+    font-size: 12pt;
+    margin-top: 3mm;
+  }
+
+  .receipt-footer {
+    margin-top: 5mm;
+    font-size: 9pt;
+  }
+
+  /* บังคับขนาดกระดาษที่นี่ */
+  @page {
+    margin: 0;
+    size: 80mm auto; /* กำหนดความกว้าง 80mm ความสูงยืดหยุ่นตามเนื้อหา */
+  }
+}
+
 /* ========== Global Styles ========== */
 .order-page {
   min-height: 100vh;
   background: var(--color-bg-primary);
+  color: #000000;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
@@ -534,12 +728,15 @@ export default {
   background: rgba(255, 255, 255, 0.15);
   color: white;
   border: 1px solid rgba(255, 255, 255, 0.3);
-  padding: 8px 16px;
+  padding: 8px 12px;
   border-radius: 20px;
   font-weight: 600;
   font-size: 14px;
   cursor: pointer;
   transition: var(--transition-normal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn-back:hover {
@@ -564,6 +761,9 @@ export default {
   font-size: 14px;
   color: rgba(255, 255, 255, 0.9);
   font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .header-actions {
@@ -580,6 +780,9 @@ export default {
   cursor: pointer;
   transition: var(--transition-normal);
   border: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .btn-qr {
@@ -635,12 +838,15 @@ export default {
   border-radius: 20px;
   border: 2px solid var(--color-secondary-dark);
   background: white;
-  color: var(--color-accent);
+  color: #000000;
   font-weight: 600;
   font-size: 14px;
   cursor: pointer;
   transition: var(--transition-normal);
   white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .category-btn:hover {
@@ -683,7 +889,7 @@ export default {
 
 .product-name {
   font-weight: 600;
-  color: var(--color-text-primary);
+  color: #000000;
   font-size: 15px;
 }
 
@@ -715,6 +921,9 @@ export default {
   margin-bottom: 12px;
   padding: 12px;
   border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .alert-header {
@@ -749,13 +958,13 @@ export default {
 
 .order-product {
   font-weight: 600;
-  color: var(--color-accent);
+  color: #000000;
   margin-bottom: 4px;
 }
 
 .order-qty {
   font-size: 13px;
-  color: var(--color-text-secondary);
+  color: #000000;
 }
 
 .order-actions {
@@ -772,18 +981,24 @@ export default {
   cursor: pointer;
   font-size: 14px;
   transition: var(--transition-normal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn-reject-small {
   background: #FFE4E1;
+  color: var(--color-danger);
 }
 
 .btn-reject-small:hover {
   background: var(--color-danger);
+  color: white;
 }
 
 .btn-confirm-small {
   background: linear-gradient(135deg, var(--color-success-light) 0%, var(--color-success) 100%);
+  color: white;
 }
 
 .btn-confirm-small:hover {
@@ -795,13 +1010,16 @@ export default {
 .history-title {
   font-size: 18px;
   font-weight: 700;
-  color: var(--color-accent);
+  color: #000000;
   margin: 0 0 16px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .empty-cart {
   text-align: center;
-  color: var(--color-text-light);
+  color: #000000;
   padding: 20px;
   font-size: 14px;
 }
@@ -830,13 +1048,13 @@ export default {
 
 .item-name {
   font-weight: 600;
-  color: var(--color-accent);
+  color: #000000;
   margin-bottom: 4px;
 }
 
 .item-detail {
   font-size: 13px;
-  color: var(--color-text-secondary);
+  color: #000000;
 }
 
 .item-controls {
@@ -851,10 +1069,13 @@ export default {
   border-radius: 50%;
   border: 1px solid var(--color-secondary-dark);
   background: white;
-  color: var(--color-accent);
+  color: #000000;
   font-weight: 700;
   cursor: pointer;
   transition: var(--transition-normal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn-qty:hover {
@@ -866,7 +1087,7 @@ export default {
   min-width: 24px;
   text-align: center;
   font-weight: 600;
-  color: var(--color-accent);
+  color: #000000;
 }
 
 .btn-remove {
@@ -881,6 +1102,9 @@ export default {
   cursor: pointer;
   transition: var(--transition-normal);
   margin-left: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn-remove:hover {
@@ -896,7 +1120,7 @@ export default {
   border-top: 2px solid var(--color-secondary-dark);
   margin-bottom: 16px;
   font-weight: 700;
-  color: var(--color-accent);
+  color: #000000;
 }
 
 .total-amount {
@@ -915,6 +1139,10 @@ export default {
   font-size: 15px;
   cursor: pointer;
   transition: var(--transition-normal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 .btn-submit-order:hover:not(:disabled) {
@@ -958,13 +1186,13 @@ export default {
 
 .history-product {
   font-weight: 600;
-  color: var(--color-accent);
+  color: #000000;
   margin-bottom: 4px;
 }
 
 .history-qty {
   font-size: 13px;
-  color: var(--color-text-secondary);
+  color: #000000;
   margin-bottom: 6px;
 }
 
@@ -973,7 +1201,10 @@ export default {
 }
 
 .status-badge {
-  display: inline-block;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: fit-content;
   padding: 4px 12px;
   border-radius: 12px;
   font-size: 12px;
@@ -1011,6 +1242,9 @@ export default {
   cursor: pointer;
   transition: var(--transition-normal);
   white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .btn-complete {
@@ -1089,7 +1323,14 @@ export default {
   margin: 0;
   font-size: 20px;
   font-weight: 700;
-  color: var(--color-accent);
+  color: #000000;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.modal-header-icon {
+  color: var(--color-primary);
 }
 
 .modal-body {
@@ -1112,12 +1353,12 @@ export default {
 
 .qr-table-name {
   font-size: 16px;
-  color: var(--color-text-secondary);
+  color: #000000;
   margin-bottom: 16px;
 }
 
 .qr-table-name strong {
-  color: var(--color-accent);
+  color: #000000;
   font-size: 18px;
 }
 
@@ -1131,7 +1372,7 @@ export default {
 }
 
 .qr-instruction {
-  color: var(--color-text-light);
+  color: #000000;
   font-size: 13px;
   margin: 0;
 }
@@ -1146,6 +1387,31 @@ export default {
   border: none;
   background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
   color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-secondary {
+  background: var(--color-divider);
+  color: #000000;
+  padding: 12px 24px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: var(--transition-normal);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-secondary:hover {
+  background: #C1C5CB;
+  transform: translateY(-2px);
 }
 
 .btn-primary:hover {

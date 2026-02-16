@@ -3,7 +3,7 @@
     <!-- Header Section -->
     <header class="page-header">
       <button class="back-button" @click="$router.push('/admin/dashboard')">
-        <ChevronLeft :size="28" />
+        <ArrowLeft :size="24" />
       </button>
       <div class="header-content">
         <h1 class="page-title">รายงานรายได้</h1>
@@ -154,14 +154,14 @@
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { 
-  ChevronLeft, Calendar, Download, Loader2, CircleDollarSign, 
+  ArrowLeft, Calendar, Download, Loader2, CircleDollarSign, 
   LayoutGrid, UserCheck, MonitorOff, Users, User, FolderOpen 
 } from 'lucide-vue-next';
 
 export default {
   name: 'DailyReport',
   components: {
-    ChevronLeft, Calendar, Download, Loader2, CircleDollarSign, 
+    ArrowLeft, Calendar, Download, Loader2, CircleDollarSign, 
     LayoutGrid, UserCheck, MonitorOff, Users, User, FolderOpen
   },
   setup() {
@@ -237,16 +237,18 @@ export default {
 /* Header */
 .page-header {
   background-color: var(--color-primary);
-  padding: 30px 40px;
+  padding: 20px 40px;
   display: flex;
   align-items: center;
   gap: 24px;
   box-shadow: var(--shadow-md);
+  min-height: 100px;
+  box-sizing: border-box;
 }
 
 .back-button {
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   background-color: rgba(255, 255, 255, 0.2);
   border: none;
