@@ -36,6 +36,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     Route::resource('users', UserController::class);
+    Route::post('/users/{id}/regenerate-pin', [UserController::class, 'regeneratePin']);
     Route::resource('products', ProductController::class)->except(['index']);
     Route::post('/settings', [SettingController::class, 'update']);
 

@@ -23,6 +23,7 @@ class TableController extends Controller
                 $session = $table->sessions->first();
                 $table->active_session = [
                     'customer_name' => $session->user ? $session->user->name : 'ลูกค้า',
+                    'user_id' => $session->user_id, // เพิ่ม user_id เข้าไปด้วย
                     'start_time' => $session->start_time,
                     'guest_amount' => $session->guest_amount,
                     'is_day_pass' => $session->is_day_pass

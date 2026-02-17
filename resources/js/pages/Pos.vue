@@ -51,10 +51,16 @@
             class="table-card"
             :class="{
               'table-available': table.status?.toLowerCase() === 'available',
-              'table-busy': table.status?.toLowerCase() === 'busy'
+              'table-busy': table.status?.toLowerCase() === 'busy',
+              'table-disabled': isTableDisabled(table)
             }"
-            @click="handleTableClick(table)"
+            @click="!isTableDisabled(table) && handleTableClick(table)"
           >
+            <!-- Disabled Overlay Info -->
+            <div v-if="isTableDisabled(table)" class="disabled-overlay-text">
+              <Lock :size="14" />
+            </div>
+
             <!-- Pending Badge -->
             <div v-if="getTablePendingCount(table.id) > 0" class="pending-badge">
               {{ getTablePendingCount(table.id) }}
@@ -214,7 +220,6 @@
             <div class="receipt-footer">
               <div class="receipt-divider">--------------------------------</div>
               <p>{{ new Date().toLocaleString('th-TH') }}</p>
-              <p>ขอให้สนุกกับการเล่นเกมนะคะ!</p>
             </div>
           </div>
         </teleport>
@@ -252,7 +257,8 @@ import {
   Plus,
   Minus,
   X,
-  LayoutGrid
+  LayoutGrid,
+  Lock
 } from 'lucide-vue-next';
 
 export default {
@@ -273,7 +279,8 @@ export default {
     Plus,
     Minus,
     X,
-    LayoutGrid
+    LayoutGrid,
+    Lock
   },
   setup() {
     const router = useRouter();
@@ -303,6 +310,16 @@ export default {
     const showQrModal = ref(false);
     const qrUrl = ref(''); 
 
+    const isTableDisabled = (table) => {
+      // ถ้าโต๊ะว่าง ไม่ต้อง disable
+      if (table.status?.toLowerCase() === 'available') return false;
+      
+      // ถ้าเป็น Admin ไม่ต้อง disable
+      if (user.value.role === 'admin') return false;
+
+      // ถ้าโต๊ะไม่ว่าง และ user_id ที่เปิดโต๊ะ ไม่ใช่ user_id ที่ล็อกอินอยู่ ให้ disable
+      return table.active_session && table.active_session.user_id !== user.value.id;
+    };
     const fetchPendingOrders = async () => {
       try {
         const token = localStorage.getItem('token');
@@ -464,13 +481,53 @@ export default {
         showModal, targetTable, pax, isDayPass, closeModal,
         showQrModal, qrUrl, closeQrModal, printQr,
         formatDuration, 
-        pendingOrders, showPendingModal, confirmOrder, getTablePendingCount, formatTime, goToTable
+        pendingOrders, showPendingModal, confirmOrder, getTablePendingCount, formatTime, goToTable,
+        isTableDisabled
     };
   }
 };
 </script>
 
 <style scoped>
+
+.table-disabled {
+  background: #e0e0e0 !important;
+  border-color: #bdbdbd !important;
+  cursor: not-allowed !important;
+  opacity: 0.8;
+  filter: grayscale(0.8);
+}
+
+.table-disabled:hover {
+  transform: none !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+.disabled-overlay-text {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(0,0,0,0.5);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  z-index: 2;
+}
+
+.table-disabled .table-number,
+.table-disabled .table-seats,
+.table-disabled .timer-label,
+.table-disabled .timer-value {
+  color: #757575 !important;
+}
+
+.table-disabled .status-badge {
+  background: #9e9e9e !important;
+}
 
 /* ========== Print Styles ========== */
 
@@ -1251,6 +1308,8 @@ export default {
 .order-time { color: #666; font-size: 12px; }
 
 .btn-confirm { background: var(--color-action); color: white; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; }
+
+.btn-confirm:hover { background: var(--color-action); transform: scale(1.1);}
 
 
 

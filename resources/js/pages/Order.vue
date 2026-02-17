@@ -221,7 +221,6 @@
             <div class="receipt-footer">
               <div class="receipt-divider">--------------------------------</div>
               <p>{{ new Date().toLocaleString('th-TH') }}</p>
-              <p>ขอให้สนุกกับการเล่นเกมนะคะ!</p>
             </div>
           </div>
         </teleport>
@@ -560,6 +559,16 @@ export default {
             error('โต๊ะนี้ยังไม่ได้เปิด', `สถานะปัจจุบัน: ${status}`);
             router.push('/pos'); 
         } else {
+            // เช็คสิทธิ์: ถ้าไม่ใช่ Admin และไม่ใช่คนที่เปิดโต๊ะ (user_id ไม่ตรงกัน) ให้เด้งออก
+            const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+            const activeSession = tableData.sessions ? tableData.sessions[0] : null;
+
+            if (currentUser.role !== 'admin' && activeSession && activeSession.user_id !== currentUser.id) {
+                warning('ไม่มีสิทธิ์เข้าถึง', 'โต๊ะนี้ถูกเปิดโดยพนักงานท่านอื่น');
+                router.push('/pos');
+                return;
+            }
+
             // เก็บ Token ไว้ใช้ทำ QR
             if (tableData.sessions && tableData.sessions.length > 0) {
                 guestToken.value = tableData.sessions[0].guest_token;
@@ -997,12 +1006,13 @@ export default {
 }
 
 .btn-confirm-small {
-  background: linear-gradient(135deg, var(--color-success-light) 0%, var(--color-success) 100%);
+  background: var(--color-success);
   color: white;
 }
 
 .btn-confirm-small:hover {
-  transform: scale(1.1);
+  background:  rgb(173, 222, 184);
+  color: var(--color-success);
 }
 
 /* Cart Card */

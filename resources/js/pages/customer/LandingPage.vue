@@ -2,20 +2,24 @@
   <div class="landing-page">
     <!-- Header -->
     <div class="page-header">
-      <button @click="goBack" class="back-button">
-        ←
-      </button>
-      <div class="header-content">
+      <div class="header-content text-center">
         <h1 class="page-title">Our Menu</h1>
         <p class="page-subtitle">Coffee • Snacks • Games</p>
       </div>
     </div>
 
     <div class="container">
-      <div v-if="loading" class="text-center py-4 text-muted">กำลังตรวจสอบความถูกต้อง...</div>
+      <div v-if="loading" class="loading-full">
+        <div class="spinner-container">
+          <div class="spinner-modern"></div>
+          <p>กำลังตรวจสอบความถูกต้อง...</p>
+        </div>
+      </div>
 
       <div v-else-if="!sessionValid" class="error-state">
-        <div class="error-icon">🚫</div>
+        <div class="error-icon">
+          <AlertCircle :size="48" />
+        </div>
         <h5>ขออภัย</h5>
         <p>{{ errorMessage }}</p>
         <p class="text-muted">หากต้องการสั่งอาหารเพิ่มเติม กรุณาติดต่อพนักงาน</p>
@@ -30,7 +34,7 @@
             @click="currentTab = cat.type"
             :class="['category-btn', { 'active': currentTab === cat.type }]"
           >
-            <span class="category-icon">{{ cat.icon }}</span>
+            <component :is="cat.icon" :size="16" class="category-icon-comp" />
             {{ cat.name }}
           </button>
         </div>
@@ -41,7 +45,11 @@
             <!-- Product Image -->
             <div class="product-image">
               <img v-if="product.image_url" :src="product.image_url" alt="" />
-              <div v-else class="placeholder-image">{{ product.category?.type === 'drink' ? '☕' : product.category?.type === 'food' ? '🍽️' : '🎮' }}</div>
+              <div v-else class="placeholder-image">
+                <Coffee v-if="product.category?.type === 'drink'" :size="32" />
+                <Utensils v-else-if="product.category?.type === 'food'" :size="32" />
+                <Gamepad2 v-else :size="32" />
+              </div>
             </div>
 
             <!-- Product Info -->
@@ -59,15 +67,23 @@
             <!-- Action Buttons -->
             <div class="product-actions">
               <template v-if="product.category?.type === 'retail'">
-                <button class="btn-view-details" @click="showProductDetail(product)">🔍</button>
+                <button class="btn-view-details" @click="showProductDetail(product)">
+                  <Search :size="18" />
+                </button>
               </template>
               <template v-else>
                 <div v-if="getItemQty(product.id) > 0" class="quantity-controls">
-                  <button @click="decreaseQty(product.id)" class="btn-qty">-</button>
+                  <button @click="decreaseQty(product.id)" class="btn-qty">
+                    <Minus :size="16" />
+                  </button>
                   <span class="qty-display">{{ getItemQty(product.id) }}</span>
-                  <button @click="addToCart(product)" class="btn-qty">+</button>
+                  <button @click="addToCart(product)" class="btn-qty">
+                    <Plus :size="16" />
+                  </button>
                 </div>
-                <button v-else class="btn-add" @click="addToCart(product)">+</button>
+                <button v-else class="btn-add" @click="addToCart(product)">
+                  <Plus :size="20" />
+                </button>
               </template>
             </div>
           </div>
@@ -78,13 +94,15 @@
     <!-- Product Detail Modal -->
     <div v-if="detailProduct" class="modal-overlay" @click.self="detailProduct = null">
       <div class="modal-content">
-        <button class="btn-close" @click="detailProduct = null">×</button>
+        <button class="btn-close" @click="detailProduct = null">
+          <X :size="20" />
+        </button>
         <img v-if="detailProduct.image_url" :src="detailProduct.image_url" class="modal-image" />
         <h3 class="modal-title">{{ detailProduct.name }}</h3>
         <div class="modal-price">ราคา: ฿{{ detailProduct.price }}</div>
         <p class="modal-description">{{ detailProduct.description || 'ไม่มีรายละเอียดเพิ่มเติม' }}</p>
         <div class="alert-contact">
-          📞 กรุณาติดต่อพนักงานที่เคาท์เตอร์สำหรับสินค้านี้
+          <Info :size="18" class="inline-icon" /> กรุณาติดต่อพนักงานที่เคาท์เตอร์สำหรับสินค้านี้
         </div>
       </div>
     </div>
@@ -92,26 +110,36 @@
     <!-- Cart Bar -->
     <div v-if="cart.length > 0" class="cart-bar">
       <div class="cart-info">
-        <div class="cart-items">{{ totalItems }} รายการ</div>
+        <div class="cart-items">
+          <ShoppingCart :size="14" class="inline-icon" /> {{ totalItems }} รายการ
+        </div>
         <div class="cart-total">รวม ฿{{ totalPrice }}</div>
       </div>
       <div class="cart-actions">
         <button class="btn-view-cart" @click="showCartModal = true">ดูตะกร้า</button>
-        <button class="btn-confirm" @click="submitOrder">✅ ยืนยัน</button>
+        <button class="btn-confirm" @click="submitOrder">
+          <Check :size="18" class="inline-icon" /> ยืนยัน
+        </button>
       </div>
     </div>
 
     <!-- Cart Modal -->
     <div v-if="showCartModal" class="modal-overlay" @click.self="showCartModal = false">
       <div class="cart-modal">
-        <h3 class="cart-modal-title">🛒 รายการอาหารของคุณ</h3>
+        <h3 class="cart-modal-title">
+          <ShoppingCart :size="22" class="inline-icon" /> รายการอาหารของคุณ
+        </h3>
         <div class="cart-items-list">
           <div v-for="item in cart" :key="item.id" class="cart-item">
             <div class="cart-item-name">{{ item.name }}</div>
             <div class="cart-item-controls">
-              <button @click="decreaseQty(item.id)" class="btn-qty-small">-</button>
+              <button @click="decreaseQty(item.id)" class="btn-qty-small">
+                <Minus :size="14" />
+              </button>
               <span class="qty-display-small">{{ item.qty }}</span>
-              <button @click="addToCart(item)" class="btn-qty-small">+</button>
+              <button @click="addToCart(item)" class="btn-qty-small">
+                <Plus :size="14" />
+              </button>
               <div class="cart-item-price">฿{{ item.price * item.qty }}</div>
             </div>
           </div>
@@ -123,7 +151,8 @@
         <div class="cart-modal-actions">
           <button class="btn-cancel" @click="showCartModal = false">ปิด</button>
           <button class="btn-submit" @click="submitOrder">
-            {{ submitting ? 'กำลังส่ง...' : '✅ ยืนยันการสั่งอาหาร' }}
+            <Check v-if="!submitting" :size="18" class="inline-icon" />
+            {{ submitting ? 'กำลังส่ง...' : 'ยืนยันการสั่งอาหาร' }}
           </button>
         </div>
       </div>
@@ -137,8 +166,38 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import axios from 'axios';
+import { 
+  ArrowLeft, 
+  Coffee, 
+  Utensils, 
+  Gamepad2, 
+  Flame, 
+  Search, 
+  Plus, 
+  Minus, 
+  ShoppingCart, 
+  Check, 
+  X, 
+  Info,
+  AlertCircle
+} from 'lucide-vue-next';
 
 export default {
+  components: {
+    ArrowLeft,
+    Coffee,
+    Utensils,
+    Gamepad2,
+    Flame,
+    Search,
+    Plus,
+    Minus,
+    ShoppingCart,
+    Check,
+    X,
+    Info,
+    AlertCircle
+  },
   setup() {
     const route = useRoute();
     const router = useRouter();
@@ -156,10 +215,10 @@ export default {
     const detailProduct = ref(null);
 
     const categories = [
-      { name: 'All', type: 'all', icon: '🔥' },
-      { name: 'Coffee', type: 'drink', icon: '☕' },
-      { name: 'Snacks', type: 'food', icon: '🍪' },
-      { name: 'Games', type: 'retail', icon: '🎮' },
+      { name: 'All', type: 'all', icon: 'Flame' },
+      { name: 'Coffee', type: 'drink', icon: 'Coffee' },
+      { name: 'Snacks', type: 'food', icon: 'Utensils' },
+      { name: 'Games', type: 'retail', icon: 'Gamepad2' },
     ];
 
     const validateSession = async () => {
@@ -263,10 +322,6 @@ export default {
       detailProduct.value = product;
     };
 
-    const goBack = () => {
-      router.go(-1);
-    };
-
     onMounted(validateSession);
 
     return { 
@@ -274,17 +329,52 @@ export default {
       loading, sessionValid, errorMessage, tableInfo,
       cart, addToCart, decreaseQty, getItemQty, totalItems, totalPrice,
       showCartModal, submitOrder, submitting,
-      detailProduct, showProductDetail, goBack
+      detailProduct, showProductDetail
     };
   }
 };
 </script>
 
-<style scoped>
+<style>
+.inline-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+
+.spinner-small {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--color-divider);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  display: inline-block;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
 /* Landing Page Container */
 .landing-page {
+  --lp-action: #2F9D7E;
+  --lp-action-hover: #23856a;
+  --lp-primary: #2F9D7E;
+  --lp-highlight: #FFB74D;
+  --lp-highlight-light: #FFF8E1;
+  --lp-text-primary: #2b2b2b;
+  --lp-text-secondary: #6b6b6b;
+  --lp-bg: #F7F9F8;
+  --lp-card: #FFFFFF;
+  --lp-border: #E6E6E6;
+
   min-height: 100vh;
-  background: var(--color-bg-primary);
+  background: var(--lp-bg);
   padding-bottom: 100px;
 }
 
@@ -389,18 +479,24 @@ export default {
 }
 
 .category-btn.active {
-  background: linear-gradient(135deg, var(--color-action) 0%, var(--color-action-hover) 100%);
-  border-color: var(--color-action);
+  background: linear-gradient(135deg, var(--lp-action) 0%, var(--lp-action-hover) 100%);
+  border-color: var(--lp-action);
   color: white;
 }
 
 .category-btn:hover:not(.active) {
-  border-color: var(--color-action);
-  background: var(--color-bg-primary);
+  border-color: var(--lp-action);
+  background: var(--lp-bg);
 }
 
 .category-icon {
   font-size: 16px;
+}
+
+.category-icon-comp {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Menu Items */
@@ -411,8 +507,8 @@ export default {
 }
 
 .menu-card {
-  background: var(--color-table-row);
-  border: 2px solid var(--color-table-border);
+  background: var(--lp-card);
+  border: 2px solid var(--lp-border);
   border-radius: 16px;
   padding: 16px;
   display: grid;
@@ -424,8 +520,8 @@ export default {
 }
 
 .menu-card:hover {
-  border-color: var(--color-action);
-  box-shadow: 0 4px 12px rgba(76, 175, 142, 0.15);
+  border-color: var(--lp-action);
+  box-shadow: 0 6px 18px rgba(47, 157, 126, 0.12);
 }
 
 /* Product Image */
@@ -449,6 +545,16 @@ export default {
 
 .placeholder-image {
   font-size: 28px;
+  color: var(--lp-action);
+  opacity: 1;
+}
+
+.placeholder-image svg {
+  width: 36px;
+  height: 36px;
+  color: var(--lp-action);
+  opacity: 1;
+  display: block;
 }
 
 /* Product Info */
@@ -463,14 +569,14 @@ export default {
 .product-name {
   font-size: 16px;
   font-weight: 700;
-  color: var(--color-text-primary);
+  color: var(--lp-text-primary);
   margin: 0;
   line-height: 1.3;
 }
 
 .product-description {
   font-size: 13px;
-  color: var(--color-text-secondary);
+  color: var(--lp-text-secondary);
   margin: 0;
   line-height: 1.4;
 }
@@ -478,11 +584,11 @@ export default {
 .category-badge {
   display: inline-block;
   padding: 4px 10px;
-  background: var(--color-bg-card);
-  border: 1px solid var(--color-table-border);
+  background: var(--lp-card);
+  border: 1px solid var(--lp-border);
   border-radius: 12px;
   font-size: 11px;
-  color: var(--color-text-secondary);
+  color: var(--lp-text-secondary);
   font-weight: 600;
   width: fit-content;
   margin-top: 4px;
@@ -493,8 +599,8 @@ export default {
   position: absolute;
   top: 12px;
   right: 12px;
-  background: linear-gradient(135deg, var(--color-highlight) 0%, var(--color-warning) 100%);
-  color: var(--color-text-primary);
+  background: linear-gradient(135deg, var(--lp-highlight) 0%, #FF8C42 100%);
+  color: white;
   padding: 6px 12px;
   border-radius: 16px;
   font-size: 14px;
@@ -514,35 +620,40 @@ export default {
 .btn-add {
   width: 36px;
   height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--color-action) 0%, var(--color-action-hover) 100%);
+  background: linear-gradient(135deg, var(--lp-action) 0%, var(--lp-action-hover) 100%);
   border: none;
   color: white;
-  font-size: 20px;
-  font-weight: 700;
+  font-size: 18px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.18s ease;
 }
 
 .btn-add:hover {
-  background: linear-gradient(135deg, var(--color-action-hover) 0%, #3F9B7A 100%);
-  transform: scale(1.05);
+  background: linear-gradient(135deg, var(--lp-action-hover) 0%, #23856a 100%);
+  transform: scale(1.03);
 }
 
 .btn-view-details {
   width: 36px;
   height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 50%;
-  background: var(--color-bg-card);
-  border: 2px solid var(--color-action);
-  color: var(--color-action);
+  background: var(--lp-card);
+  border: 2px solid var(--lp-action);
+  color: var(--lp-action);
   font-size: 16px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.18s ease;
 }
 
 .btn-view-details:hover {
-  background: var(--color-action);
+  background: var(--lp-action);
   color: white;
 }
 
@@ -558,18 +669,20 @@ export default {
 .btn-qty {
   width: 28px;
   height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 50%;
   background: white;
-  border: 1px solid var(--color-action);
-  color: var(--color-action);
-  font-size: 16px;
-  font-weight: 700;
+  border: 1px solid var(--lp-action);
+  color: var(--lp-action);
+  font-size: 14px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.18s ease;
 }
 
 .btn-qty:hover {
-  background: var(--color-action);
+  background: var(--lp-action);
   color: white;
 }
 
@@ -577,7 +690,7 @@ export default {
   min-width: 24px;
   text-align: center;
   font-weight: 700;
-  color: var(--color-text-primary);
+  color: var(--lp-text-primary);
 }
 
 /* Cart Bar */
@@ -621,31 +734,32 @@ export default {
 .btn-view-cart {
   padding: 10px 16px;
   background: white;
-  border: 2px solid var(--color-action);
-  color: var(--color-action);
+  border: 2px solid var(--lp-action);
+  color: var(--lp-action);
   border-radius: 8px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.18s ease;
 }
 
 .btn-view-cart:hover {
-  background: var(--color-bg-primary);
+  background: var(--lp-bg);
 }
 
 .btn-confirm {
-  padding: 10px 20px;
-  background: linear-gradient(135deg, var(--color-action) 0%, var(--color-action-hover) 100%);
+  padding: 8px 14px;
+  background: linear-gradient(135deg, var(--lp-action) 0%, var(--lp-action-hover) 100%);
   border: none;
   color: white;
-  border-radius: 8px;
+  border-radius: 10px;
   font-weight: 600;
+  font-size: 14px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.18s ease;
 }
 
 .btn-confirm:hover {
-  background: linear-gradient(135deg, var(--color-action-hover) 0%, #3F9B7A 100%);
+  background: linear-gradient(135deg, var(--lp-action-hover) 0%, #23856a 100%);
 }
 
 /* Modal Overlay */
@@ -676,21 +790,23 @@ export default {
 
 .btn-close {
   position: absolute;
-  top: 16px;
-  right: 16px;
-  width: 32px;
-  height: 32px;
+  top: 12px;
+  right: 12px;
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 50%;
-  background: var(--color-bg-card);
+  background: var(--lp-card);
   border: none;
-  color: var(--color-text-primary);
-  font-size: 24px;
+  color: var(--lp-text-primary);
   cursor: pointer;
   line-height: 1;
 }
 
 .btn-close:hover {
-  background: var(--color-table-border);
+  background: var(--lp-border);
 }
 
 .modal-image {
@@ -783,10 +899,13 @@ export default {
 .btn-qty-small {
   width: 24px;
   height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 50%;
   background: white;
-  border: 1px solid var(--color-action);
-  color: var(--color-action);
+  border: 1px solid var(--lp-action);
+  color: var(--lp-action);
   font-size: 14px;
   cursor: pointer;
 }
@@ -795,7 +914,7 @@ export default {
   min-width: 20px;
   text-align: center;
   font-weight: 600;
-  color: var(--color-text-primary);
+  color: var(--lp-text-primary);
 }
 
 .cart-item-price {
@@ -843,11 +962,11 @@ export default {
 
 .btn-submit {
   flex: 2;
-  padding: 12px;
-  background: linear-gradient(135deg, var(--color-action) 0%, var(--color-action-hover) 100%);
+  padding: 10px;
+  background: linear-gradient(135deg, var(--lp-action) 0%, var(--lp-action-hover) 100%);
   border: none;
   color: white;
-  border-radius: 8px;
+  border-radius: 10px;
   font-weight: 600;
   cursor: pointer;
 }
@@ -887,21 +1006,23 @@ export default {
 
 .btn-close {
   position: absolute;
-  top: 16px;
-  right: 16px;
-  width: 32px;
-  height: 32px;
+  top: 12px;
+  right: 12px;
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 50%;
-  background: #F5E6D3;
+  background: var(--lp-card);
   border: none;
-  color: #8B4513;
-  font-size: 24px;
+  color: var(--lp-text-primary);
   cursor: pointer;
   line-height: 1;
 }
 
 .btn-close:hover {
-  background: #E8D5B7;
+  background: var(--lp-border);
 }
 
 .modal-image {
@@ -913,36 +1034,36 @@ export default {
 .modal-title {
   font-size: 20px;
   font-weight: 700;
-  color: #8B4513;
+  color: var(--lp-text-primary);
   margin: 0 0 8px 0;
 }
 
 .modal-price {
   font-size: 18px;
   font-weight: 700;
-  color: #FF8C42;
+  color: var(--lp-highlight);
   margin-bottom: 12px;
 }
 
 .modal-description {
-  color: #666;
+  color: var(--lp-text-secondary);
   margin-bottom: 16px;
   line-height: 1.6;
 }
 
 .alert-contact {
-  background: #FFF3CD;
-  border: 1px solid #FFE69C;
+  background: var(--lp-highlight-light);
+  border: 1px solid var(--lp-highlight);
   border-radius: 8px;
   padding: 12px;
-  color: #8B4513;
+  color: var(--lp-text-primary);
   font-weight: 600;
   text-align: center;
 }
 
 /* Cart Modal */
 .cart-modal {
-  background: white;
+  background: var(--lp-card);
   border-radius: 16px 16px 0 0;
   padding: 24px;
   max-width: 540px;
@@ -958,7 +1079,7 @@ export default {
 .cart-modal-title {
   font-size: 20px;
   font-weight: 700;
-  color: #8B4513;
+  color: var(--lp-text-primary);
   margin: 0 0 16px 0;
 }
 
@@ -974,13 +1095,14 @@ export default {
   justify-content: space-between;
   align-items: center;
   padding: 12px;
-  background: #FFFAF0;
+  background: var(--lp-card);
+  border: 1px solid var(--lp-border);
   border-radius: 8px;
 }
 
 .cart-item-name {
   font-weight: 600;
-  color: #8B4513;
+  color: var(--lp-text-primary);
 }
 
 .cart-item-controls {
@@ -992,10 +1114,13 @@ export default {
 .btn-qty-small {
   width: 24px;
   height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 50%;
   background: white;
-  border: 1px solid #D2691E;
-  color: #8B4513;
+  border: 1px solid var(--lp-action);
+  color: var(--lp-action);
   font-size: 14px;
   cursor: pointer;
 }
@@ -1004,12 +1129,12 @@ export default {
   min-width: 20px;
   text-align: center;
   font-weight: 600;
-  color: #8B4513;
+  color: var(--lp-text-primary);
 }
 
 .cart-item-price {
   font-weight: 700;
-  color: #8B4513;
+  color: var(--lp-text-primary);
   min-width: 60px;
   text-align: right;
 }
@@ -1019,19 +1144,19 @@ export default {
   justify-content: space-between;
   align-items: center;
   padding: 16px 0;
-  border-top: 2px solid #E8D5B7;
+  border-top: 2px solid var(--lp-border);
   margin-bottom: 16px;
 }
 
 .summary-label {
   font-weight: 700;
-  color: #8B4513;
+  color: var(--lp-text-primary);
 }
 
 .summary-total {
   font-size: 20px;
   font-weight: 700;
-  color: #FF8C42;
+  color: var(--lp-highlight);
 }
 
 .cart-modal-actions {
@@ -1042,9 +1167,9 @@ export default {
 .btn-cancel {
   flex: 1;
   padding: 12px;
-  background: #F5E6D3;
+  background: var(--lp-card);
   border: none;
-  color: #8B4513;
+  color: var(--lp-text-primary);
   border-radius: 8px;
   font-weight: 600;
   cursor: pointer;

@@ -8,41 +8,41 @@
 export function useTheme() {
   // Color palette object
   const colors = {
-    // Primary / Brand (Navbar, Header, Total)
-    primary: '#6B4F3F',
-    primaryDark: '#4B3621',
-    primaryLight: '#8B6B5D',
-    primaryHover: '#5A4235',
+    // Primary / Brand (Serious & Modern)
+    primary: '#1F2937',
+    primaryDark: '#111827',
+    primaryLight: '#374151',
+    primaryHover: '#111827',
 
-    // Action / Accent (Buttons, Active)
-    action: '#4CAF8E',
-    actionHover: '#3F9B7A',
+    // Action / Accent (Professional Green)
+    action: '#059669',
+    actionHover: '#047857',
 
-    // Highlight
-    highlight: '#F2C94C',
-    highlightLight: '#FFF3C4',
+    // Highlight / Warning (Amber)
+    highlight: '#D97706',
+    highlightLight: '#FEF3C7',
 
     // Status Colors
-    success: '#22C55E',
+    success: '#10B981',
     warning: '#F59E0B',
-    danger: '#E5533D',
+    danger: '#DC2626',
     disabled: '#9CA3AF',
-    info: '#F2C94C',
+    info: '#3B82F6', // Blue for info in the new theme
 
     // Text
-    textPrimary: '#2E2E2E',
-    textSecondary: '#6B7280',
+    textPrimary: '#111827',
+    textSecondary: '#4B5563',
     textWhite: '#FFFFFF',
-    textPrice: '#4B3621',
+    textPrice: '#1F2937',
 
     // Backgrounds
-    bgPrimary: '#F6F5F2',
-    bgCard: '#ECEAE6',
-    bgHover: '#D1FAE5', // Selected row color
+    bgPrimary: '#F3F4F6',
+    bgCard: '#FFFFFF',
+    bgHover: '#ECFDF5',
 
     // Borders
-    divider: '#D1D5DB',
-    border: '#E5E7EB',
+    divider: '#E5E7EB',
+    border: '#D1D5DB',
     borderLight: '#F3F4F6',
   };
 

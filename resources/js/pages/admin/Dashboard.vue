@@ -115,7 +115,11 @@ export default {
 }
 
 .admin-icon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   font-size: 64px;
+  color: var(--color-primary);
 }
 
 .admin-title {

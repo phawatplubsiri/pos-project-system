@@ -29,17 +29,18 @@
               <th>ชื่อ-นามสกุล</th>
               <th>ตำแหน่ง</th>
               <th>อีเมล</th>
-              <th>PIN</th>
               <th>จัดการ</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="user in users" :key="user.id">
               <td>{{ user.name }}</td>
-              <td>{{ user.role }}</td>
+              <td style="text-transform: lowercase;">{{ user.role }}</td>
               <td>{{ user.email }}</td>
-              <td><span v-if="user.has_pin || user.pin" title="PIN is hidden for security">******</span><span v-else>-</span></td>
               <td class="action-cell">
+                <button @click="regeneratePin(user.id)" class="action-btn pin-btn" title="รีเซ็ต PIN">
+                  <Key :size="16" />
+                </button>
                 <button @click="openModal(user)" class="action-btn edit-btn" title="แก้ไข">
                   <Pencil :size="16" />
                 </button>
@@ -56,29 +57,32 @@
     <!-- Modal for Add/Edit -->
     <div v-if="showModal" class="modal-overlay" @click.self="showModal = false">
       <div class="modal-content-custom">
+        <button class="modal-close" @click="showModal = false">&times;</button>
         <h3 class="modal-title">{{ isEdit ? 'แก้ไขข้อมูลพนักงาน' : 'เพิ่มพนักงานใหม่' }}</h3>
         
-        <div class="form-group">
-          <label>ชื่อ-นามสกุล</label>
-          <input v-model="form.name" placeholder="กรอกชื่อ-นามสกุล" />
-        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>ชื่อ-นามสกุล</label>
+            <input v-model="form.name" placeholder="กรอกชื่อ-นามสกุล" />
+          </div>
+          
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" v-model="form.email" placeholder="กรอกอีเมล" />
+          </div>
         
-        <div class="form-group">
-          <label>Email</label>
-          <input type="email" v-model="form.email" placeholder="กรอกอีเมล" />
-        </div>
+          <div class="form-group">
+            <label>รหัสผ่าน</label>
+            <input v-model="form.password" type="password" :placeholder="isEdit ? 'เว้นว่างถ้าไม่ต้องการเปลี่ยน' : 'กรอกรหัสผ่าน'" />
+          </div>
         
-        <div class="form-group">
-          <label>รหัสผ่าน</label>
-          <input v-model="form.password" type="password" :placeholder="isEdit ? 'เว้นว่างถ้าไม่ต้องการเปลี่ยน' : 'กรอกรหัสผ่าน'" />
-        </div>
-        
-        <div class="form-group">
-          <label>ตำแหน่ง</label>
-          <select v-model="form.role">
-            <option value="STAFF">Staff (พนักงานทั่วไป)</option>
-            <option value="ADMIN">Admin (ผู้ดูแลระบบ)</option>
-          </select>
+          <div class="form-group">
+            <label>ตำแหน่ง</label>
+            <select v-model="form.role">
+              <option value="staff">Staff (พนักงานทั่วไป)</option>
+              <option value="admin">Admin (ผู้ดูแลระบบ)</option>
+            </select>
+          </div>
         </div>
 
         <div class="modal-actions">
@@ -93,11 +97,13 @@
 <script>
 import { ref, onMounted, nextTick, onBeforeUnmount, watch } from 'vue';
 import axios from 'axios';
+import { useAlert } from '../../composables/useAlert';
 import { 
   ArrowLeft, 
   Plus, 
   Pencil, 
-  Trash2 
+  Trash2,
+  Key
 } from 'lucide-vue-next';
 
 export default {
@@ -105,9 +111,11 @@ export default {
     ArrowLeft,
     Plus,
     Pencil,
-    Trash2
+    Trash2,
+    Key
   },
   setup() {
+    const { success, error, confirm: swalConfirm, loading, close: swalClose, showPin, Toast } = useAlert();
     const users = ref([]);
     const showModal = ref(false);
     const isEdit = ref(false);
@@ -120,11 +128,18 @@ export default {
         }
         nextTick(() => {
             dataTable = $('#staffTable').DataTable({
+                responsive: true,
                 language: {
                     url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/th.json',
                 },
                 pageLength: 10,
-                order: [[0, 'asc']]
+                order: [[0, 'asc']],
+                columnDefs: [
+                  { responsivePriority: 1, targets: 0 },
+                  { responsivePriority: 2, targets: 2 },
+                  // Give action column lower priority so it can collapse first
+                  { responsivePriority: 5, targets: 3 }
+                ]
             });
         });
     };
@@ -146,34 +161,65 @@ export default {
         showModal.value = true;
     };
 
+    const regeneratePin = async (id) => {
+      const ok = await swalConfirm('ยืนยันการรีเซ็ต PIN', 'คุณต้องการรีเซ็ต PIN ใหม่สำหรับพนักงานคนนี้ใช่หรือไม่?');
+      if (!ok) return;
+
+      const token = localStorage.getItem('token');
+      try {
+        loading('กำลังสร้าง PIN ใหม่...');
+        const res = await axios.post(`/api/users/${id}/regenerate-pin`, {}, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        swalClose();
+        await showPin('รีเซ็ต PIN สำเร็จ', res.data.pin);
+      } catch (err) {
+        swalClose();
+        error('เกิดข้อผิดพลาด', (err.response?.data?.message || err.message));
+      }
+    };
+
     const saveUser = async () => {
         const token = localStorage.getItem('token');
         const headers = { Authorization: `Bearer ${token}` };
 
-        try {
+          try {
+            loading('กำลังบันทึกข้อมูล...');
             if (isEdit.value) {
-                await axios.put(`/api/users/${form.value.id}`, form.value, { headers });
-                alert('อัปเดตข้อมูลสำเร็จ');
+              await axios.put(`/api/users/${form.value.id}`, form.value, { headers });
+              swalClose();
+              success('อัปเดตข้อมูลสำเร็จ');
             } else {
-                const res = await axios.post('/api/users', form.value, { headers });
-                if (res.data.pin) {
-                    alert('สร้างพนักงานสำเร็จ! PIN คือ: ' + res.data.pin);
-                } else {
-                    alert('สร้างพนักงานสำเร็จ');
-                }
+              const res = await axios.post('/api/users', form.value, { headers });
+              swalClose();
+              if (res.data.pin) {
+                await showPin('สร้างพนักงานสำเร็จ', res.data.pin);
+              } else {
+                success('สร้างพนักงานสำเร็จ');
+              }
             }
             showModal.value = false;
             fetchUsers();
-        } catch (error) {
-            alert('เกิดข้อผิดพลาด: ' + (error.response?.data?.message || error.message));
-        }
+          } catch (err) {
+            swalClose();
+            error('เกิดข้อผิดพลาด', (err.response?.data?.message || err.message));
+          }
     };
 
     const deleteUser = async (id) => {
-        if (!confirm('ยืนยันที่จะลบพนักงานคนนี้?')) return;
-        const token = localStorage.getItem('token');
+      const ok = await swalConfirm('ยืนยันการลบ', 'ยืนยันที่จะลบพนักงานคนนี้?');
+      if (!ok) return;
+      const token = localStorage.getItem('token');
+      try {
+        loading('กำลังลบ...');
         await axios.delete(`/api/users/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+        swalClose();
+        success('ลบพนักงานเรียบร้อย');
         fetchUsers();
+      } catch (err) {
+        swalClose();
+        error('ล้มเหลว', (err.response?.data?.message || err.message));
+      }
     };
 
     onMounted(fetchUsers);
@@ -188,7 +234,7 @@ export default {
         initDataTable();
     });
 
-    return { users, showModal, isEdit, form, openModal, saveUser, deleteUser };
+    return { users, showModal, isEdit, form, openModal, saveUser, deleteUser, regeneratePin };
   }
 };
 </script>
@@ -364,6 +410,7 @@ export default {
 
 .edit-btn:hover { color: #1976D2; border-color: #1976D2; background-color: #E3F2FD; }
 .delete-btn:hover { color: #D32F2F; border-color: #D32F2F; background-color: #FFEBEE; }
+.pin-btn:hover { color: #F57C00; border-color: #F57C00; background-color: #FFF3E0; }
 
 /* DataTable Overrides */
 :deep(.dataTables_wrapper) { color: #000000 !important; }
@@ -403,12 +450,13 @@ export default {
 /* Modal */
 .modal-content-custom {
   background: #ffffff;
-  padding: 35px;
+  padding: 28px;
   border-radius: 16px;
-  width: 90%;
-  max-width: 480px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  width: 40%;
+  max-width: 1000px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
   color: #000000;
+  position: relative;
 }
 
 .modal-title {
@@ -416,6 +464,31 @@ export default {
   font-weight: 700;
   color: var(--color-primary);
   margin: 0 0 25px 0;
+}
+
+.modal-close {
+  position: absolute;
+  top: 18px;
+  right: 20px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr; /* vertical stack */
+  gap: 12px;
+}
+
+.form-grid .form-group {
+  margin-bottom: 0;
 }
 
 /* Form Group */

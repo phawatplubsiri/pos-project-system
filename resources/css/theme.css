@@ -3,46 +3,46 @@
    ======================================== */
 
 :root {
-    /* Background */
-    --color-bg-primary: #F6F5F2;    /* ครีมอ่อน */
-    --color-bg-card: #ECEAE6;       /* ครีมเทา */
-    --color-divider: #D1D5DB;       /* เทาอ่อน */
+    /* Background & Surfaces */
+    --color-bg-primary: #F3F4F6;    /* Light Cool Grey */
+    --color-bg-card: #FFFFFF;       /* Pure White */
+    --color-divider: #E5E7EB;       /* Soft Grey */
 
-    /* Primary / Brand (Navbar, Header, Total) */
-    --color-primary: #6B4F3F;       /* น้ำตาลกาแฟ */
-    --color-primary-dark: #4B3621;
-    --color-primary-light: #8B6B5D;
-    --color-primary-hover: #5A4235;
+    /* Primary / Brand (Serious & Modern) */
+    --color-primary: #1F2937;       /* Deep Charcoal (Almost Black) */
+    --color-primary-dark: #111827;  /* Obsidian */
+    --color-primary-light: #374151; /* Slate Grey */
+    --color-primary-hover: #111827;
 
-    /* Action / Accent (Buttons, Active) */
-    --color-action: #4CAF8E;        /* เขียวหมากรุก */
-    --color-action-hover: #3F9B7A;  /* เขียวเข้ม */
-    --color-action-active: #4CAF8E;
+    /* Action / Success (Professional Green) */
+    --color-action: #059669;        /* Emerald Green */
+    --color-action-hover: #047857;
+    --color-action-active: #059669;
 
-    /* Highlight (Promotion, Badge) */
-    --color-highlight: #F2C94C;     /* เหลืองมัสตาร์ด */
-    --color-highlight-light: #FFF3C4; /* เหลืองอ่อน */
-
-    /* Text */
-    --color-text-primary: #2E2E2E;   /* เทาเข้ม */
-    --color-text-secondary: #6B7280; /* เทา */
-    --color-text-white: #FFFFFF;    /* ขาว */
-    --color-text-price: #4B3621;    /* น้ำตาลเข้ม */
+    /* Highlight / Warning (Amber Gold) */
+    --color-highlight: #D97706;     /* Amber */
+    --color-highlight-light: #FEF3C7;
 
     /* Status */
-    --color-success: #22C55E;       /* เขียว */
+    --color-success: #10B981;       /* Success Green */
     --color-success-light: #D1FAE5;
-    --color-warning: #F59E0B;       /* ส้ม */
-    --color-warning-light: #FFF3C4;
-    --color-danger: #E5533D;        /* แดง */
+    --color-warning: #F59E0B;       /* Warning Orange/Yellow */
+    --color-warning-light: #FEF3C7;
+    --color-danger: #DC2626;        /* Professional Red */
     --color-danger-light: #FEE2E2;
-    --color-disabled: #9CA3AF;      /* เทา */
+    --color-disabled: #9CA3AF;
+
+    /* Text */
+    --color-text-primary: #111827;   /* Almost Black */
+    --color-text-secondary: #4B5563; /* Medium Grey */
+    --color-text-white: #FFFFFF;
+    --color-text-price: #1F2937;
 
     /* Table / List */
-    --color-table-row: #FFFFFF;     /* ขาวครีม */
-    --color-table-row-alt: #F3F4F6; /* เทาอ่อน */
-    --color-table-row-selected: #D1FAE5; /* เขียวอ่อน */
-    --color-table-border: #E5E7EB;  /* เทาอ่อน */
+    --color-table-row: #FFFFFF;
+    --color-table-row-alt: #F9FAFB;
+    --color-table-row-selected: #ECFDF5;
+    --color-table-border: #E5E7EB;
 
     /* Legacy mapping for compatibility */
     --color-secondary: var(--color-bg-card);
@@ -260,3 +260,102 @@
     transform: translateY(-6px);
     box-shadow: var(--shadow-lg);
 }
+
+/* ========================================
+   SweetAlert2 Custom Styles (lp theme)
+   ======================================== */
+
+/* Popup styling */
+.lp-popup {
+    border-radius: 12px !important;
+    padding: 20px !important;
+    box-shadow: 0 12px 40px rgba(45, 125, 102, 0.12) !important;
+    border: 1px solid var(--color-border-light) !important;
+    font-family: inherit;
+}
+
+.lp-title {
+    color: var(--color-text-primary) !important;
+    font-size: 18px !important;
+    font-weight: 700 !important;
+}
+
+.lp-content {
+    color: var(--color-text-secondary) !important;
+    font-size: 14px !important;
+    margin-top: 8px;
+}
+
+/* Buttons (we use buttonsStyling: false to allow our classes) */
+.lp-btn-confirm {
+    background: linear-gradient(135deg, #2F9D7E 0%, #23856a 100%) !important;
+    color: #ffffff !important;
+    border: none !important;
+    padding: 10px 16px !important;
+    border-radius: 8px !important;
+    font-weight: 700 !important;
+    box-shadow: 0 6px 18px rgba(47, 157, 126, 0.14) !important;
+}
+
+.lp-btn-cancel {
+    background: transparent !important;
+    color: var(--color-text-primary) !important;
+    border: 1px solid var(--color-divider) !important;
+    padding: 8px 14px !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+}
+
+/* Icon colors for built-in icons */
+.swal2-icon.swal2-success {
+    border-color: rgba(47,157,126,0.15) !important;
+    color: #2F9D7E !important;
+}
+.swal2-icon.swal2-error {
+    color: var(--color-danger) !important;
+}
+.swal2-icon.swal2-warning {
+    color: var(--color-warning) !important;
+}
+
+/* Toast look */
+.swal2-container .swal2-toast {
+    border-radius: 10px !important;
+    padding: 10px 14px !important;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08) !important;
+    border: 1px solid var(--color-border-light) !important;
+}
+
+/* Slight animation */
+.swal2-show {
+    transform-origin: center !important;
+}
+
+/* Ensure large icons inside toasts/popup are centered */
+.swal2-popup .swal2-icon {
+    margin: 0 auto 8px auto !important;
+}
+
+/* PIN large display */
+.swal-pin {
+    text-align: center;
+}
+.swal-pin-num {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 40px;
+    font-weight: 800;
+    letter-spacing: 6px;
+    color: var(--color-action);
+    background: rgba(47,157,126,0.06);
+    display: inline-block;
+    padding: 10px 18px;
+    border-radius: 10px;
+    margin-bottom: 8px;
+}
+.swal-pin-note {
+    display: block;
+    color: var(--color-text-secondary);
+    font-size: 13px;
+    margin-top: 6px;
+}
+

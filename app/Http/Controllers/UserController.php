@@ -14,19 +14,46 @@ class UserController extends Controller
 
     public function store(Request $request)
     {
-        // ✅ แก้ Validate เป็น email
         $request->validate([
             'name' => 'required',
-            'email' => 'required|email|unique:users', // เช็คว่าเป็น email และห้ามซ้ำ
+            'email' => 'required|email',
             'password' => 'required|min:4',
             'role' => 'required'
         ]);
+
+        // Check if user exists (including soft deleted)
+        $existingUser = User::withTrashed()->where('email', $request->email)->first();
+
+        if ($existingUser) {
+            if ($existingUser->trashed()) {
+                // Restore the user if they were soft-deleted
+                $pin = User::generateUniquePin(6);
+                $existingUser->restore();
+                $existingUser->update([
+                    'name' => $request->name,
+                    'password' => Hash::make($request->password),
+                    'role' => $request->role,
+                    'pin' => Hash::make($pin)
+                ]);
+
+                return response()->json([
+                    'user' => $existingUser,
+                    'pin' => $pin,
+                    'message' => 'กู้คืนข้อมูลพนักงานเดิมและเจน PIN ใหม่สำเร็จ'
+                ], 201);
+            } else {
+                // If user is not trashed, it's a real duplicate
+                return response()->json([
+                    'message' => 'อีเมลนี้ถูกใช้งานอยู่ในระบบแล้ว'
+                ], 422);
+            }
+        }
 
         $pin = User::generateUniquePin(6);
 
         $user = User::create([
             'name' => $request->name,
-            'email' => $request->email, // ✅ บันทึก email
+            'email' => $request->email,
             'password' => Hash::make($request->password),
             'role' => $request->role,
             'pin' => Hash::make($pin)
@@ -34,7 +61,7 @@ class UserController extends Controller
 
         return response()->json([
             'user' => $user,
-            'pin' => $pin, // ส่ง PIN แบบธรรมดาไปให้ดูแค่ครั้งแรก
+            'pin' => $pin,
             'message' => 'สร้างพนักงานและเจน PIN สำเร็จ'
         ], 201);
     }
@@ -61,5 +88,17 @@ class UserController extends Controller
     public function destroy($id)
     {
         return User::destroy($id);
+    }
+
+    public function regeneratePin($id)
+    {
+        $user = User::findOrFail($id);
+        $pin = User::generateUniquePin(6);
+        $user->update(['pin' => Hash::make($pin)]);
+
+        return response()->json([
+            'pin' => $pin,
+            'message' => 'รีเซ็ตรหัส PIN ใหม่สำเร็จ'
+        ]);
     }
 }
