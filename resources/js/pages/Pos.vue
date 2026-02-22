@@ -155,15 +155,20 @@
             </div>
           </div>
           
-          <div class="options-section">
-            <label class="option-card" :class="{ active: isDayPass }">
-              <input type="checkbox" v-model="isDayPass" class="hidden-checkbox">
-              <Ticket :size="20" />
-              <span class="option-text">เหมาวัน (Day Pass)</span>
-              <div class="custom-check">
-                <Check v-if="isDayPass" :size="14" />
+          <div class="pax-section">
+            <label class="pax-label">จำนวน Daypass</label>
+            <div class="pax-control-modern">
+              <button @click="dayPassCount > 0 ? dayPassCount-- : null" class="btn-pax-modern" type="button">
+                <Minus :size="20" />
+              </button>
+              <div class="pax-display">
+                <span class="pax-number">{{ dayPassCount }}</span>
+                <span class="pax-unit">คน</span>
               </div>
-            </label>
+              <button @click="dayPassCount < pax ? dayPassCount++ : null" class="btn-pax-modern" type="button">
+                <Plus :size="20" />
+              </button>
+            </div>
           </div>
 
           <transition name="fade">
@@ -304,7 +309,7 @@ export default {
     const showModal = ref(false);
     const targetTable = ref(null);
     const pax = ref(1);
-    const isDayPass = ref(false);
+    const dayPassCount = ref(0);
 
     // Modal 2: QR Code
     const showQrModal = ref(false);
@@ -404,12 +409,15 @@ export default {
       }
       targetTable.value = table;
       pax.value = 1;
-      isDayPass.value = false;
+      dayPassCount.value = 0;
       showModal.value = true;
     };
 
     const closeModal = () => {
         showModal.value = false;
+        pax.value = 1;
+        dayPassCount.value = 0;
+        targetTable.value = null;
     };
 
     const confirmOpenTable = async () => {
@@ -425,7 +433,7 @@ export default {
             const token = localStorage.getItem('token');
             const response = await axios.post(`/api/tables/${targetTable.value.id}/open`, {
                 pax: pax.value,
-                is_day_pass: isDayPass.value
+                day_pass_count: dayPassCount.value
             }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -478,7 +486,7 @@ export default {
     return { 
         user, tables, loading, logout, 
         handleTableClick, confirmOpenTable,
-        showModal, targetTable, pax, isDayPass, closeModal,
+        showModal, targetTable, pax, dayPassCount, closeModal,
         showQrModal, qrUrl, closeQrModal, printQr,
         formatDuration, 
         pendingOrders, showPendingModal, confirmOrder, getTablePendingCount, formatTime, goToTable,

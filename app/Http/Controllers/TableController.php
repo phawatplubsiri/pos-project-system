@@ -26,7 +26,7 @@ class TableController extends Controller
                     'user_id' => $session->user_id, // เพิ่ม user_id เข้าไปด้วย
                     'start_time' => $session->start_time,
                     'guest_amount' => $session->guest_amount,
-                    'is_day_pass' => $session->is_day_pass
+                    'day_pass_count' => $session->day_pass_count ?? 0
                 ];
             }
         });
@@ -58,7 +58,7 @@ class TableController extends Controller
                     'table_id' => $table->id,
                     'user_id' => $request->user()->id, // ดึง ID พนักงานที่ล็อกอินอยู่
                     'guest_amount' => $request->input('pax', 1), // ใช้ guest_amount ให้ตรงกับ Migration
-                    'is_day_pass' => $request->input('is_day_pass', false),
+                    'day_pass_count' => $request->input('day_pass_count', 0), // จำนวนคนที่เอา daypass
                     'guest_token' => \Illuminate\Support\Str::random(10),
                     'start_time' => now(),
                     'status' => 'ongoing',
@@ -89,15 +89,23 @@ class TableController extends Controller
         }
 
         // --- คำนวณค่าชั่วโมง / Day Pass ---
-        $pax = $session->guest_amount; // จำนวนคน
+        $pax = $session->guest_amount; // จำนวนคนทั้งหมด
+        $dayPassCount = $session->day_pass_count ?? 0; // จำนวนคนที่เอา daypass
+        $regularCount = $pax - $dayPassCount; // จำนวนคนที่ไม่เอา daypass
         $timeCost = 0;
+        $dayPassCost = 0;
+        $regularTimeCost = 0;
         $minutes = 0;
 
-        if ($session->is_day_pass) {
+        // คำนวณค่าสำหรับคนที่เอา daypass
+        if ($dayPassCount > 0) {
             $setting = Setting::where('key', 'day_pass_rate')->first();
             $dayPassRate = $setting ? (int)$setting->value : 199;
-            $timeCost = $dayPassRate * $pax;
-        } else {
+            $dayPassCost = $dayPassRate * $dayPassCount;
+        }
+
+        // คำนวณค่าเวลาสำหรับคนที่ไม่เอา daypass
+        if ($regularCount > 0) {
             $start = Carbon::parse($session->start_time);
             $now = Carbon::now();
             $minutes = $start->diffInMinutes($now);
@@ -106,8 +114,10 @@ class TableController extends Controller
 
             $setting = Setting::where('key', 'hourly_rate')->first();
             $ratePerHour = $setting ? (int)$setting->value : 40;
-            $timeCost = $hours * $ratePerHour * $pax;
+            $regularTimeCost = $hours * $ratePerHour * $regularCount;
         }
+
+        $timeCost = $dayPassCost + $regularTimeCost;
 
         // --- คำนวณค่าอาหาร (เฉพาะรายการที่ไม่ได้ยกเลิก) ---
         $foodCost = $session->orders()
@@ -117,10 +127,13 @@ class TableController extends Controller
         return response()->json([
             'session_id' => $session->id,
             'pax' => $pax,
-            'is_day_pass' => $session->is_day_pass,
+            'day_pass_count' => $dayPassCount,
+            'regular_count' => $regularCount,
             'duration_minutes' => $minutes,
             'costs' => [
                 'food' => $foodCost,
+                'day_pass' => $dayPassCost,
+                'regular_time' => $regularTimeCost,
                 'time' => $timeCost,
                 'total' => $foodCost + $timeCost
             ]
@@ -139,22 +152,32 @@ class TableController extends Controller
 
         // --- คำนวณยอดสุดท้าย ---
         $now = Carbon::now();
-        $timeCost = 0;
         $pax = $session->guest_amount;
+        $dayPassCount = $session->day_pass_count ?? 0;
+        $regularCount = $pax - $dayPassCount;
+        $timeCost = 0;
+        $dayPassCost = 0;
+        $regularTimeCost = 0;
 
-        if ($session->is_day_pass) {
+        // คำนวณค่าสำหรับคนที่เอา daypass
+        if ($dayPassCount > 0) {
             $setting = Setting::where('key', 'day_pass_rate')->first();
             $dayPassRate = $setting ? (int)$setting->value : 199;
-            $timeCost = $dayPassRate * $pax;
-        } else {
+            $dayPassCost = $dayPassRate * $dayPassCount;
+        }
+
+        // คำนวณค่าเวลาสำหรับคนที่ไม่เอา daypass
+        if ($regularCount > 0) {
             $start = Carbon::parse($session->start_time);
             $hours = ceil($start->diffInMinutes($now) / 60);
             if ($hours == 0) $hours = 1;
 
             $setting = Setting::where('key', 'hourly_rate')->first();
             $ratePerHour = $setting ? (int)$setting->value : 40;
-            $timeCost = $hours * $ratePerHour * $pax;
+            $regularTimeCost = $hours * $ratePerHour * $regularCount;
         }
+
+        $timeCost = $dayPassCost + $regularTimeCost;
 
         $foodCost = $session->orders()
             ->where('status', '!=', 'cancelled')

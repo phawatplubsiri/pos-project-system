@@ -492,14 +492,27 @@ export default {
         const data = response.data;
         
         // 2. เตรียมข้อความสรุป
-        const timeLabel = data.is_day_pass ? '🎟️ ประเภท: 1 Day Pass (เหมาวัน)' : `⏱️ เวลาที่เล่น: ${data.duration_minutes} นาที`;
+        let serviceBreakdown = '';
+        if (data.day_pass_count > 0) {
+          serviceBreakdown += `<div style="display: flex; justify-content: space-between;">
+                    <span>🎟️ Day Pass (${data.day_pass_count} คน):</span>
+                    <strong>${formatPrice(data.costs.day_pass)} ฿</strong>
+                </div>`;
+        }
+        if (data.regular_count > 0) {
+          serviceBreakdown += `<div style="display: flex; justify-content: space-between;">
+                    <span>⏱️ ค่าชั่วโมง (${data.regular_count} คน):</span>
+                    <strong>${formatPrice(data.costs.regular_time)} ฿</strong>
+                </div>`;
+        }
+        
         const htmlContent = `
             <div style="text-align: left; font-family: 'Sarabun', sans-serif;">
-                <p><strong>👥 ลูกค้า:</strong> ${data.pax} คน</p>
-                <p><strong>${timeLabel}</strong></p>
+                <p><strong>👥 รวมลูกค้า:</strong> ${data.pax} คน</p>
                 <hr>
+                ${serviceBreakdown}
                 <div style="display: flex; justify-content: space-between;">
-                    <span>💵 ค่าบริการ:</span>
+                    <span>ค่าบริการรวม:</span>
                     <strong>${formatPrice(data.costs.time)} ฿</strong>
                 </div>
                 <div style="display: flex; justify-content: space-between;">

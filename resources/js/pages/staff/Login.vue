@@ -17,9 +17,16 @@
         </p>
       </header>
 
+      <!-- Feedback Section -->
+      <transition name="fade">
+        <p v-if="errorMessage" class="error-alert" role="alert">
+          {{ errorMessage }}
+        </p>
+      </transition>
+
       <!-- PIN Login Form (Default) -->
       <div v-if="usePin" class="login-form">
-        <div class="pin-container">
+        <div :class="['pin-container', { 'pin-error': pinError, 'shake': pinError }]">
           <div v-if="loading" class="loading-overlay">
             <div class="loading-dot"></div>
             <div class="loading-dot"></div>
@@ -35,6 +42,12 @@
             </div>
           </div>
         </div>
+        <!-- PIN Error Message -->
+        <transition name="fade">
+          <p v-if="pinError" class="pin-error-message">
+            {{ pinErrorMessage }}
+          </p>
+        </transition>
 
         <div class="numpad">
           <button 
@@ -100,12 +113,6 @@
         </button>
       </form>
 
-      <!-- Feedback Section -->
-      <transition name="fade">
-        <p v-if="errorMessage" class="error-alert" role="alert">
-          {{ errorMessage }}
-        </p>
-      </transition>
     </div>
   </div>
 </template>
@@ -137,6 +144,8 @@ export default {
     });
 
     const lastTypedIndex = ref(-1);
+    const pinError = ref(false);
+    const pinErrorMessage = ref('');
     let maskTimer = null;
 
     const numpadNumbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0];
@@ -144,6 +153,11 @@ export default {
     const appendPin = (num) => {
       if (pinForm.pin.length < 6) {
         pinForm.pin += num;
+        // ล้าง error เมื่อผู้ใช้พิมพ์ PIN ใหม่
+        if (pinError.value) {
+          pinError.value = false;
+          pinErrorMessage.value = '';
+        }
         
         // Show the number briefly
         lastTypedIndex.value = pinForm.pin.length - 1;
@@ -197,8 +211,15 @@ export default {
         processLoginSuccess(data);
       } catch (error) {
         console.error('PIN Login error:', error);
-        errorMessage.value = error.response?.data?.message || 'PIN ไม่ถูกต้อง';
-        clearPin(); // ล้าง PIN เมื่อกรอกผิด
+        // แสดง error UI บน PIN container แทนที่จะ clearPin
+        pinError.value = true;
+        pinErrorMessage.value = error.response?.data?.message || 'PIN ไม่ถูกต้อง';
+        // ล้าง error หลังจาก 3 วินาที
+        setTimeout(() => {
+          pinForm.pin = '';
+          pinError.value = false;
+          pinErrorMessage.value = '';
+        }, 1000);
       } finally {
         loading.value = false;
       }
@@ -218,7 +239,7 @@ export default {
     return { 
       form, pinForm, numpadNumbers, lastTypedIndex,
       handleLogin, handlePinLogin, appendPin, clearPin, backspacePin,
-      errorMessage, loading, usePin 
+      errorMessage, loading, usePin, pinError, pinErrorMessage
     };
   }
 };
@@ -297,6 +318,16 @@ export default {
   justify-content: center;
   align-items: center;
   height: 44px;
+  transition: border-color 0.3s ease;
+}
+
+.pin-container.pin-error {
+  border-color: var(--color-danger);
+  background-color: rgba(239, 68, 68, 0.05);
+}
+
+.pin-container.shake {
+  animation: shake 0.5s ease-in-out;
 }
 
 .pin-display {
@@ -505,14 +536,49 @@ export default {
   to { transform: rotate(360deg); }
 }
 
+@keyframes shake {
+  0% { transform: translateX(0); }
+  10% { transform: translateX(-8px); }
+  20% { transform: translateX(8px); }
+  30% { transform: translateX(-8px); }
+  40% { transform: translateX(8px); }
+  50% { transform: translateX(-8px); }
+  60% { transform: translateX(8px); }
+  70% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+  90% { transform: translateX(-2px); }
+  100% { transform: translateX(0); }
+}
+
 .error-alert {
-  color: white;
-  background-color: var(--color-danger);
+  color: var(--color-danger);
+  background-color: var(--color-danger-light);
   font-size: 14px;
   font-weight: 600;
-  margin-top: 24px;
+  margin: 24px 0px;
   padding: 12px;
   border-radius: var(--radius-md);
+  border: 1px solid var(--color-danger);
+}
+
+.pin-error-message {
+  color: var(--color-danger);
+  font-size: 13px;
+  font-weight: 600;
+  margin: -20px 0 16px 0;
+  text-align: center;
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .fade-enter-active, .fade-leave-active {
