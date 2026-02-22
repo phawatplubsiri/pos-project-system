@@ -304,6 +304,14 @@
     padding: 8px 14px !important;
     border-radius: 8px !important;
     font-weight: 600 !important;
+    margin-right: 12px !important;
+}
+
+/* Provide consistent gap between action buttons inside SweetAlert2 */
+.lp-popup .swal2-actions {
+    gap: 12px !important;
+    display: flex !important;
+    justify-content: center !important;
 }
 
 /* Icon colors for built-in icons */

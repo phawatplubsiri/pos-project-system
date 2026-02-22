@@ -514,30 +514,22 @@ export default {
             </div>
         `;
 
-        // 3. ถามยืนยัน
-        const result = await import('sweetalert2').then(Swal => Swal.default.fire({
-            title: `สรุปยอดเงิน (โต๊ะ ${tableName.value || tableId})`,
-            html: htmlContent,
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#4CAF8E',
-            cancelButtonColor: '#E5533D',
-            confirmButtonText: 'เช็คบิล & ปิดโต๊ะ',
-            cancelButtonText: 'กลับไปแก้ไข',
-            background: '#F6F5F2',
-            color: '#000000',
-            iconColor: '#6B4F3F'
-        }));
+        // 3. ถามยืนยัน (ใช้ confirm ของ useAlert เพื่อให้ธีมตรงกัน)
+        const isConfirmed = await confirm(
+          `สรุปยอดเงิน (โต๊ะ ${tableName.value || tableId})`,
+          htmlContent,
+          'เช็คบิล & ปิดโต๊ะ'
+        );
 
-        if (result.isConfirmed) {
-            showAlertLoading('กำลังปิดโต๊ะ...');
-            // 4. ยิง API ปิดโต๊ะ
-            await axios.post(`/api/tables/${tableId}/checkout`, {}, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+        if (isConfirmed) {
+          showAlertLoading('กำลังปิดโต๊ะ...');
+          // 4. ยิง API ปิดโต๊ะ
+          await axios.post(`/api/tables/${tableId}/checkout`, {}, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
 
-            success('✅ ปิดโต๊ะเรียบร้อย ขอบคุณครับ!');
-            router.push('/pos'); // เด้งกลับหน้าผังร้าน
+          success('✅ ปิดโต๊ะเรียบร้อย ขอบคุณครับ!');
+          router.push('/pos'); // เด้งกลับหน้าผังร้าน
         }
 
       } catch (err) {

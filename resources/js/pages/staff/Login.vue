@@ -309,7 +309,7 @@ export default {
 .pin-dot {
   width: 12px;
   height: 12px;
-  border: 2px solid var(--color-border);
+  border: 2px solid var(--color-primary);
   border-radius: 50%;
   transition: all 0.2s ease;
   background-color: white;
