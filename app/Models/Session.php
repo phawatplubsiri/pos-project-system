@@ -13,7 +13,7 @@ class Session extends Model
         'table_id',
         'user_id',
         'guest_amount',
-        'is_day_pass',
+        'day_pass_count',
         'guest_token',
         'start_time',
         'end_time',
@@ -25,7 +25,7 @@ class Session extends Model
     protected $casts = [
         'start_time' => 'datetime',
         'end_time' => 'datetime',
-        'is_day_pass' => 'boolean',
+        'day_pass_count' => 'integer',
     ];
 
     public function table()

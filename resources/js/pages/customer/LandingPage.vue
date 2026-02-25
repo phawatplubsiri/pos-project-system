@@ -3,8 +3,8 @@
     <!-- Header -->
     <div class="page-header">
       <div class="header-content text-center">
-        <h1 class="page-title">Our Menu</h1>
-        <p class="page-subtitle">Coffee • Snacks • Games</p>
+        <h1 class="page-title">รายการเมนู</h1>
+        <p class="page-subtitle">เครื่องดื่ม • ของทานเล่น • บอร์ดเกม</p>
       </div>
     </div>
 
@@ -16,13 +16,15 @@
         </div>
       </div>
 
-      <div v-else-if="!sessionValid" class="error-state">
-        <div class="error-icon">
-          <AlertCircle :size="48" />
+      <div v-else-if="!sessionValid" class="error-container">
+        <div class="error-card">
+          <div class="error-icon-wrapper">
+            <AlertCircle :size="56" />
+          </div>
+          <h2 class="error-title">ขออภัย</h2>
+          <p class="error-message">{{ errorMessage }}</p>
+          <p class="error-instruction">หากคุณต้องการสั่งอาหารหรือเปิดโต๊ะใหม่<br>กรุณาติดต่อพนักงานที่เคาน์เตอร์</p>
         </div>
-        <h5>ขออภัย</h5>
-        <p>{{ errorMessage }}</p>
-        <p class="text-muted">หากต้องการสั่งอาหารเพิ่มเติม กรุณาติดต่อพนักงาน</p>
       </div>
 
       <div v-else>
@@ -59,7 +61,7 @@
             <!-- Product Info -->
             <div class="product-info">
               <h3 class="product-name">{{ product.name }}</h3>
-              <p class="product-description">{{ product.description || 'Rich, bold Italian espresso shot' }}</p>
+              <p class="product-description">{{ product.description || 'ไม่มีรายละเอียดเพิ่มเติม' }}</p>
               <span class="category-badge">{{ getCategoryLabel(product.category?.type) }}</span>
             </div>
 
@@ -169,8 +171,6 @@
         </div>
       </div>
     </div>
-
-    <footer class="page-footer">เพลิดเพลินกับเกมและอาหารในร้านเรานะครับ</footer>
   </div>
 </template>
 
@@ -229,10 +229,10 @@ export default {
     const detailProduct = ref(null);
 
     const categories = [
-      { name: 'All', type: 'all', icon: 'Flame' },
-      { name: 'Coffee', type: 'drink', icon: 'Coffee' },
-      { name: 'Snacks', type: 'food', icon: 'Utensils' },
-      { name: 'Games', type: 'retail', icon: 'Gamepad2' },
+      { name: 'ทั้งหมด', type: 'all', icon: 'Flame' },
+      { name: 'เครื่องดื่ม', type: 'drink', icon: 'Coffee' },
+      { name: 'อาหาร & ของทานเล่น', type: 'food', icon: 'Utensils' },
+      { name: 'บอร์ดเกม', type: 'retail', icon: 'Gamepad2' },
     ];
 
     const validateSession = async () => {
@@ -279,9 +279,9 @@ export default {
 
     const getCategoryLabel = (type) => {
       const labels = {
-        'drink': 'Coffee',
-        'food': 'Snacks',
-        'retail': 'Games'
+        'drink': 'เครื่องดื่ม',
+        'food': 'อาหาร & ของทานเล่น',
+        'retail': 'บอร์ดเกม'
       };
       return labels[type] || type;
     };
@@ -410,6 +410,56 @@ export default {
   vertical-align: middle;
 }
 
+/* Error State Modernized */
+.error-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 70vh;
+  padding: 24px;
+}
+
+.error-card {
+  background: rgb(255, 255, 255);
+  padding: 32px 32px;
+  border-radius: 32px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.06);
+  text-align: center;
+  max-width: 400px;
+  width: 100%;
+  border: 1px solid var(--lp-border);
+}
+
+.error-icon-wrapper {
+  color: #ff5252;
+  margin: 24px 0;
+  display: flex;
+  justify-content: center;
+}
+
+.error-title {
+  font-size: 28px;
+  font-weight: 800;
+  color: #000000;
+  margin: 0 0 12px 0;
+}
+
+.error-message {
+  font-size: 16px;
+  color: #000000;
+  font-weight: 500;
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+.error-instruction {
+  font-size: 14px;
+  font-weight: bold;
+  color: #444444;
+  margin-bottom: 32px;
+  line-height: 1.6;
+}
+
 .error-state {
   text-align: center;
   padding: 60px 20px;
@@ -422,16 +472,16 @@ export default {
 
 /* Landing Page Container */
 .landing-page {
-  --lp-action: #2F9D7E;
-  --lp-action-hover: #23856a;
-  --lp-primary: #2F9D7E;
-  --lp-highlight: #FFB74D;
-  --lp-highlight-light: #FFF8E1;
-  --lp-text-primary: #2b2b2b;
-  --lp-text-secondary: #6b6b6b;
-  --lp-bg: #F7F9F8;
-  --lp-card: #FFFFFF;
-  --lp-border: #E6E6E6;
+  --lp-action: #298468;
+  --lp-action-hover: #1e634e;
+  --lp-primary: #256b56;
+  --lp-highlight: #d19a4d;
+  --lp-highlight-light: #fdf5e6;
+  --lp-text-primary: #333333;
+  --lp-text-secondary: #5a5a5a;
+  --lp-bg: #eceee9;
+  --lp-card: #f9faf8;
+  --lp-border: #d8dbd5;
 
   min-height: 100vh;
   background: var(--lp-bg);
@@ -462,7 +512,7 @@ export default {
 
 /* Container */
 .container {
-  max-width: 540px;
+  max-width: 610px;
   margin: 0 auto;
   padding: 16px;
 }

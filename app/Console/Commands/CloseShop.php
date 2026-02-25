@@ -54,16 +54,20 @@ class CloseShop extends Command
             DB::transaction(function () use ($session, $now, $ratePerHour, $dayPassRate) {
                 // --- คำนวณค่าชั่วโมง / Day Pass ---
                 $pax = $session->guest_amount;
-                $timeCost = 0;
+                $dayPassCount = $session->day_pass_count ?? 0;
+                $regularCount = $pax - $dayPassCount;
+                
+                $dayPassCost = $dayPassCount * $dayPassRate;
+                $regularTimeCost = 0;
 
-                if ($session->is_day_pass) {
-                    $timeCost = $dayPassRate * $pax;
-                } else {
+                if ($regularCount > 0) {
                     $start = Carbon::parse($session->start_time);
                     $hours = ceil($start->diffInMinutes($now) / 60);
                     if ($hours == 0) $hours = 1;
-                    $timeCost = $hours * $ratePerHour * $pax;
+                    $regularTimeCost = $hours * $ratePerHour * $regularCount;
                 }
+
+                $timeCost = $dayPassCost + $regularTimeCost;
 
                 // --- คำนวณค่าอาหาร (กรองรายการที่ยกเลิกออก) ---
                 $foodCost = $session->orders()
