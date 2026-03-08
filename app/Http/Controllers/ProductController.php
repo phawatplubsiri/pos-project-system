@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use App\Models\Category;
 use Illuminate\Http\Request;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
@@ -33,9 +34,17 @@ class ProductController extends Controller
 
         // แปลง path ให้เป็น URL เต็มสำหรับ Frontend
         $products->transform(function ($product) {
-            $product->image_url = $product->image_path 
-                ? asset('storage/' . $product->image_path) 
-                : null;
+            if ($product->image_path) {
+                // ถ้าเป็น URL อยู่แล้ว (จาก Cloudinary) ให้ใช้ได้เลย
+                if (filter_var($product->image_path, FILTER_VALIDATE_URL)) {
+                    $product->image_url = $product->image_path;
+                } else {
+                    // ถ้าเป็น path ในเครื่อง (Legacy)
+                    $product->image_url = asset('storage/' . $product->image_path);
+                }
+            } else {
+                $product->image_url = null;
+            }
             return $product;
         });
 
@@ -63,8 +72,11 @@ class ProductController extends Controller
         $data['is_active'] = filter_var($request->is_active, FILTER_VALIDATE_BOOLEAN);
 
         if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('products', 'public');
-            $data['image_path'] = $path;
+            // อัปโหลดขึ้น Cloudinary
+            $uploadedFileUrl = Cloudinary::upload($request->file('image')->getRealPath(), [
+                'folder' => 'products'
+            ])->getSecurePath();
+            $data['image_path'] = $uploadedFileUrl;
         }
 
         $product = Product::create($data);
@@ -87,18 +99,31 @@ class ProductController extends Controller
             'stock_qty' => 'required|integer',
             'is_active' => 'required',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image_path' => 'nullable', // อนุญาตให้ส่ง null มาเพื่อลบรูป
         ]);
 
         $data = $request->except('image');
         $data['is_active'] = filter_var($request->is_active, FILTER_VALIDATE_BOOLEAN);
 
+        // ถ้ามีการส่ง image_path มาเป็น string 'null' หรือ 'undefined' หรือค่าว่าง ให้เซตเป็น null จริงๆ
+        if ($request->has('image_path')) {
+            $val = $request->image_path;
+            if ($val === 'null' || $val === 'undefined' || empty($val)) {
+                $data['image_path'] = null;
+            }
+        }
+
         if ($request->hasFile('image')) {
-            // ลบรูปเก่า
-            if ($product->image_path) {
+            // ลบรูปเก่า (ถ้าเป็น local storage)
+            if ($product->image_path && !filter_var($product->image_path, FILTER_VALIDATE_URL)) {
                 Storage::disk('public')->delete($product->image_path);
             }
-            $path = $request->file('image')->store('products', 'public');
-            $data['image_path'] = $path;
+            
+            // อัปโหลดขึ้น Cloudinary
+            $uploadedFileUrl = Cloudinary::upload($request->file('image')->getRealPath(), [
+                'folder' => 'products'
+            ])->getSecurePath();
+            $data['image_path'] = $uploadedFileUrl;
         }
 
         $product->update($data);
@@ -113,7 +138,8 @@ class ProductController extends Controller
     {
         $product = Product::findOrFail($id);
         
-        if ($product->image_path) {
+        // ลบรูปเก่า (ถ้าเป็น local storage)
+        if ($product->image_path && !filter_var($product->image_path, FILTER_VALIDATE_URL)) {
             Storage::disk('public')->delete($product->image_path);
         }
         

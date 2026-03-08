@@ -330,7 +330,7 @@ export default {
           token: token.value,
           items: cart.value.map(i => ({ id: i.id, qty: i.qty }))
         });
-        alert.success('สั่งอาหารเรียบร้อย', 'กรุณารอพนักงานยืนยันครับ');
+        alert.success('สั่งอาหารเรียบร้อย');
         cart.value = [];
         showCartModal.value = false;
       } catch (error) {

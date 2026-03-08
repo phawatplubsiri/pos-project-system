@@ -14,7 +14,8 @@ class TableSeeder extends Seeder
             Table::create([
                 'name' => 'T' . $i,
                 'seat_count' => 4,
-                'status' => 'available' // เริ่มต้นคือว่าง
+                'is_available' => true,
+                'is_active' => true,
             ]);
         }
     }

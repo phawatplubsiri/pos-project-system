@@ -13,7 +13,13 @@ class Table extends Model
     protected $fillable = [
         'name',
         'seat_count',
-        'status',
+        'is_available',
+        'is_active',
+    ];
+
+    protected $casts = [
+        'is_available' => 'boolean',
+        'is_active' => 'boolean',
     ];
 
     public function sessions()

@@ -85,7 +85,7 @@ class CloseShop extends Command
                 ]);
 
                 // 2. ปิดโต๊ะ
-                $session->table->update(['status' => 'available']);
+                $session->table->update(['is_available' => true]);
 
                 $this->info("Closed Session ID: {$session->id} for Table: {$session->table->name} | Total: {$grandTotal}");
             });

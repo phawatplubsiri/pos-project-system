@@ -50,8 +50,8 @@
           <div
             class="table-card"
             :class="{
-              'table-available': table.status?.toLowerCase() === 'available',
-              'table-busy': table.status?.toLowerCase() === 'busy',
+              'table-available': table.is_available,
+              'table-busy': !table.is_available,
               'table-disabled': isTableDisabled(table)
             }"
             @click="!isTableDisabled(table) && handleTableClick(table)"
@@ -76,7 +76,7 @@
 
             <!-- Status Badge -->
             <div class="table-status">
-              <span v-if="table.status?.toLowerCase() === 'available'" class="status-badge status-available">
+              <span v-if="table.is_available" class="status-badge status-available">
                 <Check :size="14" /> ว่าง
               </span>
               <span v-else class="status-badge status-busy">
@@ -85,7 +85,7 @@
             </div>
 
             <!-- Timer for Busy Tables -->
-            <div v-if="table.status?.toLowerCase() === 'busy' && table.active_session" class="table-timer">
+            <div v-if="!table.is_available && table.active_session" class="table-timer">
               <div class="timer-label">เวลาใช้งาน</div>
               <div class="timer-value">
                 <Clock :size="16" class="timer-icon" />
@@ -317,7 +317,7 @@ export default {
 
     const isTableDisabled = (table) => {
       // ถ้าโต๊ะว่าง ไม่ต้อง disable
-      if (table.status?.toLowerCase() === 'available') return false;
+      if (table.is_available) return false;
       
       // ถ้าเป็น Admin ไม่ต้อง disable
       if (user.value.role === 'admin') return false;
@@ -380,7 +380,8 @@ export default {
         const response = await axios.get('/api/tables', {
           headers: { Authorization: `Bearer ${token}` }
         });
-        tables.value = response.data;
+        // แสดงเฉพาะโต๊ะที่เปิดใช้งาน (is_active)
+        tables.value = response.data.filter(t => t.is_active);
       } catch (error) {
         if (error.response && error.response.status === 401) logout();
       } finally {
@@ -403,7 +404,7 @@ export default {
     };
 
     const handleTableClick = (table) => {
-      if (table.status?.toLowerCase() === 'busy') {
+      if (!table.is_available) {
         router.push(`/order/${table.id}`);
         return;
       }

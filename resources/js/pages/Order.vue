@@ -418,11 +418,11 @@ export default {
             });
 
             if (newStatus === 'pending') {
-                success('✅ ยืนยันรายการแล้ว');
+                success('ยืนยันรายการแล้ว');
             } else if (newStatus === 'completed') {
-                success('✅ รายการเสร็จสมบูรณ์');
+                success('รายการเสร็จสมบูรณ์');
             } else {
-                warning('❌ ยกเลิกรายการแล้ว');
+                warning('ยกเลิกรายการแล้ว');
             }
 
             fetchOrderHistory(); // โหลดใหม่หลังอัปเดต
@@ -541,7 +541,7 @@ export default {
             headers: { Authorization: `Bearer ${token}` }
           });
 
-          success('✅ ปิดโต๊ะเรียบร้อย ขอบคุณครับ!');
+          success('ปิดโต๊ะเรียบร้อย');
           router.push('/pos'); // เด้งกลับหน้าผังร้าน
         }
 
@@ -557,11 +557,11 @@ export default {
         });
 
         const tableData = response.data;
-        const status = (tableData.status || '').toLowerCase(); 
+        const isAvailable = tableData.is_available; 
         tableName.value = tableData.name;
 
-        if (status !== 'busy' && status !== 'occupied') {
-            error('โต๊ะนี้ยังไม่ได้เปิด', `สถานะปัจจุบัน: ${status}`);
+        if (isAvailable) {
+            error('โต๊ะนี้ยังไม่ได้เปิด', `สถานะปัจจุบัน: ว่าง`);
             router.push('/pos'); 
         } else {
             // เช็คสิทธิ์: ถ้าไม่ใช่ Admin และไม่ใช่คนที่เปิดโต๊ะ (user_id ไม่ตรงกัน) ให้เด้งออก
@@ -1263,13 +1263,15 @@ export default {
 }
 
 .btn-complete {
-  background: linear-gradient(135deg, var(--color-success-light) 0%, var(--color-success) 100%);
+  background: var(--color-success);
   color: white;
 }
 
 .btn-complete:hover {
   transform: translateY(-1px);
   box-shadow: 0 2px 8px rgba(102, 187, 106, 0.3);
+  background: var(--color-success-light);
+  color: var(--color-success);
 }
 
 .btn-cancel {

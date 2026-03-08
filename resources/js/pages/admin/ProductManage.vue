@@ -55,7 +55,8 @@
                 <tr>
                   <th>ชื่อโต๊ะ</th>
                   <th>จำนวนที่นั่ง</th>
-                  <th>สถานะ</th>
+                  <th>สถานะลูกค้า</th>
+                  <th>สถานะการใช้งาน</th>
                   <th>จัดการ</th>
                 </tr>
               </thead>
@@ -64,15 +65,30 @@
                   <td class="font-bold">โต๊ะ {{ table.name }}</td>
                   <td>{{ table.seat_count }} ที่นั่ง</td>
                   <td>
-                    <span :class="['status-badge', table.status === 'available' ? 'available' : 'busy']">
-                      {{ table.status === 'available' ? 'ว่าง' : 'ไม่ว่าง' }}
+                    <span :class="['status-badge', table.is_available ? 'available' : 'busy']">
+                      {{ table.is_available ? 'ว่าง' : 'ไม่ว่าง' }}
+                    </span>
+                  </td>
+                  <td>
+                    <span :class="['status-badge', table.is_active ? 'available' : 'inactive']">
+                      {{ table.is_active ? 'เปิดใช้งาน' : 'ปิดใช้งาน' }}
                     </span>
                   </td>
                   <td class="action-cell">
-                    <button @click="editTable(table)" class="action-btn edit-btn">
+                    <button 
+                      @click="editTable(table)" 
+                      class="action-btn edit-btn" 
+                      :disabled="!table.is_available"
+                      :title="table.is_available ? 'แก้ไข' : 'ไม่สามารถแก้ไขโต๊ะที่มีลูกค้าอยู่'"
+                    >
                       <Pencil :size="14" />
                     </button>
-                    <button @click="deleteTable(table.id)" class="action-btn delete-btn" :disabled="table.status !== 'available'">
+                    <button 
+                      @click="deleteTable(table.id)" 
+                      class="action-btn delete-btn" 
+                      :disabled="!table.is_available" 
+                      :title="table.is_available ? 'ลบ' : 'ไม่สามารถลบโต๊ะที่มีลูกค้าอยู่'"
+                    >
                       <Trash2 :size="14" />
                     </button>
                   </td>
@@ -136,7 +152,7 @@
                   <td>{{ product.stock_qty }}</td>
                   <td>
                     <span :class="['status-badge', product.is_active ? 'available' : 'inactive']">
-                      {{ product.is_active ? 'เปิด' : 'ปิด' }}
+                      {{ product.is_active ? 'เปิดให้บริการ' : 'ปิดให้บริการ' }}
                     </span>
                   </td>
                   <td class="action-cell">
@@ -234,6 +250,13 @@
           <input type="number" v-model="tableForm.seat_count" min="1">
         </div>
 
+        <div class="form-group">
+          <label class="checkbox-label-inline">
+            <input type="checkbox" v-model="tableForm.is_active"> 
+            <span>เปิดใช้งานโต๊ะนี้</span>
+          </label>
+        </div>
+
         <div class="modal-actions">
           <button @click="showTableModal = false" class="cancel-btn">ยกเลิก</button>
           <button @click="saveTable" class="save-btn">บันทึก</button>
@@ -274,7 +297,7 @@ export default {
     const editingId = ref(null);
     const showTableModal = ref(false);
     const editingTableId = ref(null);
-    const tableForm = ref({ name: '', seat_count: 4 });
+    const tableForm = ref({ name: '', seat_count: 4, is_active: true });
 
     const imagePreview = ref(null);
     const selectedFile = ref(null);
@@ -349,13 +372,17 @@ export default {
 
     const openTableModal = () => {
       editingTableId.value = null;
-      tableForm.value = { name: '', seat_count: 4 };
+      tableForm.value = { name: '', seat_count: 4, is_active: true };
       showTableModal.value = true;
     };
 
     const editTable = (table) => {
       editingTableId.value = table.id;
-      tableForm.value = { name: table.name, seat_count: table.seat_count };
+      tableForm.value = { 
+        name: table.name, 
+        seat_count: table.seat_count,
+        is_active: !!table.is_active 
+      };
       showTableModal.value = true;
     };
 
@@ -403,7 +430,10 @@ export default {
     };
 
     const clearImage = () => {
-      selectedFile.value = null; imagePreview.value = null; form.value.image_url = null;
+      selectedFile.value = null; 
+      imagePreview.value = null; 
+      form.value.image_url = null;
+      form.value.image_path = null;
     };
 
     const openAddModal = () => {
@@ -422,9 +452,22 @@ export default {
       try {
         const token = localStorage.getItem('token');
         const formData = new FormData();
+        
+        // กรองเอาเฉพาะข้อมูลที่จำเป็นส่งไป
         Object.keys(form.value).forEach(key => {
-          if (form.value[key] !== null) formData.append(key, form.value[key]);
+          // ข้าม image_url เพราะเป็นค่าที่ได้มาจาก backend สำหรับแสดงผลเท่านั้น
+          if (key === 'image_url') return;
+
+          const value = form.value[key];
+
+          if (key === 'image_path' && (value === null || value === '')) {
+            // ส่งค่าว่างไปเพื่อให้ backend รู้ว่าต้องการลบรูป
+            formData.append(key, '');
+          } else if (value !== null) {
+            formData.append(key, value);
+          }
         });
+
         if (selectedFile.value) formData.append('image', selectedFile.value);
         if (editingId.value) formData.append('_method', 'PUT');
 
@@ -616,10 +659,11 @@ input, select, textarea {
 
 .action-cell { display: flex; gap: 8px; }
 .action-btn { width: 32px; height: 32px; border-radius: 6px; border: 1px solid #ddd; background-color: #ffffff; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; }
-.action-btn:hover { transform: scale(1.1); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+.action-btn:hover:not(:disabled) { transform: scale(1.1); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+.action-btn:disabled { opacity: 0.4; cursor: not-allowed; background-color: #f5f5f5; border-color: #eee; }
 
-.edit-btn:hover { color: #1976D2; border-color: #1976D2; background-color: #E3F2FD; }
-.delete-btn:hover { color: #D32F2F; border-color: #D32F2F; background-color: #FFEBEE; }
+.edit-btn:hover:not(:disabled) { color: #1976D2; border-color: #1976D2; background-color: #E3F2FD; }
+.delete-btn:hover:not(:disabled) { color: #D32F2F; border-color: #D32F2F; background-color: #FFEBEE; }
 
 .filter-bar { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
 .filter-btn { padding: 6px 15px; border-radius: 15px; border: 1px solid #ddd; background: white; cursor: pointer; font-size: 13px; }

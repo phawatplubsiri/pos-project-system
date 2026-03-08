@@ -43,14 +43,14 @@ class TableController extends Controller
             return response()->json(['message' => 'ไม่พบโต๊ะนี้'], 404);
         }
 
-        if ($table->status === 'busy') {
+        if (!$table->is_available) {
             return response()->json(['message' => 'โต๊ะนี้มีลูกค้าอยู่แล้ว'], 400);
         }
 
         try {
             return \Illuminate\Support\Facades\DB::transaction(function () use ($table, $request) {
                 // 1. เปลี่ยนสถานะโต๊ะ
-                $table->status = 'busy';
+                $table->is_available = false;
                 $table->save();
 
                 // 2. ✅ สร้าง Session ใหม่
@@ -196,7 +196,7 @@ class TableController extends Controller
 
         // 2. ปิดโต๊ะ (กลับเป็นว่าง)
         $table = Table::find($id);
-        $table->update(['status' => 'available']);
+        $table->update(['is_available' => true]);
 
         return response()->json([
             'message' => 'เช็คบิลเรียบร้อย',
@@ -222,12 +222,14 @@ class TableController extends Controller
         $request->validate([
             'name' => 'required|string|max:255|unique:tables,name,NULL,id,deleted_at,NULL',
             'seat_count' => 'required|integer|min:1',
+            'is_active' => 'boolean'
         ]);
 
         $table = Table::create([
             'name' => $request->name,
             'seat_count' => $request->seat_count,
-            'status' => 'available'
+            'is_available' => true,
+            'is_active' => $request->input('is_active', true),
         ]);
 
         return response()->json([
@@ -247,9 +249,10 @@ class TableController extends Controller
         $request->validate([
             'name' => 'required|string|max:255|unique:tables,name,' . $id . ',id,deleted_at,NULL',
             'seat_count' => 'required|integer|min:1',
+            'is_active' => 'boolean'
         ]);
 
-        $table->update($request->only(['name', 'seat_count']));
+        $table->update($request->only(['name', 'seat_count', 'is_active']));
 
         return response()->json([
             'message' => 'แก้ไขข้อมูลโต๊ะสำเร็จ',
@@ -265,7 +268,7 @@ class TableController extends Controller
             return response()->json(['message' => 'ไม่พบโต๊ะนี้'], 404);
         }
 
-        if ($table->status === 'busy') {
+        if (!$table->is_available) {
             return response()->json(['message' => 'ไม่สามารถลบโต๊ะที่มีลูกค้าอยู่ได้'], 400);
         }
 
