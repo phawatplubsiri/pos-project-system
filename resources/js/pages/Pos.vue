@@ -61,6 +61,12 @@
               <Lock :size="14" />
             </div>
 
+            <!-- Staff Tag (Admin Only - Top Right) -->
+            <div v-if="!table.is_available && table.active_session && user.role === 'admin'" class="table-staff-tag">
+              <User :size="12" />
+              <span>{{ table.active_session.staff_name }}</span>
+            </div>
+
             <!-- Pending Badge -->
             <div v-if="getTablePendingCount(table.id) > 0" class="pending-badge">
               {{ getTablePendingCount(table.id) }}
@@ -252,6 +258,8 @@ import {
   LayoutDashboard, 
   LogOut, 
   Users, 
+  User,
+  UserCheck,
   Check, 
   Circle, 
   Clock, 
@@ -274,6 +282,7 @@ export default {
     LayoutDashboard,
     LogOut,
     Users,
+    User,
     Check,
     Circle,
     Clock,
@@ -1132,7 +1141,21 @@ export default {
 
 .status-busy { background: var(--color-danger); color: white; }
 
-
+.table-staff-tag {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(107, 79, 63, 0.1);
+  color: var(--color-primary);
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  z-index: 1;
+}
 
 .table-timer { margin-top: 8px; padding-top: 12px; border-top: 1px solid var(--color-secondary-dark); }
 

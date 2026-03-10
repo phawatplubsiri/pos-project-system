@@ -171,6 +171,14 @@
       </section>
     </div>
 
+    <!-- Global Processing Overlay -->
+    <div v-if="isSaving" class="processing-overlay">
+      <div class="loader-content shadow-2xl">
+        <div class="spinner"></div>
+        <p class="loader-text">กำลังบันทึกข้อมูล...</p>
+      </div>
+    </div>
+
     <!-- Modals -->
     <!-- Modal เพิ่ม/แก้ไขสินค้า -->
     <div v-if="showModal" class="modal-overlay" @click.self="showModal = false">
@@ -229,8 +237,10 @@
         </div>
 
         <div class="modal-actions">
-          <button @click="showModal = false" class="cancel-btn">ยกเลิก</button>
-          <button @click="saveProduct" class="save-btn">บันทึก</button>
+          <button @click="showModal = false" class="cancel-btn" :disabled="savingProduct">ยกเลิก</button>
+          <button @click="saveProduct" class="save-btn" :disabled="savingProduct">
+            {{ savingProduct ? 'กำลังบันทึก...' : 'บันทึก' }}
+          </button>
         </div>
       </div>
     </div>
@@ -258,8 +268,10 @@
         </div>
 
         <div class="modal-actions">
-          <button @click="showTableModal = false" class="cancel-btn">ยกเลิก</button>
-          <button @click="saveTable" class="save-btn">บันทึก</button>
+          <button @click="showTableModal = false" class="cancel-btn" :disabled="savingTable">ยกเลิก</button>
+          <button @click="saveTable" class="save-btn" :disabled="savingTable">
+            {{ savingTable ? 'กำลังบันทึก...' : 'บันทึก' }}
+          </button>
         </div>
       </div>
     </div>
@@ -285,6 +297,8 @@ export default {
     const hourlyRate = ref(0);
     const dayPassRate = ref(0);
     const savingRate = ref(false);
+    const savingProduct = ref(false);
+    const savingTable = ref(false);
     const globalLoading = ref(true);
 
     const products = ref([]);
@@ -387,6 +401,7 @@ export default {
     };
 
     const saveTable = async () => {
+      savingTable.value = true;
       try {
         const token = localStorage.getItem('token');
         const config = { headers: { Authorization: `Bearer ${token}` } };
@@ -396,6 +411,7 @@ export default {
         fetchData();
         success('บันทึกโต๊ะสำเร็จ');
       } catch (err) { error('ผิดพลาด', err.message); }
+      finally { savingTable.value = false; }
     };
 
     const deleteTable = async (id) => {
@@ -449,6 +465,7 @@ export default {
     };
 
     const saveProduct = async () => {
+      savingProduct.value = true;
       try {
         const token = localStorage.getItem('token');
         const formData = new FormData();
@@ -477,6 +494,7 @@ export default {
         fetchData();
         success('บันทึกสำเร็จ');
       } catch (err) { error('ผิดพลาด', err.message); }
+      finally { savingProduct.value = false; }
     };
 
     const deleteProduct = async (id) => {
@@ -489,6 +507,8 @@ export default {
       } catch (err) { error('ผิดพลาด', err.message); }
     };
 
+    const isSaving = computed(() => savingRate.value || savingProduct.value || savingTable.value);
+
     onMounted(fetchData);
     onBeforeUnmount(() => { if (dataTable) dataTable.destroy(); });
 
@@ -498,13 +518,59 @@ export default {
       showModal, editingId, form, openAddModal, editProduct, saveProduct, deleteProduct,
       onFileChange, imagePreview, clearImage, fileInput,
       tables, showTableModal, editingTableId, tableForm, openTableModal, editTable, saveTable, deleteTable,
-      globalLoading, renderTable
+      globalLoading, renderTable, savingProduct, savingTable, isSaving
     };
   }
 };
 </script>
 
 <style scoped>
+/* Processing Overlay */
+.processing-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  backdrop-filter: blur(4px);
+  cursor: wait;
+}
+
+.loader-content {
+  text-align: center;
+  background: white;
+  padding: 30px 50px;
+  border-radius: 20px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid var(--color-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 15px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loader-text {
+  font-weight: 700;
+  color: var(--color-primary);
+  font-size: 18px;
+  margin: 0;
+}
+
 .product-manage-container {
   min-height: 100vh;
   background-color: var(--color-bg-primary);
