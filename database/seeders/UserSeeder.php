@@ -10,22 +10,26 @@ class UserSeeder extends Seeder
 {
     public function run()
     {
-        // สร้าง User: Admin
-        User::create([
-            'name' => 'Admin Manager',
-            'email' => 'admin@example.com',
-            'password' => Hash::make('admin1234'),
-            'role' => 'admin',
-            'pin' => Hash::make('123456'), // กำหนดเลขคงที่ให้จำง่ายสำหรับเทส
-        ]);
+        // สร้าง User: Admin (ใช้ firstOrCreate ป้องกันซ้ำตอน deploy ใหม่)
+        User::firstOrCreate(
+            ['email' => 'admin@example.com'],
+            [
+                'name' => 'Admin Manager',
+                'password' => Hash::make('admin1234'),
+                'role' => 'admin',
+                'pin' => Hash::make('123456'),
+            ]
+        );
 
-        // สร้าง User: Staff (เอาไว้เทสอีกคน)
-        User::create([
-            'name' => 'First Staff',
-            'email' => 'staff@example.com',
-            'password' => Hash::make('staff1234'),
-            'role' => 'staff',
-            'pin' => Hash::make('111111'),
-        ]);
+        // สร้าง User: Staff
+        User::firstOrCreate(
+            ['email' => 'staff@example.com'],
+            [
+                'name' => 'First Staff',
+                'password' => Hash::make('staff1234'),
+                'role' => 'staff',
+                'pin' => Hash::make('111111'),
+            ]
+        );
     }
 }

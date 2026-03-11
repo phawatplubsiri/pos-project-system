@@ -18,7 +18,10 @@ class CategorySeeder extends Seeder
         ];
 
         foreach ($categories as $cat) {
-            Category::create($cat);
+            Category::firstOrCreate(
+                ['type' => $cat['type']],
+                ['name' => $cat['name']]
+            );
         }
     }
 }
