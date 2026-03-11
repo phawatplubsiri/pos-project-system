@@ -66,7 +66,7 @@ const router = createRouter({
 
 // (Optional) เพิ่ม Guard ป้องกันคนไม่ได้ Login เข้ามา
 router.beforeEach((to, from, next) => {
-    const publicPages = ['/'];
+    const publicPages = ['/', '/customer/menu'];
     const authRequired = !publicPages.includes(to.path);
     const loggedIn = localStorage.getItem('token');
 
