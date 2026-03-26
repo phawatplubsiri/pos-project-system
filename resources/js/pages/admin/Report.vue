@@ -1,23 +1,23 @@
 <template>
-  <div class="report-container">
+  <div class="min-h-screen bg-[var(--color-bg-primary)]">
     <!-- Header Section -->
-    <header class="page-header">
-      <button class="back-button" @click="$router.push('/admin/dashboard')">
+    <header class="bg-[var(--color-primary)] py-5 px-10 flex items-center gap-6 shadow-[var(--shadow-md)] min-h-[100px] box-border">
+      <button class="w-10 h-10 rounded-full bg-white/20 border-none text-white cursor-pointer flex items-center justify-center transition-all duration-300 hover:bg-white/30 hover:scale-105" @click="$router.push('/admin/dashboard')">
         <ArrowLeft :size="24" />
       </button>
-      <div class="header-content">
-        <h1 class="page-title">รายงานรายได้</h1>
-        <p class="page-subtitle">Revenue Report</p>
+      <div>
+        <h1 class="text-[28px] font-bold text-[var(--color-highlight-light)] m-0 mb-1">รายงานรายได้</h1>
+        <p class="text-sm text-white/80 m-0">Revenue Report</p>
       </div>
     </header>
 
-    <main class="report-content">
+    <main class="py-7.5 px-10 max-w-[1400px] mx-auto">
       <!-- Filter Bar -->
-      <section class="filter-bar">
-        <div class="date-range-selector">
+      <section class="bg-white p-5 px-6 rounded-[var(--radius-lg)] shadow-[var(--shadow-sm)] mb-7.5 flex justify-between items-center gap-5">
+        <div class="flex items-center gap-4">
           <!-- Start Date -->
-          <div class="date-input-group">
-            <label class="filter-label">ตั้งแต่:</label>
+          <div class="flex items-center gap-2">
+            <label class="font-semibold text-[var(--color-primary)] text-sm">ตั้งแต่:</label>
             <div class="date-input-wrapper">
               <Calendar class="date-icon-inside" :size="18" />
               <input 
@@ -29,8 +29,8 @@
             </div>
           </div>
           <!-- End Date -->
-          <div class="date-input-group">
-            <label class="filter-label">ถึง:</label>
+          <div class="flex items-center gap-2">
+            <label class="font-semibold text-[var(--color-primary)] text-sm">ถึง:</label>
             <div class="date-input-wrapper">
               <Calendar class="date-icon-inside" :size="18" />
               <input 
@@ -46,54 +46,54 @@
         
         <button 
           @click="downloadCSV"
-          class="btn-download"
+          class="py-3 px-6 text-[15px] font-semibold text-white bg-gradient-to-br from-[var(--color-action)] to-[var(--color-action-hover)] border-none rounded-xl cursor-pointer transition-all duration-300 shadow-[0_2px_8px_rgba(76,175,142,0.3)] flex items-center gap-2.5 hover:not-disabled:-translate-y-0.5 hover:not-disabled:shadow-[0_4px_12px_rgba(76,175,142,0.4)]"
           :disabled="loading || !reportData.details.length"
         >
           <Download :size="20" />
-          <span class="text">ดาวน์โหลด CSV</span>
+          <span>ดาวน์โหลด CSV</span>
         </button>
       </section>
 
       <!-- Summary Section -->
-      <div v-if="loading" class="loading-overlay">
-        <Loader2 class="spinner-icon animate-spin" :size="48" />
+      <div v-if="loading" class="text-center py-25 text-[var(--color-primary)]">
+        <Loader2 class="mx-auto mb-5 animate-spin" :size="48" />
         <p>กำลังสรุปข้อมูล...</p>
       </div>
 
       <template v-else>
-        <section class="summary-grid" v-if="reportData.summary">
-          <div class="summary-card border-action">
-            <div class="summary-header">
-              <p class="summary-label">รายได้รวม</p>
-              <CircleDollarSign class="text-accent" :size="20" />
+        <section v-if="reportData.summary" class="grid grid-cols-[repeat(auto-fit,minmax(240px,1fr))] gap-5 mb-7.5">
+          <div class="bg-white p-6 rounded-[var(--radius-lg)] shadow-[var(--shadow-sm)] border-t-[5px] border-[var(--color-action)] transition-[var(--transition-normal)]">
+            <div class="flex justify-between items-start mb-3">
+              <p class="text-sm text-[var(--color-text-secondary)] font-semibold m-0">รายได้รวม</p>
+              <CircleDollarSign class="text-[var(--color-action)]" :size="20" />
             </div>
-            <p class="summary-value text-accent">฿{{ formatPrice(reportData.summary.total_revenue) }}</p>
+            <p class="text-[2rem] font-extrabold m-0 text-[var(--color-action)]">฿{{ formatPrice(reportData.summary.total_revenue) }}</p>
           </div>
-          <div class="summary-card border-primary">
-            <div class="summary-header">
-              <p class="summary-label">จำนวนโต๊ะที่เปิด</p>
-              <LayoutGrid class="text-primary" :size="20" />
+          <div class="bg-white p-6 rounded-[var(--radius-lg)] shadow-[var(--shadow-sm)] border-t-[5px] border-[var(--color-primary)] transition-[var(--transition-normal)]">
+            <div class="flex justify-between items-start mb-3">
+              <p class="text-sm text-[var(--color-text-secondary)] font-semibold m-0">จำนวนโต๊ะที่เปิด</p>
+              <LayoutGrid class="text-[var(--color-primary)]" :size="20" />
             </div>
-            <p class="summary-value text-primary">{{ reportData.summary.total_tables }}</p>
+            <p class="text-[2rem] font-extrabold m-0 text-[var(--color-primary)]">{{ reportData.summary.total_tables }}</p>
           </div>
-          <div class="summary-card border-warning">
-            <div class="summary-header">
-              <p class="summary-label">ปิดโดยพนักงาน</p>
-              <UserCheck class="text-warning" :size="20" />
+          <div class="bg-white p-6 rounded-[var(--radius-lg)] shadow-[var(--shadow-sm)] border-t-[5px] border-[var(--color-warning)] transition-[var(--transition-normal)]">
+            <div class="flex justify-between items-start mb-3">
+              <p class="text-sm text-[var(--color-text-secondary)] font-semibold m-0">ปิดโดยพนักงาน</p>
+              <UserCheck class="text-[var(--color-warning)]" :size="20" />
             </div>
-            <p class="summary-value text-warning">{{ reportData.summary.closed_by_staff }}</p>
+            <p class="text-[2rem] font-extrabold m-0 text-[var(--color-warning)]">{{ reportData.summary.closed_by_staff }}</p>
           </div>
-          <div class="summary-card border-danger">
-            <div class="summary-header">
-              <p class="summary-label">ระบบปิดอัตโนมัติ</p>
-              <MonitorOff class="text-danger" :size="20" />
+          <div class="bg-white p-6 rounded-[var(--radius-lg)] shadow-[var(--shadow-sm)] border-t-[5px] border-[var(--color-danger)] transition-[var(--transition-normal)]">
+            <div class="flex justify-between items-start mb-3">
+              <p class="text-sm text-[var(--color-text-secondary)] font-semibold m-0">ระบบปิดอัตโนมัติ</p>
+              <MonitorOff class="text-[var(--color-danger)]" :size="20" />
             </div>
-            <p class="summary-value text-danger">{{ reportData.summary.closed_by_system }}</p>
+            <p class="text-[2rem] font-extrabold m-0 text-[var(--color-danger)]">{{ reportData.summary.closed_by_system }}</p>
           </div>
         </section>
 
         <!-- Detailed Table -->
-        <section class="table-wrapper card-theme">
+        <section class="bg-white rounded-[var(--radius-lg)] shadow-[var(--shadow-sm)] overflow-hidden">
           <table class="data-table">
             <thead>
               <tr>
@@ -107,37 +107,37 @@
             </thead>
             <tbody v-if="reportData.details && reportData.details.length > 0">
               <tr v-for="item in reportData.details" :key="item.id">
-                <td class="id-cell">#{{ String(item.id).padStart(3, '0') }}</td>
+                <td class="text-[var(--color-text-secondary)] text-xs">#{{ String(item.id).padStart(3, '0') }}</td>
                 <td class="font-bold">{{ item.table_name }}</td>
                 <td>
-                   <div class="pax-info">
+                   <div class="flex items-center gap-1.5">
                      <Users :size="14" class="opacity-50" />
                      <span>{{ item.pax }} คน</span>
                    </div>
                 </td>
-                <td class="time-cell text-center">
-                   <div class="time-range text-xs">
+                <td class="text-center">
+                   <div class="flex flex-col text-xs text-[var(--color-text-secondary)]">
                      <span class="font-medium text-gray-700">{{ item.start_time }}</span>
-                     <span class="time-divider">to</span>
+                     <span class="text-[10px] opacity-50 my-0.5">to</span>
                      <span class="font-medium text-gray-700">{{ item.end_time }}</span>
                    </div>
                 </td>
                 <td>
-                  <span :class="['badge-icon', item.closed_by === 'system' ? 'badge-danger' : 'badge-warning']">
+                  <span :class="['inline-flex items-center gap-1.5 py-1.5 px-3 rounded-full text-[11px] font-bold text-white', item.closed_by === 'system' ? 'bg-[var(--color-danger)]' : 'bg-[var(--color-warning)]']">
                     <component :is="item.closed_by === 'system' ? 'MonitorOff' : 'User'" :size="12" />
                     {{ item.closed_by === 'system' ? 'Auto System' : 'Staff' }}
                   </span>
                 </td>
-                <td class="text-right font-bold text-accent">
+                <td class="text-right font-bold text-[var(--color-action)]">
                   ฿{{ formatPrice(item.total_amount) }}
                 </td>
               </tr>
             </tbody>
             <tbody v-else>
               <tr>
-                <td colspan="6" class="empty-row">
-                  <div class="empty-content">
-                    <FolderOpen :size="48" class="empty-icon" />
+                <td colspan="6">
+                  <div class="py-20 text-center text-[#D1D5DB] flex flex-col items-center">
+                    <FolderOpen :size="48" class="mb-4" />
                     <p>ไม่พบข้อมูลรายได้ในช่วงวันที่เลือก</p>
                   </div>
                 </td>
@@ -229,94 +229,7 @@ export default {
 </script>
 
 <style scoped>
-.report-container {
-  min-height: 100vh;
-  background-color: var(--color-bg-primary);
-}
-
-/* Header */
-.page-header {
-  background-color: var(--color-primary);
-  padding: 20px 40px;
-  display: flex;
-  align-items: center;
-  gap: 24px;
-  box-shadow: var(--shadow-md);
-  min-height: 100px;
-  box-sizing: border-box;
-}
-
-.back-button {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background-color: rgba(255, 255, 255, 0.2);
-  border: none;
-  color: #ffffff;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s ease;
-}
-
-.back-button:hover {
-  background-color: rgba(255, 255, 255, 0.3);
-  transform: scale(1.05);
-}
-
-.page-title {
-  font-size: 28px;
-  font-weight: 700;
-  color: var(--color-highlight-light);
-  margin: 0 0 4px 0;
-}
-
-.page-subtitle {
-  font-size: 14px;
-  color: rgba(255, 255, 255, 0.8);
-  margin: 0;
-}
-
-/* Main Content */
-.report-content {
-  padding: 30px 40px;
-  max-width: 1400px;
-  margin: 0 auto;
-}
-
-/* Filter Bar */
-.filter-bar {
-  background: white;
-  padding: 20px 24px;
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
-  margin-bottom: 30px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 20px;
-}
-
-.date-range-selector {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.date-input-group {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.filter-label {
-  font-weight: 600;
-  color: var(--color-primary);
-  font-size: 14px;
-}
-
-/* Styled Native Date Input Wrapper */
+/* Date Input Styling */
 .date-input-wrapper {
   position: relative;
   display: flex;
@@ -327,7 +240,7 @@ export default {
   position: absolute;
   left: 12px;
   color: var(--color-primary);
-  pointer-events: none; /* เพื่อให้คลิกผ่านไอคอนไปยัง input ได้ */
+  pointer-events: none;
 }
 
 .custom-native-date {
@@ -344,103 +257,20 @@ export default {
   cursor: pointer;
 }
 
-.custom-native-date:hover {
-  border-color: var(--color-primary-light);
-}
+.custom-native-date:hover { border-color: var(--color-primary-light); }
+.custom-native-date:focus { border-color: var(--color-primary); box-shadow: 0 0 0 3px rgba(107, 79, 63, 0.1); }
 
-.custom-native-date:focus {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(107, 79, 63, 0.1);
-}
-
-/* ซ่อนไอคอนเดิมของบราวเซอร์และขยายพื้นที่คลิก */
 .custom-native-date::-webkit-calendar-picker-indicator {
   position: absolute;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  padding: 0;
+  left: 0; top: 0;
+  width: 100%; height: 100%;
+  margin: 0; padding: 0;
   cursor: pointer;
-  opacity: 0; /* ซ่อนไอคอนจริงแต่ยังรับคลิกได้ทั่วทั้งช่อง */
+  opacity: 0;
 }
 
-.btn-download {
-  padding: 12px 24px;
-  font-size: 15px;
-  font-weight: 600;
-  color: #ffffff;
-  background: linear-gradient(135deg, var(--color-action), var(--color-action-hover));
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(76, 175, 142, 0.3);
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.btn-download:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(76, 175, 142, 0.4);
-}
-
-/* Summary Grid */
-.summary-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 20px;
-  margin-bottom: 30px;
-}
-
-.summary-card {
-  background: white;
-  padding: 24px;
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
-  border-top: 5px solid;
-  transition: var(--transition-normal);
-}
-
-.summary-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 12px;
-}
-
-.summary-label {
-  font-size: 14px;
-  color: var(--color-text-secondary);
-  font-weight: 600;
-  margin: 0;
-}
-
-.summary-value {
-  font-size: 2rem;
-  font-weight: 800;
-  margin: 0;
-}
-
-.border-action{ border-color: var(--color-action); }
-.border-primary { border-color: var(--color-primary); }
-.border-warning { border-color: var(--color-warning); }
-.border-danger { border-color: var(--color-danger); }
-
-/* Table Section */
-.table-wrapper {
-  background: white;
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
-  overflow: hidden;
-}
-
-.data-table {
-  width: 100%;
-  border-collapse: collapse;
-}
+/* Data Table */
+.data-table { width: 100%; border-collapse: collapse; }
 
 .data-table th {
   background-color: #F9FAFB;
@@ -459,74 +289,8 @@ export default {
   color: var(--color-text-primary);
 }
 
-.text-center { text-align: center; }
-.text-right { text-align: right; }
-.font-bold { font-weight: 700; }
-.text-accent { color: var(--color-action); }
-.text-primary { color: var(--color-primary); }
-.text-warning { color: var(--color-warning); }
-.text-danger { color: var(--color-danger); }
-
-.pax-info {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.time-range {
-  display: flex;
-  flex-direction: column;
-  color: var(--color-text-secondary);
-}
-
-.time-divider {
-  font-size: 10px;
-  opacity: 0.5;
-  margin: 2px 0;
-}
-
-.badge-icon {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  border-radius: var(--radius-full);
-  font-size: 11px;
-  font-weight: 700;
-  color: white;
-}
-
-.badge-warning { background-color: var(--color-warning); }
-.badge-danger { background-color: var(--color-danger); }
-
-/* Loading & Empty */
-.loading-overlay {
-  text-align: center;
-  padding: 100px 0;
-  color: var(--color-primary);
-}
-
-.spinner-icon {
-  margin: 0 auto 20px;
-}
-
-.empty-content {
-  padding: 80px 0;
-  text-align: center;
-  color: #D1D5DB;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.empty-icon {
-  margin-bottom: 16px;
-}
-
 @media (max-width: 768px) {
-  .page-header { padding: 20px; }
-  .report-content { padding: 20px; }
+  main { padding: 20px; }
   .filter-bar { flex-direction: column; align-items: stretch; }
-  .date-range-selector { flex-direction: column; align-items: flex-start; gap: 12px; }
 }
 </style>

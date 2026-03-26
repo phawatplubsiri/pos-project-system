@@ -1,3 +1,37 @@
 @import "tailwindcss";
 @plugin "daisyui";
 @import './theme.css';
+
+/* ========================================
+   Tailwind Theme — Map project colors
+   ======================================== */
+@theme {
+  /* Background & Surfaces */
+  --color-bg-primary: #F3F4F6;
+  --color-bg-card: #FFFFFF;
+  --color-divider: #E5E7EB;
+
+  /* Primary / Brand */
+  --color-brand: #1F2937;
+  --color-brand-dark: #111827;
+  --color-brand-light: #374151;
+
+  /* Action / Success */
+  --color-action: #059669;
+  --color-action-hover: #047857;
+
+  /* Status */
+  --color-success: #10B981;
+  --color-success-light: #D1FAE5;
+  --color-warning: #F59E0B;
+  --color-warning-light: #FEF3C7;
+  --color-danger: #DC2626;
+  --color-danger-light: #FEE2E2;
+  --color-highlight: #D97706;
+  --color-highlight-light: #FEF3C7;
+
+  /* Shadows */
+  --shadow-theme-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-theme-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-theme-lg: 0 10px 20px rgba(0, 0, 0, 0.1);
+}

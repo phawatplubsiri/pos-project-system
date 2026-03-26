@@ -1,22 +1,22 @@
 <template>
-  <div class="order-page">
+  <div class="min-h-screen bg-[var(--color-bg-primary)] text-black font-[-apple-system,BlinkMacSystemFont,'Segoe_UI',Roboto,sans-serif]">
     <!-- Header -->
     <div class="order-header">
-      <div class="header-container">
-        <div class="header-left">
+      <div class="max-w-[1600px] mx-auto py-5 px-8 flex justify-between items-center gap-6 flex-wrap">
+        <div class="flex items-center gap-4">
           <button @click="$router.go(-1)" class="btn-back">
             <ArrowLeft :size="18" />
           </button>
-          <div class="table-info">
-            <h1 class="table-title">โต๊ะ {{ tableName || tableId }}</h1>
-            <div class="table-timer">
+          <div class="flex flex-col gap-1">
+            <h1 class="text-2xl font-bold text-[var(--color-highlight-light)] m-0">โต๊ะ {{ tableName || tableId }}</h1>
+            <div class="font-[Courier_New,monospace] text-sm text-white/90 font-semibold flex items-center gap-1.5">
               <Clock :size="14" />
               {{ formatDuration(sessionStartTime) }}
             </div>
           </div>
         </div>
         
-        <div class="header-actions">
+        <div class="flex gap-3">
           <button @click="showQrModal = true" class="btn-qr">
             <QrCode :size="18" />
             QR Code
@@ -30,12 +30,12 @@
     </div>
 
     <!-- Main Content -->
-    <div class="order-content">
+    <div class="max-w-[1600px] mx-auto p-8">
       <div class="content-grid">
         <!-- Products Section -->
-        <div class="products-section">
+        <div class="flex flex-col gap-6">
           <!-- Category Filters -->
-          <div class="category-filters">
+          <div class="flex gap-3 flex-wrap overflow-x-auto pb-2">
             <button
               v-for="cat in categories"
               :key="cat.type"
@@ -49,38 +49,38 @@
           </div>
 
           <!-- Product Grid -->
-          <div class="product-grid">
+          <div class="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-4">
             <div
               v-for="product in filteredProducts"
               :key="product.id"
               class="product-card"
               @click="addToCart(product)"
             >
-              <div class="product-name">{{ product.name }}</div>
-              <div class="product-price">{{ formatPrice(product.price) }} ฿</div>
+              <div class="font-semibold text-black text-[15px]">{{ product.name }}</div>
+              <div class="font-bold text-[var(--color-text-price)] text-base">{{ formatPrice(product.price) }} ฿</div>
             </div>
           </div>
         </div>
 
         <!-- Cart & Orders Section -->
-        <div class="cart-section">
+        <div class="flex flex-col gap-5">
           <!-- Awaiting Confirmation Orders -->
-          <div v-if="awaitingConfirmOrders.length > 0" class="awaiting-orders">
-            <div class="section-header alert-header">
+          <div v-if="awaitingConfirmOrders.length > 0" class="bg-white rounded-[var(--radius-lg)] p-5 shadow-[var(--shadow-sm)]">
+            <div class="font-bold text-sm mb-3 p-3 rounded-[var(--radius-md)] flex items-center gap-2 bg-[#FFF3CD] text-[#856404] border border-[#FFE69C]">
               <Bell :size="18" />
               ออเดอร์จากลูกค้า (รอยืนยัน)
             </div>
-            <div class="order-list">
+            <div class="flex flex-col gap-2">
               <div
                 v-for="order in awaitingConfirmOrders"
                 :key="order.id"
-                class="order-item awaiting-item"
+                class="flex justify-between items-center p-3 rounded-[var(--radius-md)] bg-[var(--color-bg-primary)] border border-[var(--color-secondary-dark)] gap-3"
               >
-                <div class="order-info">
-                  <div class="order-product">{{ order.product?.name }}</div>
-                  <div class="order-qty">จำนวน: {{ order.quantity }}</div>
+                <div class="flex-1">
+                  <div class="font-semibold text-black mb-1">{{ order.product?.name }}</div>
+                  <div class="text-[13px] text-black">จำนวน: {{ order.quantity }}</div>
                 </div>
-                <div class="order-actions">
+                <div class="flex gap-1.5">
                   <button @click="confirmCancelOrder(order.id)" class="btn-reject-small">
                     <X :size="16" />
                   </button>
@@ -93,27 +93,27 @@
           </div>
 
           <!-- Staff Cart -->
-          <div class="cart-card">
-            <h3 class="cart-title">
+          <div class="bg-white rounded-[var(--radius-lg)] p-5 shadow-[var(--shadow-sm)]">
+            <h3 class="text-lg font-bold text-black m-0 mb-4 flex items-center gap-2.5">
               <ShoppingCart :size="20" />
               รายการที่พนักงานเลือก
             </h3>
             
-            <div v-if="cart.length === 0" class="empty-cart">
+            <div v-if="cart.length === 0" class="text-center text-black py-5 text-sm">
               ยังไม่มีรายการใหม่
             </div>
 
-            <div v-else class="cart-items">
-              <div v-for="(item, index) in cart" :key="index" class="cart-item">
-                <div class="item-info">
-                  <div class="item-name">{{ item.name }}</div>
-                  <div class="item-detail">{{ item.price }} × {{ item.qty }}</div>
+            <div v-else class="flex flex-col gap-3 mb-4">
+              <div v-for="(item, index) in cart" :key="index" class="flex justify-between items-center p-3 bg-[var(--color-bg-primary)] border border-[var(--color-secondary-dark)] rounded-[var(--radius-md)] gap-3">
+                <div class="flex-1">
+                  <div class="font-semibold text-black mb-1">{{ item.name }}</div>
+                  <div class="text-[13px] text-black">{{ item.price }} × {{ item.qty }}</div>
                 </div>
-                <div class="item-controls">
+                <div class="flex items-center gap-2">
                   <button @click="decreaseQty(index)" class="btn-qty">
                     <Minus :size="14" />
                   </button>
-                  <span class="qty-display">{{ item.qty }}</span>
+                  <span class="min-w-[24px] text-center font-semibold text-black">{{ item.qty }}</span>
                   <button @click="increaseQty(index)" class="btn-qty">
                     <Plus :size="14" />
                   </button>
@@ -124,9 +124,9 @@
               </div>
             </div>
 
-            <div class="cart-total">
+            <div class="flex justify-between items-center py-4 border-t-2 border-[var(--color-secondary-dark)] mb-4 font-bold text-black">
               <span>รวมรายการใหม่:</span>
-              <span class="total-amount">{{ formatPrice(totalPrice) }} ฿</span>
+              <span class="text-xl text-[var(--color-text-price)]">{{ formatPrice(totalPrice) }} ฿</span>
             </div>
 
             <button
@@ -140,22 +140,22 @@
           </div>
 
           <!-- Order History -->
-          <div class="history-card">
-            <h3 class="history-title">
+          <div class="bg-white rounded-[var(--radius-lg)] p-5 shadow-[var(--shadow-sm)]">
+            <h3 class="text-lg font-bold text-black m-0 mb-4 flex items-center gap-2.5">
               <ClipboardList :size="20" />
               ประวัติการสั่ง
             </h3>
-            <div class="history-list">
+            <div class="max-h-[300px] overflow-y-auto flex flex-col gap-3">
               <div
                 v-for="order in activeAndPastOrders"
                 :key="order.id"
-                class="history-item"
-                :class="{ cancelled: order.status === 'cancelled' }"
+                class="flex justify-between items-start p-3 bg-[var(--color-bg-primary)] border border-[var(--color-secondary-dark)] rounded-[var(--radius-md)] gap-3"
+                :class="{ 'opacity-60 bg-[var(--color-bg-secondary)]': order.status === 'cancelled' }"
               >
-                <div class="history-info">
-                  <div class="history-product">{{ order.product?.name }}</div>
-                  <div class="history-qty">จำนวน: {{ order.quantity }}</div>
-                  <div class="history-status">
+                <div class="flex-1">
+                  <div class="font-semibold text-black mb-1">{{ order.product?.name }}</div>
+                  <div class="text-[13px] text-black mb-1.5">จำนวน: {{ order.quantity }}</div>
+                  <div class="mt-1">
                     <span
                       class="status-badge"
                       :class="{
@@ -171,7 +171,7 @@
                     </span>
                   </div>
                 </div>
-                <div v-if="order.status === 'pending'" class="history-actions">
+                <div v-if="order.status === 'pending'" class="flex flex-col gap-1.5">
                   <button @click="updateOrderStatus(order.id, 'completed')" class="btn-complete">
                     <Check :size="12" /> เสร็จ
                   </button>
@@ -188,22 +188,22 @@
 
     <!-- QR Modal -->
     <div v-if="showQrModal" class="modal-overlay" @click.self="showQrModal = false">
-      <div class="modal-card modal-small">
-        <div class="modal-header">
-          <h3>
-            <QrCode :size="20" class="modal-header-icon" />
+      <div class="modal-card max-w-[400px]">
+        <div class="p-6 pb-4 border-b border-[var(--color-secondary-dark)]">
+          <h3 class="m-0 text-xl font-bold text-black flex items-center gap-2.5">
+            <QrCode :size="20" class="text-[var(--color-primary)]" />
             สแกนเพื่อสั่งอาหาร
           </h3>
         </div>
-        <div class="modal-body text-center">
-          <p class="qr-table-name">โต๊ะ: <strong>{{ tableName || tableId }}</strong></p>
-          <div class="qr-code-wrapper">
+        <div class="p-6 text-center">
+          <p class="text-base text-black mb-4">โต๊ะ: <strong class="text-lg">{{ tableName || tableId }}</strong></p>
+          <div class="bg-white border-3 border-[var(--color-secondary-dark)] rounded-[var(--radius-lg)] p-5 inline-block mb-4">
             <QrcodeVue :value="qrUrl" :size="220" level="H" />
           </div>
-          <p class="qr-instruction">ให้ลูกค้าสแกนเพื่อดูเมนูและสั่งอาหาร</p>
+          <p class="text-black text-[13px] m-0">ให้ลูกค้าสแกนเพื่อดูเมนูและสั่งอาหาร</p>
         </div>
 
-        <!-- Use Teleport to move receipt to body -->
+        <!-- Print Receipt (Teleport) -->
         <teleport to="body">
           <div v-if="showQrModal" id="receipt-print-area" class="print-only">
             <div class="receipt-header">
@@ -225,11 +225,9 @@
           </div>
         </teleport>
 
-        <div class="modal-footer">
-          <button @click="printQr" class="btn-secondary">
-            พิมพ์
-          </button>
-          <button @click="showQrModal = false" class="btn-primary">ปิด</button>
+        <div class="p-4 border-t border-[var(--color-secondary-dark)] flex gap-3 justify-end">
+          <button @click="showQrModal = false" class="btn-secondary">ปิด</button>
+          <button @click="printQr" class="btn-primary">พิมพ์</button>
         </div>
       </div>
     </div>
@@ -238,54 +236,25 @@
 
 <script>
 import { ref, computed, onMounted, onUnmounted } from 'vue';
-import { useRoute, useRouter } from 'vue-router'; // ✅ เพิ่ม useRouter
+import { useRoute, useRouter } from 'vue-router';
 import axios from 'axios';
 import QrcodeVue from 'qrcode.vue';
 import { useAlert } from '../composables/useAlert';
 import { 
-  ArrowLeft, 
-  ShoppingCart, 
-  Clock, 
-  QrCode, 
-  Banknote, 
-  Coffee, 
-  Utensils, 
-  Package, 
-  Bell, 
-  Trash2, 
-  Plus, 
-  Minus, 
-  Check, 
-  X, 
-  ClipboardList, 
-  RotateCcw,
-  Printer
+  ArrowLeft, ShoppingCart, Clock, QrCode, Banknote, 
+  Coffee, Utensils, Package, Bell, Trash2, 
+  Plus, Minus, Check, X, ClipboardList, RotateCcw, Printer
 } from 'lucide-vue-next';
 
 export default {
   components: {
-    QrcodeVue,
-    ArrowLeft,
-    ShoppingCart,
-    Clock,
-    QrCode,
-    Banknote,
-    Coffee,
-    Utensils,
-    Package,
-    Bell,
-    Trash2,
-    Plus,
-    Minus,
-    Check,
-    X,
-    ClipboardList,
-    RotateCcw,
-    Printer
+    QrcodeVue, ArrowLeft, ShoppingCart, Clock, QrCode, Banknote,
+    Coffee, Utensils, Package, Bell, Trash2,
+    Plus, Minus, Check, X, ClipboardList, RotateCcw, Printer
   },
   setup() {
     const route = useRoute();
-    const router = useRouter(); // ✅ เรียกใช้ router
+    const router = useRouter();
     const { success, error, warning, confirm, loading: showAlertLoading, close: closeAlert } = useAlert();
     const tableId = route.params.id;
     const tableName = ref('');
@@ -310,39 +279,30 @@ export default {
         if (!startTime) return '00:00:00';
         const start = new Date(startTime);
         const diff = Math.floor((currentTime.value - start) / 1000);
-        
         if (diff < 0) return '00:00:00';
-
         const h = Math.floor(diff / 3600);
         const m = Math.floor((diff % 3600) / 60);
         const s = diff % 60;
-
         return [h, m, s].map(v => v.toString().padStart(2, '0')).join(':');
     };
 
     const formatPrice = (value) => {
         return new Intl.NumberFormat('th-TH', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
+            minimumFractionDigits: 2, maximumFractionDigits: 2
         }).format(value || 0);
     };
 
     const qrUrl = computed(() => {
         if (!guestToken.value) return '';
-        const baseUrl = window.location.origin;
-        return `${baseUrl}/customer/menu?token=${guestToken.value}`;
+        return `${window.location.origin}/customer/menu?token=${guestToken.value}`;
     });
 
     const fetchProducts = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.get('/api/products', {
-            headers: { Authorization: `Bearer ${token}` }
-        });
+        const response = await axios.get('/api/products', { headers: { Authorization: `Bearer ${token}` } });
         products.value = response.data;
-      } catch (error) {
-        console.error(error);
-      }
+      } catch (error) { console.error(error); }
     };
 
     const filteredProducts = computed(() => {
@@ -351,254 +311,125 @@ export default {
 
     const addToCart = (product) => {
       const existingItem = cart.value.find(item => item.id === product.id);
-      if (existingItem) {
-        existingItem.qty++; 
-      } else {
-        cart.value.push({ ...product, qty: 1 });
-      }
+      if (existingItem) { existingItem.qty++; } 
+      else { cart.value.push({ ...product, qty: 1 }); }
     };
 
-    const decreaseQty = (index) => {
-        if (cart.value[index].qty > 1) {
-            cart.value[index].qty--;
-        } else {
-            removeFromCart(index); 
-        }
-    };
-
-    const increaseQty = (index) => {
-        cart.value[index].qty++;
-    };
-
-    const removeFromCart = (index) => {
-        cart.value.splice(index, 1);
-    };
-
-    const totalPrice = computed(() => {
-        return cart.value.reduce((sum, item) => sum + (item.price * item.qty), 0);
-    });
-
-    const awaitingConfirmOrders = computed(() => {
-        return orderHistory.value.filter(o => o.status.toLowerCase() === 'confirming');
-    });
-
-    const activeAndPastOrders = computed(() => {
-        return orderHistory.value.filter(o => o.status.toLowerCase() !== 'confirming');
-    });
+    const decreaseQty = (index) => { if (cart.value[index].qty > 1) cart.value[index].qty--; else removeFromCart(index); };
+    const increaseQty = (index) => { cart.value[index].qty++; };
+    const removeFromCart = (index) => { cart.value.splice(index, 1); };
+    const totalPrice = computed(() => cart.value.reduce((sum, item) => sum + (item.price * item.qty), 0));
+    const awaitingConfirmOrders = computed(() => orderHistory.value.filter(o => o.status.toLowerCase() === 'confirming'));
+    const activeAndPastOrders = computed(() => orderHistory.value.filter(o => o.status.toLowerCase() !== 'confirming'));
 
     const fetchOrderHistory = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get(`/api/tables/${tableId}/orders`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            
+            const response = await axios.get(`/api/tables/${tableId}/orders`, { headers: { Authorization: `Bearer ${token}` } });
             const newOrders = response.data;
             const currentConfirmingCount = awaitingConfirmOrders.value.length;
             const newConfirmingCount = newOrders.filter(o => o.status.toLowerCase() === 'confirming').length;
-
-            // ถ้ามีออเดอร์ใหม่ที่รอยืนยันเพิ่มขึ้น ให้โชว์ Alert
-            if (newConfirmingCount > currentConfirmingCount) {
-                success('🔔 มีออเดอร์ใหม่จากลูกค้า!');
-            }
-
+            if (newConfirmingCount > currentConfirmingCount) success('🔔 มีออเดอร์ใหม่จากลูกค้า!');
             orderHistory.value = newOrders;
-        } catch (err) {
-            console.error('Fetch history error:', err);
-        }
+        } catch (err) { console.error('Fetch history error:', err); }
     };
 
     const updateOrderStatus = async (orderId, newStatus) => {
         try {
             const token = localStorage.getItem('token');
-            await axios.put(`/api/orders/${orderId}/status`, {
-                status: newStatus
-            }, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-
-            if (newStatus === 'pending') {
-                success('ยืนยันรายการแล้ว');
-            } else if (newStatus === 'completed') {
-                success('รายการเสร็จสมบูรณ์');
-            } else {
-                warning('ยกเลิกรายการแล้ว');
-            }
-
-            fetchOrderHistory(); // โหลดใหม่หลังอัปเดต
-        } catch (err) {
-            error('ไม่สามารถอัปเดตสถานะได้', err.response?.data?.message || err.message);
-        }
+            await axios.put(`/api/orders/${orderId}/status`, { status: newStatus }, { headers: { Authorization: `Bearer ${token}` } });
+            if (newStatus === 'pending') success('ยืนยันรายการแล้ว');
+            else if (newStatus === 'completed') success('รายการเสร็จสมบูรณ์');
+            else warning('ยกเลิกรายการแล้ว');
+            fetchOrderHistory();
+        } catch (err) { error('ไม่สามารถอัปเดตสถานะได้', err.response?.data?.message || err.message); }
     };
 
     const confirmCancelOrder = async (orderId) => {
         const isConfirmed = await confirm('⚠️ ยืนยันการยกเลิกรายการนี้?', '(สต็อกจะถูกคืน และยอดเงินจะถูกหักออกจากบิล)');
-        if (isConfirmed) {
-            updateOrderStatus(orderId, 'cancelled');
-        }
+        if (isConfirmed) updateOrderStatus(orderId, 'cancelled');
     };
 
     const submitOrder = async () => {
         if (cart.value.length === 0) return;
-        
         const isConfirmed = await confirm('ยืนยันการสั่ง?', `สั่งอาหาร รวม ${totalPrice.value} บาท?`);
         if(!isConfirmed) return;
-
         try {
             const token = localStorage.getItem('token');
             showAlertLoading('กำลังส่งออเดอร์...');
             await axios.post('/api/orders', {
-                table_id: tableId, 
-                items: cart.value.map(item => ({
-                    id: item.id,
-                    qty: item.qty
-                }))
-            }, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-
+                table_id: tableId, items: cart.value.map(item => ({ id: item.id, qty: item.qty }))
+            }, { headers: { Authorization: `Bearer ${token}` } });
             success('✅ สั่งอาหารสำเร็จ!');
             cart.value = []; 
-            fetchOrderHistory(); // <--- เพิ่มให้โหลดประวัติใหม่ทันที
-            
-        } catch (err) {
-            error('❌ สั่งอาหารไม่สำเร็จ', err.response?.data?.message || 'โปรดลองใหม่');
-        }
+            fetchOrderHistory();
+        } catch (err) { error('❌ สั่งอาหารไม่สำเร็จ', err.response?.data?.message || 'โปรดลองใหม่'); }
     };
 
-    // ✅ ฟังก์ชันเช็คบิล / ปิดโต๊ะ (เพิ่มใหม่)
     const handleCheckout = async () => {
-      // ตรวจสอบออเดอร์ตกค้าง (ที่ยังไม่เสร็จหรือยังไม่ถูกยกเลิก)
       const outstandingOrders = orderHistory.value.filter(o => 
         o.status.toLowerCase() === 'confirming' || o.status.toLowerCase() === 'pending'
       );
-
       if (outstandingOrders.length > 0) {
-        warning(
-          'มีออเดอร์ตกค้าง!', 
-          `กรุณาจัดการออเดอร์ที่ยังค้างอยู่ (${outstandingOrders.length} รายการ) ให้เรียบร้อยก่อนเช็คบิล`
-        );
+        warning('มีออเดอร์ตกค้าง!', `กรุณาจัดการออเดอร์ที่ยังค้างอยู่ (${outstandingOrders.length} รายการ) ให้เรียบร้อยก่อนเช็คบิล`);
         return;
       }
-
       try {
         const token = localStorage.getItem('token');
-        
-        // 1. ดึงข้อมูลบิลมาดู (Preview)
-        const response = await axios.get(`/api/tables/${tableId}/bill`, {
-            headers: { Authorization: `Bearer ${token}` }
-        });
-
+        const response = await axios.get(`/api/tables/${tableId}/bill`, { headers: { Authorization: `Bearer ${token}` } });
         const data = response.data;
-        
-        // 2. เตรียมข้อความสรุป
         let serviceBreakdown = '';
         if (data.day_pass_count > 0) {
-          serviceBreakdown += `<div style="display: flex; justify-content: space-between;">
-                    <span>🎟️ Day Pass (${data.day_pass_count} คน):</span>
-                    <strong>${formatPrice(data.costs.day_pass)} ฿</strong>
-                </div>`;
+          serviceBreakdown += `<div style="display: flex; justify-content: space-between;"><span>🎟️ Day Pass (${data.day_pass_count} คน):</span><strong>${formatPrice(data.costs.day_pass)} ฿</strong></div>`;
         }
         if (data.regular_count > 0) {
-          serviceBreakdown += `<div style="display: flex; justify-content: space-between;">
-                    <span>⏱️ ค่าชั่วโมง (${data.regular_count} คน):</span>
-                    <strong>${formatPrice(data.costs.regular_time)} ฿</strong>
-                </div>`;
+          serviceBreakdown += `<div style="display: flex; justify-content: space-between;"><span>⏱️ ค่าชั่วโมง (${data.regular_count} คน):</span><strong>${formatPrice(data.costs.regular_time)} ฿</strong></div>`;
         }
-        
         const htmlContent = `
             <div style="text-align: left; font-family: 'Sarabun', sans-serif;">
-                <p><strong>👥 รวมลูกค้า:</strong> ${data.pax} คน</p>
-                <hr>
+                <p><strong>👥 รวมลูกค้า:</strong> ${data.pax} คน</p><hr>
                 ${serviceBreakdown}
-                <div style="display: flex; justify-content: space-between;">
-                    <span>ค่าบริการรวม:</span>
-                    <strong>${formatPrice(data.costs.time)} ฿</strong>
-                </div>
-                <div style="display: flex; justify-content: space-between;">
-                    <span>🍔 ค่าอาหาร/น้ำ:</span>
-                    <strong>${formatPrice(data.costs.food)} ฿</strong>
-                </div>
-                <hr>
-                <div style="display: flex; justify-content: space-between; font-size: 1.2em; color: #4B3621;">
-                    <span>💰 ยอดสุทธิ:</span>
-                    <strong>${formatPrice(data.costs.total)} ฿</strong>
-                </div>
-            </div>
-        `;
-
-        // 3. ถามยืนยัน (ใช้ confirm ของ useAlert เพื่อให้ธีมตรงกัน)
-        const isConfirmed = await confirm(
-          `สรุปยอดเงิน (โต๊ะ ${tableName.value || tableId})`,
-          htmlContent,
-          'เช็คบิล & ปิดโต๊ะ'
-        );
-
+                <div style="display: flex; justify-content: space-between;"><span>ค่าบริการรวม:</span><strong>${formatPrice(data.costs.time)} ฿</strong></div>
+                <div style="display: flex; justify-content: space-between;"><span>🍔 ค่าอาหาร/น้ำ:</span><strong>${formatPrice(data.costs.food)} ฿</strong></div><hr>
+                <div style="display: flex; justify-content: space-between; font-size: 1.2em; color: #4B3621;"><span>💰 ยอดสุทธิ:</span><strong>${formatPrice(data.costs.total)} ฿</strong></div>
+            </div>`;
+        const isConfirmed = await confirm(`สรุปยอดเงิน (โต๊ะ ${tableName.value || tableId})`, htmlContent, 'เช็คบิล & ปิดโต๊ะ');
         if (isConfirmed) {
           showAlertLoading('กำลังปิดโต๊ะ...');
-          // 4. ยิง API ปิดโต๊ะ
-          await axios.post(`/api/tables/${tableId}/checkout`, {}, {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-
+          await axios.post(`/api/tables/${tableId}/checkout`, {}, { headers: { Authorization: `Bearer ${token}` } });
           success('ปิดโต๊ะเรียบร้อย');
-          router.push('/pos'); // เด้งกลับหน้าผังร้าน
+          router.push('/pos');
         }
-
-      } catch (err) {
-        error('เกิดข้อผิดพลาด', err.response?.data?.message || err.message);
-      }
+      } catch (err) { error('เกิดข้อผิดพลาด', err.response?.data?.message || err.message); }
     };
+
     const checkTableStatus = async () => {
       try {
           const token = localStorage.getItem('token');
-          const response = await axios.get(`/api/tables/${tableId}`, {
-            headers: { Authorization: `Bearer ${token}` }
-        });
-
-        const tableData = response.data;
-        const isAvailable = tableData.is_available; 
-        tableName.value = tableData.name;
-
-        if (isAvailable) {
-            error('โต๊ะนี้ยังไม่ได้เปิด', `สถานะปัจจุบัน: ว่าง`);
-            router.push('/pos'); 
-        } else {
-            // เช็คสิทธิ์: ถ้าไม่ใช่ Admin และไม่ใช่คนที่เปิดโต๊ะ (user_id ไม่ตรงกัน) ให้เด้งออก
-            const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-            const activeSession = tableData.sessions ? tableData.sessions[0] : null;
-
-            if (currentUser.role !== 'admin' && activeSession && activeSession.user_id !== currentUser.id) {
-                warning('ไม่มีสิทธิ์เข้าถึง', 'โต๊ะนี้ถูกเปิดโดยพนักงานท่านอื่น');
-                router.push('/pos');
-                return;
-            }
-
-            // เก็บ Token ไว้ใช้ทำ QR
-            if (tableData.sessions && tableData.sessions.length > 0) {
-                guestToken.value = tableData.sessions[0].guest_token;
-                sessionStartTime.value = tableData.sessions[0].start_time;
-            }
-        }
-
-      } catch (err) {
-        console.error(err);
-        router.push('/pos'); 
-      }
+          const response = await axios.get(`/api/tables/${tableId}`, { headers: { Authorization: `Bearer ${token}` } });
+          const tableData = response.data;
+          tableName.value = tableData.name;
+          if (tableData.is_available) { error('โต๊ะนี้ยังไม่ได้เปิด', `สถานะปัจจุบัน: ว่าง`); router.push('/pos'); }
+          else {
+              const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+              const activeSession = tableData.sessions ? tableData.sessions[0] : null;
+              if (currentUser.role !== 'admin' && activeSession && activeSession.user_id !== currentUser.id) {
+                  warning('ไม่มีสิทธิ์เข้าถึง', 'โต๊ะนี้ถูกเปิดโดยพนักงานท่านอื่น'); router.push('/pos'); return;
+              }
+              if (tableData.sessions && tableData.sessions.length > 0) {
+                  guestToken.value = tableData.sessions[0].guest_token;
+                  sessionStartTime.value = tableData.sessions[0].start_time;
+              }
+          }
+      } catch (err) { console.error(err); router.push('/pos'); }
     };
 
-    const printQr = () => {
-      window.print();
-    };
+    const printQr = () => { window.print(); };
 
     onMounted(() => {
-      checkTableStatus();
-      fetchProducts();
-      fetchOrderHistory(); // <--- โหลดประวัติเมื่อเปิดหน้า
-      timerInterval = setInterval(() => {
-          currentTime.value = new Date();
-      }, 1000);
-      pollingInterval = setInterval(fetchOrderHistory, 5000); // เช็คออเดอร์ใหม่ทุก 5 วินาที
+      checkTableStatus(); fetchProducts(); fetchOrderHistory();
+      timerInterval = setInterval(() => { currentTime.value = new Date(); }, 1000);
+      pollingInterval = setInterval(fetchOrderHistory, 5000);
     });
 
     onUnmounted(() => {
@@ -613,890 +444,158 @@ export default {
       orderHistory, updateOrderStatus, confirmCancelOrder,
       awaitingConfirmOrders, activeAndPastOrders, formatPrice, printQr
     };
-
-    
   }
 };
 </script>
 
 <style scoped>
-/* ========== Print Styles ========== */
-@media screen {
-  .print-only { display: none; }
-}
-
+/* Print Styles */
+@media screen { .print-only { display: none; } }
 @media print {
-  @page {
-    size: 80mm auto;
-    margin: 0;
-  }
-
-  html, body {
-    width: 80mm !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    overflow: visible !important;
-  }
-
-  /* ซ่อนโครงสร้างหลักของหน้าเว็บทั้งหมด และ SweetAlert */
-  .order-page, .modal-overlay, .swal2-container, #app > div:not(#receipt-print-area) {
-    display: none !important;
-  }
-  
-  /* แสดงเฉพาะส่วนใบเสร็จที่ถูก Teleport ไปยัง body */
+  @page { size: 80mm auto; margin: 0; }
+  html, body { width: 80mm !important; margin: 0 !important; padding: 0 !important; overflow: visible !important; }
+  .min-h-screen, .modal-overlay, .swal2-container, #app > div:not(#receipt-print-area) { display: none !important; }
   #receipt-print-area {
-    display: block !important;
-    width: 80mm !important;
-    margin: 0 auto !important;
-    padding: 10mm 5mm !important;
-    background: white !important;
-    color: black !important;
-    font-family: 'Courier New', Courier, monospace;
-    text-align: center;
-    position: static !important;
-    visibility: visible !important;
+    display: block !important; width: 80mm !important; margin: 0 auto !important;
+    padding: 10mm 5mm !important; background: white !important; color: black !important;
+    font-family: 'Courier New', Courier, monospace; text-align: center; position: static !important; visibility: visible !important;
   }
-
-  #receipt-print-area * {
-    visibility: visible !important;
-  }
-
-  .receipt-header {
-    margin-bottom: 5mm;
-  }
-
-  .receipt-shop-name {
-    font-size: 18pt;
-    margin: 0;
-  }
-
-  .receipt-table-num {
-    font-size: 24pt;
-    margin: 5mm 0;
-    font-weight: bold;
-  }
-
-  .receipt-divider {
-    font-size: 10pt;
-    margin: 2mm 0;
-  }
-
-  .receipt-qr-wrapper {
-    margin: 5mm auto;
-    display: flex;
-    justify-content: center;
-  }
-
-  .receipt-instruction {
-    font-size: 12pt;
-    margin-top: 3mm;
-  }
-
-  .receipt-footer {
-    margin-top: 5mm;
-    font-size: 9pt;
-  }
-
-  /* บังคับขนาดกระดาษที่นี่ */
-  @page {
-    margin: 0;
-    size: 80mm auto; /* กำหนดความกว้าง 80mm ความสูงยืดหยุ่นตามเนื้อหา */
-  }
+  #receipt-print-area * { visibility: visible !important; }
+  .receipt-header { margin-bottom: 5mm; }
+  .receipt-shop-name { font-size: 18pt; margin: 0; }
+  .receipt-table-num { font-size: 24pt; margin: 5mm 0; font-weight: bold; }
+  .receipt-divider { font-size: 10pt; margin: 2mm 0; }
+  .receipt-qr-wrapper { margin: 5mm auto; display: flex; justify-content: center; }
+  .receipt-instruction { font-size: 12pt; margin-top: 3mm; }
+  .receipt-footer { margin-top: 5mm; font-size: 9pt; }
 }
 
-/* ========== Global Styles ========== */
-.order-page {
-  min-height: 100vh;
-  background: var(--color-bg-primary);
-  color: #000000;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-}
-
-/* ========== Header ========== */
+/* Header */
 .order-header {
   background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
-  box-shadow: var(--shadow-md);
-  position: sticky;
-  top: 0;
-  z-index: 100;
+  box-shadow: var(--shadow-md); position: sticky; top: 0; z-index: 100;
 }
 
-.header-container {
-  max-width: 1600px;
-  margin: 0 auto;
-  padding: 20px 32px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 24px;
-  flex-wrap: wrap;
-}
+/* Content Grid */
+.content-grid { display: grid; grid-template-columns: 1fr 400px; gap: 32px; }
 
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 16px;
+/* Header Buttons */
+.btn-back, .btn-qr, .btn-checkout {
+  padding: 10px 18px; border-radius: 20px; font-weight: 600; font-size: 14px;
+  cursor: pointer; transition: var(--transition-normal); border: none;
+  display: flex; align-items: center; gap: 8px;
 }
+.btn-back { background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.3); }
+.btn-back:hover { background: rgba(255,255,255,0.25); }
+.btn-qr { background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.3); }
+.btn-qr:hover { background: rgba(255,255,255,0.25); }
+.btn-checkout { background: linear-gradient(135deg, var(--color-action) 0%, var(--color-action-hover) 100%); color: white; }
+.btn-checkout:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(76,175,142,0.3); }
 
-.btn-back {
-  background: rgba(255, 255, 255, 0.15);
-  color: white;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  padding: 8px 12px;
-  border-radius: 20px;
-  font-weight: 600;
-  font-size: 14px;
-  cursor: pointer;
-  transition: var(--transition-normal);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.btn-back:hover {
-  background: rgba(255, 255, 255, 0.25);
-}
-
-.table-info {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.table-title {
-  font-size: 24px;
-  font-weight: 700;
-  color: var(--color-highlight-light);
-  margin: 0;
-}
-
-.table-timer {
-  font-family: 'Courier New', monospace;
-  font-size: 14px;
-  color: rgba(255, 255, 255, 0.9);
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.header-actions {
-  display: flex;
-  gap: 12px;
-}
-
-.btn-qr,
-.btn-checkout {
-  padding: 10px 18px;
-  border-radius: 20px;
-  font-weight: 600;
-  font-size: 14px;
-  cursor: pointer;
-  transition: var(--transition-normal);
-  border: none;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.btn-qr {
-  background: rgba(255, 255, 255, 0.15);
-  color: white;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-}
-
-.btn-qr:hover {
-  background: rgba(255, 255, 255, 0.25);
-}
-
-.btn-checkout {
-  background: linear-gradient(135deg, var(--color-action) 0%, var(--color-action-hover) 100%);
-  color: white;
-}
-
-.btn-checkout:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(76, 175, 142, 0.3);
-}
-
-/* ========== Main Content ========== */
-.order-content {
-  max-width: 1600px;
-  margin: 0 auto;
-  padding: 32px;
-}
-
-.content-grid {
-  display: grid;
-  grid-template-columns: 1fr 400px;
-  gap: 32px;
-}
-
-/* ========== Products Section ========== */
-.products-section {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.category-filters {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-  overflow-x: auto;
-  padding-bottom: 8px;
-}
-
+/* Category Button */
 .category-btn {
-  padding: 10px 20px;
-  border-radius: 20px;
-  border: 2px solid var(--color-secondary-dark);
-  background: white;
-  color: #000000;
-  font-weight: 600;
-  font-size: 14px;
-  cursor: pointer;
-  transition: var(--transition-normal);
-  white-space: nowrap;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  padding: 10px 20px; border-radius: 20px; border: 2px solid var(--color-secondary-dark);
+  background: white; color: #000; font-weight: 600; font-size: 14px; cursor: pointer;
+  transition: var(--transition-normal); white-space: nowrap; display: flex; align-items: center; gap: 8px;
 }
+.category-btn:hover { border-color: var(--color-primary); background: var(--color-bg-primary); }
+.category-btn.active { background: linear-gradient(135deg, var(--color-action) 0%, var(--color-action-hover) 100%); color: white; border-color: var(--color-action); }
 
-.category-btn:hover {
-  border-color: var(--color-primary);
-  background: var(--color-bg-primary);
-}
-
-.category-btn.active {
-  background: linear-gradient(135deg, var(--color-action) 0%, var(--color-action-hover) 100%);
-  color: white;
-  border-color: var(--color-action);
-}
-
-.product-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 16px;
-}
-
+/* Product Card */
 .product-card {
-  background: var(--color-table-row);
-  border: 2px solid var(--color-table-border);
-  border-radius: var(--radius-lg);
-  padding: 20px;
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  text-align: center;
-  min-height: 100px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 8px;
+  background: var(--color-table-row); border: 2px solid var(--color-table-border);
+  border-radius: var(--radius-lg); padding: 20px; cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4,0,0.2,1); text-align: center;
+  min-height: 100px; display: flex; flex-direction: column; justify-content: center; gap: 8px;
 }
+.product-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); border-color: var(--color-action); }
 
-.product-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-md);
-  border-color: var(--color-action);
+/* Action Buttons */
+.btn-reject-small, .btn-confirm-small {
+  width: 32px; height: 32px; border-radius: 50%; border: none; cursor: pointer;
+  font-size: 14px; transition: var(--transition-normal);
+  display: flex; align-items: center; justify-content: center;
 }
+.btn-reject-small { background: #FFE4E1; color: var(--color-danger); }
+.btn-reject-small:hover { background: var(--color-danger); color: white; }
+.btn-confirm-small { background: var(--color-success); color: white; }
+.btn-confirm-small:hover { background: rgb(173,222,184); color: var(--color-success); }
 
-.product-name {
-  font-weight: 600;
-  color: #000000;
-  font-size: 15px;
-}
-
-.product-price {
-  font-weight: 700;
-  color: var(--color-text-price);
-  font-size: 16px;
-}
-
-/* ========== Cart Section ========== */
-.cart-section {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.awaiting-orders,
-.cart-card,
-.history-card {
-  background: white;
-  border-radius: var(--radius-lg);
-  padding: 20px;
-  box-shadow: var(--shadow-sm);
-}
-
-.section-header {
-  font-weight: 700;
-  font-size: 14px;
-  margin-bottom: 12px;
-  padding: 12px;
-  border-radius: var(--radius-md);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.alert-header {
-  background: #FFF3CD;
-  color: #856404;
-  border: 1px solid #FFE69C;
-}
-
-.order-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.order-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px;
-  border-radius: var(--radius-md);
-  gap: 12px;
-}
-
-.awaiting-item {
-  background: var(--color-bg-primary);
-  border: 1px solid var(--color-secondary-dark);
-}
-
-.order-info {
-  flex: 1;
-}
-
-.order-product {
-  font-weight: 600;
-  color: #000000;
-  margin-bottom: 4px;
-}
-
-.order-qty {
-  font-size: 13px;
-  color: #000000;
-}
-
-.order-actions {
-  display: flex;
-  gap: 6px;
-}
-
-.btn-reject-small,
-.btn-confirm-small {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  border: none;
-  cursor: pointer;
-  font-size: 14px;
-  transition: var(--transition-normal);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.btn-reject-small {
-  background: #FFE4E1;
-  color: var(--color-danger);
-}
-
-.btn-reject-small:hover {
-  background: var(--color-danger);
-  color: white;
-}
-
-.btn-confirm-small {
-  background: var(--color-success);
-  color: white;
-}
-
-.btn-confirm-small:hover {
-  background:  rgb(173, 222, 184);
-  color: var(--color-success);
-}
-
-/* Cart Card */
-.cart-title,
-.history-title {
-  font-size: 18px;
-  font-weight: 700;
-  color: #000000;
-  margin: 0 0 16px 0;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.empty-cart {
-  text-align: center;
-  color: #000000;
-  padding: 20px;
-  font-size: 14px;
-}
-
-.cart-items {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.cart-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px;
-  background: var(--color-bg-primary);
-  border: 1px solid var(--color-secondary-dark);
-  border-radius: var(--radius-md);
-  gap: 12px;
-}
-
-.item-info {
-  flex: 1;
-}
-
-.item-name {
-  font-weight: 600;
-  color: #000000;
-  margin-bottom: 4px;
-}
-
-.item-detail {
-  font-size: 13px;
-  color: #000000;
-}
-
-.item-controls {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
+/* Qty and Remove Buttons */
 .btn-qty {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  border: 1px solid var(--color-secondary-dark);
-  background: white;
-  color: #000000;
-  font-weight: 700;
-  cursor: pointer;
-  transition: var(--transition-normal);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--color-secondary-dark);
+  background: white; color: #000; font-weight: 700; cursor: pointer;
+  transition: var(--transition-normal); display: flex; align-items: center; justify-content: center;
 }
-
-.btn-qty:hover {
-  background: var(--color-bg-primary);
-  border-color: var(--color-primary);
-}
-
-.qty-display {
-  min-width: 24px;
-  text-align: center;
-  font-weight: 600;
-  color: #000000;
-}
-
+.btn-qty:hover { background: var(--color-bg-primary); border-color: var(--color-primary); }
 .btn-remove {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  border: none;
-  background: #FFE4E1;
-  color: var(--color-danger);
-  font-weight: 700;
-  font-size: 18px;
-  cursor: pointer;
-  transition: var(--transition-normal);
-  margin-left: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 28px; height: 28px; border-radius: 50%; border: none; background: #FFE4E1;
+  color: var(--color-danger); font-weight: 700; cursor: pointer; margin-left: 4px;
+  display: flex; align-items: center; justify-content: center; transition: var(--transition-normal);
 }
+.btn-remove:hover { background: var(--color-danger); color: white; }
 
-.btn-remove:hover {
-  background: var(--color-danger);
-  color: white;
-}
-
-.cart-total {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px 0;
-  border-top: 2px solid var(--color-secondary-dark);
-  margin-bottom: 16px;
-  font-weight: 700;
-  color: #000000;
-}
-
-.total-amount {
-  font-size: 20px;
-  color: var(--color-text-price);
-}
-
+/* Submit Order */
 .btn-submit-order {
-  width: 100%;
-  padding: 14px;
-  border-radius: 24px;
-  border: none;
+  width: 100%; padding: 14px; border-radius: 24px; border: none;
   background: linear-gradient(135deg, var(--color-action) 0%, var(--color-action-hover) 100%);
-  color: white;
-  font-weight: 700;
-  font-size: 15px;
-  cursor: pointer;
-  transition: var(--transition-normal);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
+  color: white; font-weight: 700; font-size: 15px; cursor: pointer;
+  transition: var(--transition-normal); display: flex; align-items: center; justify-content: center; gap: 8px;
 }
+.btn-submit-order:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(76,175,142,0.3); }
+.btn-submit-order:disabled { opacity: 0.5; cursor: not-allowed; }
 
-.btn-submit-order:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(76, 175, 142, 0.3);
+/* Status Badges */
+.status-badge { display: flex; align-items: center; gap: 4px; width: fit-content; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+.status-pending { background: #FFF3CD; color: #856404; }
+.status-completed { background: #D4EDDA; color: #155724; }
+.status-cancelled { background: #F8D7DA; color: #721C24; }
+
+/* History Action Buttons */
+.btn-complete, .btn-cancel {
+  padding: 6px 12px; border-radius: 12px; border: none; font-weight: 600; font-size: 12px;
+  cursor: pointer; transition: var(--transition-normal); white-space: nowrap;
+  display: flex; align-items: center; gap: 4px;
 }
+.btn-complete { background: var(--color-success); color: white; }
+.btn-complete:hover { transform: translateY(-1px); box-shadow: 0 2px 8px rgba(102,187,106,0.3); background: var(--color-success-light); color: var(--color-success); }
+.btn-cancel { background: #FFE4E1; color: var(--color-danger); }
+.btn-cancel:hover { background: var(--color-danger); color: white; }
 
-.btn-submit-order:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* History Card */
-.history-list {
-  max-height: 300px;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.history-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  padding: 12px;
-  background: var(--color-bg-primary);
-  border: 1px solid var(--color-secondary-dark);
-  border-radius: var(--radius-md);
-  gap: 12px;
-}
-
-.history-item.cancelled {
-  opacity: 0.6;
-  background: var(--color-bg-secondary);
-}
-
-.history-info {
-  flex: 1;
-}
-
-.history-product {
-  font-weight: 600;
-  color: #000000;
-  margin-bottom: 4px;
-}
-
-.history-qty {
-  font-size: 13px;
-  color: #000000;
-  margin-bottom: 6px;
-}
-
-.history-status {
-  margin-top: 4px;
-}
-
-.status-badge {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  width: fit-content;
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.status-pending {
-  background: #FFF3CD;
-  color: #856404;
-}
-
-.status-completed {
-  background: #D4EDDA;
-  color: #155724;
-}
-
-.status-cancelled {
-  background: #F8D7DA;
-  color: #721C24;
-}
-
-.history-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.btn-complete,
-.btn-cancel {
-  padding: 6px 12px;
-  border-radius: 12px;
-  border: none;
-  font-weight: 600;
-  font-size: 12px;
-  cursor: pointer;
-  transition: var(--transition-normal);
-  white-space: nowrap;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.btn-complete {
-  background: var(--color-success);
-  color: white;
-}
-
-.btn-complete:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(102, 187, 106, 0.3);
-  background: var(--color-success-light);
-  color: var(--color-success);
-}
-
-.btn-cancel {
-  background: #FFE4E1;
-  color: var(--color-danger);
-}
-
-.btn-cancel:hover {
-  background: var(--color-danger);
-  color: white;
-}
-
-/* ========== Modals ========== */
+/* Modal */
 .modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  padding: 20px;
-  animation: fadeIn 0.2s ease;
+  position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1000; padding: 20px; animation: fadeIn 0.2s ease;
 }
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
 .modal-card {
-  background: white;
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
-  max-width: 500px;
-  width: 100%;
-  max-height: 90vh;
-  overflow: hidden;
-  animation: slideUp 0.3s ease;
+  background: white; border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);
+  max-width: 500px; width: 100%; max-height: 90vh; overflow: hidden; animation: slideUp 0.3s ease;
 }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-.modal-small {
-  max-width: 400px;
+/* Modal Buttons */
+.btn-primary, .btn-secondary {
+  padding: 12px 24px; border-radius: 20px; font-weight: 600; font-size: 14px;
+  cursor: pointer; transition: var(--transition-normal); border: none;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
 }
+.btn-primary { background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%); color: white; }
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(255,140,66,0.3); }
+.btn-secondary { background: var(--color-divider); color: #000; }
+.btn-secondary:hover { background: #C1C5CB; transform: translateY(-2px); }
 
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.modal-header {
-  padding: 24px 24px 16px;
-  border-bottom: 1px solid var(--color-secondary-dark);
-}
-
-.modal-header h3 {
-  margin: 0;
-  font-size: 20px;
-  font-weight: 700;
-  color: #000000;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.modal-header-icon {
-  color: var(--color-primary);
-}
-
-.modal-body {
-  padding: 24px;
-  max-height: 60vh;
-  overflow-y: auto;
-}
-
-.modal-footer {
-  padding: 16px 24px;
-  border-top: 1px solid var(--color-secondary-dark);
-  display: flex;
-  gap: 12px;
-  justify-content: flex-end;
-}
-
-.text-center {
-  text-align: center;
-}
-
-.qr-table-name {
-  font-size: 16px;
-  color: #000000;
-  margin-bottom: 16px;
-}
-
-.qr-table-name strong {
-  color: #000000;
-  font-size: 18px;
-}
-
-.qr-code-wrapper {
-  background: white;
-  border: 3px solid var(--color-secondary-dark);
-  border-radius: var(--radius-lg);
-  padding: 20px;
-  display: inline-block;
-  margin-bottom: 16px;
-}
-
-.qr-instruction {
-  color: #000000;
-  font-size: 13px;
-  margin: 0;
-}
-
-.btn-primary {
-  padding: 12px 24px;
-  border-radius: 20px;
-  font-weight: 600;
-  font-size: 14px;
-  cursor: pointer;
-  transition: var(--transition-normal);
-  border: none;
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-
-.btn-secondary {
-  background: var(--color-divider);
-  color: #000000;
-  padding: 12px 24px;
-  border-radius: 20px;
-  font-weight: 600;
-  font-size: 14px;
-  cursor: pointer;
-  transition: var(--transition-normal);
-  border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-
-.btn-secondary:hover {
-  background: #C1C5CB;
-  transform: translateY(-2px);
-}
-
-.btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(255, 140, 66, 0.3);
-}
-
-.full-width {
-  width: 100%;
-}
-
-/* ========== Responsive ========== */
+/* Responsive */
 @media (max-width: 1024px) {
-  .content-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .cart-section {
-    order: -1;
-  }
-
-  .product-grid {
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  }
+  .content-grid { grid-template-columns: 1fr; }
+  .content-grid > div:last-child { order: -1; }
 }
-
 @media (max-width: 768px) {
-  .header-container {
-    padding: 16px 20px;
-  }
-
-  .table-title {
-    font-size: 20px;
-  }
-
-  .header-actions {
-    width: 100%;
-    justify-content: flex-end;
-  }
-
-  .order-content {
-    padding: 24px 16px;
-  }
-
-  .product-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .history-list {
-    max-height: 200px;
-  }
+  .content-grid .grid { grid-template-columns: repeat(2, 1fr); }
 }
-
 @media (max-width: 480px) {
-  .btn-back,
-  .btn-qr,
-  .btn-checkout {
-    font-size: 12px;
-    padding: 8px 12px;
-  }
-
-  .table-title {
-    font-size: 18px;
-  }
-
-  .category-btn {
-    font-size: 13px;
-    padding: 8px 16px;
-  }
+  .btn-back, .btn-qr, .btn-checkout { font-size: 12px; padding: 8px 12px; }
+  .category-btn { font-size: 13px; padding: 8px 16px; }
 }
 </style>

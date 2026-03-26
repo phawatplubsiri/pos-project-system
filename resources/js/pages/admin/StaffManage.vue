@@ -1,28 +1,28 @@
 <template>
-  <div class="staff-manage-container">
+  <div class="min-h-screen bg-[var(--color-bg-primary)] font-[Sarabun,-apple-system,BlinkMacSystemFont,'Segoe_UI',sans-serif] text-black">
     <!-- Header Section -->
-    <div class="page-header">
-      <button class="back-button" @click="$router.push('/admin/dashboard')">
+    <div class="bg-[var(--color-primary)] py-5 px-10 flex items-center gap-5 shadow-[0_2px_8px_rgba(0,0,0,0.1)] min-h-[100px] box-border">
+      <button class="w-10 h-10 rounded-full bg-white/20 border-none text-white cursor-pointer flex items-center justify-center transition-all duration-300 hover:bg-white/30 hover:scale-105" @click="$router.push('/admin/dashboard')">
         <ArrowLeft :size="24" />
       </button>
-      <div class="header-content">
-        <h1 class="page-title">จัดการพนักงาน</h1>
-        <p class="page-subtitle">Staff Management</p>
+      <div class="flex-1">
+        <h1 class="text-[28px] font-bold text-[var(--color-highlight-light)] m-0 mb-1">จัดการพนักงาน</h1>
+        <p class="text-sm text-white/90 m-0">Staff Management</p>
       </div>
     </div>
 
     <!-- Main Content Card -->
-    <div class="content-card">
-      <!-- Section Header with Add Button -->
-      <div class="section-header">
-        <h2 class="section-title">รายชื่อพนักงาน</h2>
-        <button class="add-staff-button" @click="openModal()">
+    <div class="max-w-[1200px] mx-auto my-10 bg-white border border-[#eee] rounded-2xl p-8 shadow-[0_4px_20px_rgba(0,0,0,0.05)]">
+      <!-- Section Header -->
+      <div class="flex justify-between items-center mb-7.5">
+        <h2 class="text-[22px] font-bold text-[var(--color-primary)] m-0 pb-2 border-b-3 border-[var(--color-action)] inline-block">รายชื่อพนักงาน</h2>
+        <button class="py-3 px-6 text-[15px] font-semibold text-white bg-[var(--color-action)] border-none rounded-lg cursor-pointer transition-all duration-300 flex items-center gap-2 hover:bg-[var(--color-action-hover)] hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(76,175,142,0.3)]" @click="openModal()">
           <Plus :size="18" /> เพิ่มพนักงานใหม่
         </button>
       </div>
 
       <!-- Staff Table -->
-      <div class="table-container">
+      <div class="overflow-x-auto text-black">
         <table id="staffTable" class="staff-table" style="width:100%">
           <thead>
             <tr>
@@ -37,14 +37,14 @@
               <td>{{ user.name }}</td>
               <td style="text-transform: lowercase;">{{ user.role }}</td>
               <td>{{ user.email }}</td>
-              <td class="action-cell">
-                <button @click="regeneratePin(user.id)" class="action-btn pin-btn" title="รีเซ็ต PIN">
+              <td class="flex gap-2.5 items-center">
+                <button @click="regeneratePin(user.id)" class="action-btn hover:text-[#F57C00] hover:border-[#F57C00] hover:bg-[#FFF3E0]" title="รีเซ็ต PIN">
                   <Key :size="16" />
                 </button>
-                <button @click="openModal(user)" class="action-btn edit-btn" title="แก้ไข">
+                <button @click="openModal(user)" class="action-btn hover:text-[#1976D2] hover:border-[#1976D2] hover:bg-[#E3F2FD]" title="แก้ไข">
                   <Pencil :size="16" />
                 </button>
-                <button @click="deleteUser(user.id)" class="action-btn delete-btn" title="ลบ">
+                <button @click="deleteUser(user.id)" class="action-btn hover:text-[#D32F2F] hover:border-[#D32F2F] hover:bg-[#FFEBEE]" title="ลบ">
                   <Trash2 :size="16" />
                 </button>
               </td>
@@ -55,39 +55,39 @@
     </div>
 
     <!-- Modal for Add/Edit -->
-    <div v-if="showModal" class="modal-overlay" @click.self="showModal = false">
-      <div class="modal-content-custom">
-        <button class="modal-close" @click="showModal = false">&times;</button>
-        <h3 class="modal-title">{{ isEdit ? 'แก้ไขข้อมูลพนักงาน' : 'เพิ่มพนักงานใหม่' }}</h3>
+    <div v-if="showModal" class="fixed inset-0 bg-black/50 flex justify-center items-center z-[1000] backdrop-blur-[4px]" @click.self="showModal = false">
+      <div class="bg-white p-7 rounded-2xl w-2/5 max-w-[1000px] shadow-[0_10px_40px_rgba(0,0,0,0.12)] text-black relative">
+        <button class="absolute top-[18px] right-5 w-9 h-9 rounded-full border-none bg-transparent text-2xl leading-none cursor-pointer text-[var(--color-text-secondary)]" @click="showModal = false">&times;</button>
+        <h3 class="text-[22px] font-bold text-[var(--color-primary)] m-0 mb-6">{{ isEdit ? 'แก้ไขข้อมูลพนักงาน' : 'เพิ่มพนักงานใหม่' }}</h3>
         
-        <div class="form-grid">
-          <div class="form-group">
-            <label>ชื่อ-นามสกุล</label>
-            <input v-model="form.name" placeholder="กรอกชื่อ-นามสกุล" />
+        <div class="grid grid-cols-1 gap-3">
+          <div>
+            <label class="block text-sm font-semibold text-[#444] mb-2">ชื่อ-นามสกุล</label>
+            <input v-model="form.name" placeholder="กรอกชื่อ-นามสกุล" class="form-field" />
           </div>
           
-          <div class="form-group">
-            <label>Email</label>
-            <input type="email" v-model="form.email" placeholder="กรอกอีเมล" />
+          <div>
+            <label class="block text-sm font-semibold text-[#444] mb-2">Email</label>
+            <input type="email" v-model="form.email" placeholder="กรอกอีเมล" class="form-field" />
           </div>
         
-          <div class="form-group">
-            <label>รหัสผ่าน</label>
-            <input v-model="form.password" type="password" :placeholder="isEdit ? 'เว้นว่างถ้าไม่ต้องการเปลี่ยน' : 'กรอกรหัสผ่าน'" />
+          <div>
+            <label class="block text-sm font-semibold text-[#444] mb-2">รหัสผ่าน</label>
+            <input v-model="form.password" type="password" :placeholder="isEdit ? 'เว้นว่างถ้าไม่ต้องการเปลี่ยน' : 'กรอกรหัสผ่าน'" class="form-field" />
           </div>
         
-          <div class="form-group">
-            <label>ตำแหน่ง</label>
-            <select v-model="form.role">
+          <div>
+            <label class="block text-sm font-semibold text-[#444] mb-2">ตำแหน่ง</label>
+            <select v-model="form.role" class="form-field">
               <option value="staff">Staff (พนักงานทั่วไป)</option>
               <option value="admin">Admin (ผู้ดูแลระบบ)</option>
             </select>
           </div>
         </div>
 
-        <div class="modal-actions">
-          <button @click="showModal = false" class="cancel-btn">ยกเลิก</button>
-          <button @click="saveUser" class="save-btn">บันทึก</button>
+        <div class="flex justify-end gap-3 mt-7.5">
+          <button @click="showModal = false" class="py-3 px-7 text-[15px] font-semibold border-none rounded-lg cursor-pointer transition-all duration-300 bg-[#f5f5f5] text-[#666] hover:bg-[#eee]">ยกเลิก</button>
+          <button @click="saveUser" class="py-3 px-7 text-[15px] font-semibold border-none rounded-lg cursor-pointer transition-all duration-300 bg-[var(--color-action)] text-white hover:bg-[var(--color-action-hover)] hover:-translate-y-0.5">บันทึก</button>
         </div>
       </div>
     </div>
@@ -137,7 +137,6 @@ export default {
                 columnDefs: [
                   { responsivePriority: 1, targets: 0 },
                   { responsivePriority: 2, targets: 2 },
-                  // Give action column lower priority so it can collapse first
                   { responsivePriority: 5, targets: 3 }
                 ]
             });
@@ -240,118 +239,6 @@ export default {
 </script>
 
 <style scoped>
-/* Staff Management Container */
-.staff-manage-container {
-  min-height: 100vh;
-  background-color: var(--color-bg-primary);
-  font-family: 'Sarabun', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  color: #000000;
-}
-
-/* Page Header - Brown Section */
-.page-header {
-  background-color: var(--color-primary);
-  padding: 20px 40px;
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  min-height: 100px;
-  box-sizing: border-box;
-}
-
-.back-button {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background-color: rgba(255, 255, 255, 0.2);
-  border: none;
-  color: #ffffff;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s ease;
-}
-
-.back-button:hover {
-  background-color: rgba(255, 255, 255, 0.3);
-  transform: scale(1.05);
-}
-
-.header-content {
-  flex: 1;
-}
-
-.page-title {
-  font-size: 28px;
-  font-weight: 700;
-  color: var(--color-highlight-light);
-  margin: 0 0 4px 0;
-}
-
-.page-subtitle {
-  font-size: 14px;
-  color: rgba(255, 255, 255, 0.9);
-  margin: 0;
-}
-
-/* Main ัContent Card */
-.content-card {
-  max-width: 1200px;
-  margin: 40px auto;
-  background-color: #ffffff;
-  border: 1px solid #eee;
-  border-radius: 16px;
-  padding: 32px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-}
-
-/* Section Header */
-.section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 30px;
-}
-
-.section-title {
-  font-size: 22px;
-  font-weight: 700;
-  color: var(--color-primary);
-  margin: 0;
-  padding-bottom: 8px;
-  border-bottom: 3px solid var(--color-action);
-  display: inline-block;
-}
-
-.add-staff-button {
-  padding: 12px 24px;
-  font-size: 15px;
-  font-weight: 600;
-  color: #ffffff;
-  background: var(--color-action);
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.add-staff-button:hover {
-  background-color: var(--color-action-hover);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(76, 175, 142, 0.3);
-}
-
-/* Table Container */
-.table-container {
-  overflow-x: auto;
-  color: #000000;
-}
-
 /* Staff Table */
 .staff-table {
   width: 100% !important;
@@ -383,13 +270,7 @@ export default {
   color: #000000;
 }
 
-/* Action Cell */
-.action-cell {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-
+/* Action Button */
 .action-btn {
   width: 32px;
   height: 32px;
@@ -408,9 +289,28 @@ export default {
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
-.edit-btn:hover { color: #1976D2; border-color: #1976D2; background-color: #E3F2FD; }
-.delete-btn:hover { color: #D32F2F; border-color: #D32F2F; background-color: #FFEBEE; }
-.pin-btn:hover { color: #F57C00; border-color: #F57C00; background-color: #FFF3E0; }
+/* Form Field */
+.form-field {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #ffffff;
+  color: #000000 !important;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+.form-field::placeholder {
+  color: #999999;
+}
+
+.form-field:focus {
+  outline: none;
+  border-color: var(--color-action);
+  box-shadow: 0 0 0 3px rgba(76, 175, 142, 0.1);
+}
 
 /* DataTable Overrides */
 :deep(.dataTables_wrapper) { color: #000000 !important; }
@@ -432,143 +332,7 @@ export default {
   margin-top: 20px !important;
 }
 
-/* Modal Overlay */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-  backdrop-filter: blur(4px);
-}
-
-/* Modal */
-.modal-content-custom {
-  background: #ffffff;
-  padding: 28px;
-  border-radius: 16px;
-  width: 40%;
-  max-width: 1000px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
-  color: #000000;
-  position: relative;
-}
-
-.modal-title {
-  font-size: 22px;
-  font-weight: 700;
-  color: var(--color-primary);
-  margin: 0 0 25px 0;
-}
-
-.modal-close {
-  position: absolute;
-  top: 18px;
-  right: 20px;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: none;
-  background: transparent;
-  font-size: 24px;
-  line-height: 1;
-  cursor: pointer;
-  color: var(--color-text-secondary);
-}
-
-.form-grid {
-  display: grid;
-  grid-template-columns: 1fr; /* vertical stack */
-  gap: 12px;
-}
-
-.form-grid .form-group {
-  margin-bottom: 0;
-}
-
-/* Form Group */
-.form-group {
-  margin-bottom: 20px;
-}
-
-.form-group label {
-  display: block;
-  font-size: 14px;
-  font-weight: 600;
-  color: #444444;
-  margin-bottom: 8px;
-}
-
-.form-group input,
-.form-group select {
-  width: 100%;
-  padding: 12px 16px;
-  font-size: 15px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  background-color: #ffffff;
-  color: #000000 !important;
-  transition: all 0.3s ease;
-  box-sizing: border-box;
-}
-
-.form-group input::placeholder {
-  color: #999999;
-}
-
-.form-group input:focus,
-.form-group select:focus {
-  outline: none;
-  border-color: var(--color-action);
-  box-shadow: 0 0 0 3px rgba(76, 175, 142, 0.1);
-}
-
-/* Modal Actions */
-.modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  margin-top: 30px;
-}
-
-.modal-actions button {
-  padding: 12px 28px;
-  font-size: 15px;
-  font-weight: 600;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.cancel-btn {
-  background-color: #f5f5f5;
-  color: #666666;
-}
-
-.cancel-btn:hover { background-color: #eeeeee; }
-
-.save-btn {
-  background: var(--color-action);
-  color: #ffffff;
-}
-
-.save-btn:hover {
-  background-color: var(--color-action-hover);
-  transform: translateY(-2px);
-}
-
-/* Responsive Design */
 @media (max-width: 768px) {
-  .page-header { padding: 20px 24px; }
-  .page-title { font-size: 24px; }
-  .content-card { margin: 24px 16px; padding: 24px 20px; }
-  .section-header { flex-direction: column; align-items: flex-start; gap: 16px; }
-  .add-staff-button { width: 100%; }
+  .flex.justify-between { flex-direction: column; align-items: flex-start; gap: 16px; }
 }
 </style>

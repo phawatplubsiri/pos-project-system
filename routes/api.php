@@ -18,8 +18,8 @@ use App\Http\Controllers\ReportController;
 */
 
 // Authentication
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/login-pin', [AuthController::class, 'loginWithPin']);
+Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:login');
+Route::post('/login-pin', [AuthController::class, 'loginWithPin'])->middleware('throttle:login');
 
 // Public Data
 Route::get('/products', [ProductController::class, 'index']);
@@ -28,7 +28,10 @@ Route::get('/settings/{key}', [SettingController::class, 'get']);
 
 // Session & Guest
 Route::get('/sessions/validate/{token}', [App\Http\Controllers\SessionController::class, 'validateToken']);
-Route::post('/guest/orders', [OrderController::class, 'storeGuestOrder']);
+Route::middleware('throttle:10,1')->group(function () {
+    Route::post('/guest/orders', [OrderController::class, 'storeGuestOrder']);
+    Route::post('/guest/call-staff', [OrderController::class, 'callStaff']);
+});
 
 Route::middleware('auth:sanctum')->group(function () {
     

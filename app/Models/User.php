@@ -38,18 +38,16 @@ class User extends Authenticatable
     ];
 
     /**
-     * Generate a unique 6-digit PIN.
+     * Generate a random 6-digit PIN.
+     * Note: Since PINs are hashed in the database, we cannot efficiently 
+     * check for uniqueness without comparing against every user.
      *
      * @param int $length
      * @return string
      */
     public static function generateUniquePin($length = 6)
     {
-        do {
-            $pin = str_pad(mt_rand(0, pow(10, $length) - 1), $length, '0', STR_PAD_LEFT);
-        } while (self::where('pin', $pin)->exists());
-
-        return $pin;
+        return str_pad(random_int(0, pow(10, $length) - 1), $length, '0', STR_PAD_LEFT);
     }
 
     /**

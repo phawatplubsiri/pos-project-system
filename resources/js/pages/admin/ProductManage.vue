@@ -1,37 +1,37 @@
 <template>
-  <div class="product-manage-container">
+  <div class="min-h-screen bg-[var(--color-bg-primary)] pb-12 font-[Sarabun,sans-serif] text-black">
     <!-- Header Section -->
-    <div class="page-header">
-      <button class="back-button" @click="$router.push('/admin/dashboard')">
+    <div class="bg-[var(--color-primary)] py-5 px-10 flex items-center gap-5 shadow-[0_2px_8px_rgba(0,0,0,0.1)] min-h-[100px] box-border">
+      <button class="w-10 h-10 rounded-full bg-white/20 border-none text-white cursor-pointer flex items-center justify-center" @click="$router.push('/admin/dashboard')">
         <ArrowLeft :size="24" />
       </button>
-      <div class="header-content">
-        <h1 class="page-title">จัดการสินค้า & ค่าบริการ</h1>
-        <p class="page-subtitle">Product & Service Management</p>
+      <div>
+        <h1 class="text-[28px] font-bold text-[var(--color-highlight-light)] m-0 mb-1">จัดการสินค้า & ค่าบริการ</h1>
+        <p class="text-sm text-white/80 m-0">Product & Service Management</p>
       </div>
     </div>
 
-    <div class="main-content-wrapper">
+    <div class="max-w-[1200px] mx-auto mt-7.5 px-5 flex flex-col gap-10">
       <!-- 1. ตั้งค่าค่าบริการ Section -->
-      <section class="manage-section">
-        <div class="section-header-main">
-          <Timer :size="24" class="text-primary" />
-          <h2 class="section-title-main">ตั้งค่าค่าบริการ</h2>
+      <section class="flex flex-col gap-4">
+        <div class="flex items-center gap-3">
+          <Timer :size="24" class="text-[var(--color-primary)]" />
+          <h2 class="text-xl font-bold text-[var(--color-primary)] m-0 flex-1">ตั้งค่าค่าบริการ</h2>
         </div>
         <div class="section-card">
           <div v-if="globalLoading" class="text-center py-4">กำลังโหลด...</div>
           <div v-else>
-            <div class="settings-grid">
-              <div class="setting-card">
-                <label class="setting-label">ราคาต่อคน ต่อชั่วโมง (บาท):</label>
+            <div class="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-5 mb-5">
+              <div>
+                <label class="block text-sm font-semibold mb-2 text-[#333]">ราคาต่อคน ต่อชั่วโมง (บาท):</label>
                 <input type="number" v-model="hourlyRate" class="setting-input">
               </div>
-              <div class="setting-card">
-                <label class="setting-label">ราคาเหมาวัน Day Pass (บาท):</label>
+              <div>
+                <label class="block text-sm font-semibold mb-2 text-[#333]">ราคาเหมาวัน Day Pass (บาท):</label>
                 <input type="number" v-model="dayPassRate" class="setting-input">
               </div>
             </div>
-            <button @click="saveRate" class="save-btn" :disabled="savingRate">
+            <button @click="saveRate" class="py-2.5 px-6 bg-[var(--color-action)] text-white border-none rounded-lg font-semibold cursor-pointer flex items-center gap-2" :disabled="savingRate">
               <Save :size="18" />
               {{ savingRate ? 'กำลังบันทึก...' : 'บันทึกการตั้งค่า' }}
             </button>
@@ -40,16 +40,16 @@
       </section>
 
       <!-- 2. จัดการโต๊ะ Section -->
-      <section class="manage-section">
-        <div class="section-header-main">
-          <LayoutGrid :size="24" class="text-primary" />
-          <h2 class="section-title-main">จัดการโต๊ะ</h2>
-          <button class="add-btn-small" @click="openTableModal">
+      <section class="flex flex-col gap-4">
+        <div class="flex items-center gap-3">
+          <LayoutGrid :size="24" class="text-[var(--color-primary)]" />
+          <h2 class="text-xl font-bold text-[var(--color-primary)] m-0 flex-1">จัดการโต๊ะ</h2>
+          <button class="py-2 px-4 bg-[var(--color-action)] text-white border-none rounded-md text-sm font-semibold cursor-pointer flex items-center gap-1" @click="openTableModal">
             <Plus :size="16" /> เพิ่มโต๊ะ
           </button>
         </div>
         <div class="section-card">
-          <div class="table-container">
+          <div class="overflow-x-auto text-black">
             <table class="data-table">
               <thead>
                 <tr>
@@ -74,10 +74,10 @@
                       {{ table.is_active ? 'เปิดใช้งาน' : 'ปิดใช้งาน' }}
                     </span>
                   </td>
-                  <td class="action-cell">
+                  <td class="flex gap-2">
                     <button 
                       @click="editTable(table)" 
-                      class="action-btn edit-btn" 
+                      class="action-btn hover:text-[#1976D2] hover:border-[#1976D2] hover:bg-[#E3F2FD]" 
                       :disabled="!table.is_available"
                       :title="table.is_available ? 'แก้ไข' : 'ไม่สามารถแก้ไขโต๊ะที่มีลูกค้าอยู่'"
                     >
@@ -85,7 +85,7 @@
                     </button>
                     <button 
                       @click="deleteTable(table.id)" 
-                      class="action-btn delete-btn" 
+                      class="action-btn hover:text-[#D32F2F] hover:border-[#D32F2F] hover:bg-[#FFEBEE]" 
                       :disabled="!table.is_available" 
                       :title="table.is_available ? 'ลบ' : 'ไม่สามารถลบโต๊ะที่มีลูกค้าอยู่'"
                     >
@@ -103,18 +103,18 @@
       </section>
 
       <!-- 3. รายการสินค้า Section -->
-      <section class="manage-section">
-        <div class="section-header-main">
-          <Package :size="24" class="text-primary" />
-          <h2 class="section-title-main">รายการสินค้า</h2>
-          <button class="add-btn-small" @click="openAddModal">
+      <section class="flex flex-col gap-4">
+        <div class="flex items-center gap-3">
+          <Package :size="24" class="text-[var(--color-primary)]" />
+          <h2 class="text-xl font-bold text-[var(--color-primary)] m-0 flex-1">รายการสินค้า</h2>
+          <button class="py-2 px-4 bg-[var(--color-action)] text-white border-none rounded-md text-sm font-semibold cursor-pointer flex items-center gap-1" @click="openAddModal">
             <Plus :size="16" /> เพิ่มสินค้า
           </button>
         </div>
         
         <div class="section-card">
           <!-- Category Filter -->
-          <div class="filter-bar">
+          <div class="flex gap-2.5 mb-5 flex-wrap">
             <button 
               v-for="cat in [{id: 'all', name: 'ทั้งหมด'}, ...categories]" 
               :key="cat.id"
@@ -125,7 +125,7 @@
             </button>
           </div>
 
-          <div class="table-container" v-if="renderTable">
+          <div class="overflow-x-auto text-black" v-if="renderTable">
             <table id="productTable" class="data-table display" style="width:100%">
               <thead>
                 <tr>
@@ -141,25 +141,25 @@
               <tbody>
                 <tr v-for="product in filteredProducts" :key="product.id">
                   <td>
-                    <img v-if="product.image_url" :src="product.image_url" class="product-img-mini">
-                    <div v-else class="no-img-mini">
+                    <img v-if="product.image_url" :src="product.image_url" class="w-10 h-10 rounded-md object-cover">
+                    <div v-else class="w-10 h-10 bg-[#eee] rounded-md flex items-center justify-center text-[#999]">
                       <ImageOff :size="18" />
                     </div>
                   </td>
-                  <td class="text-secondary">{{ product.category?.name }}</td>
+                  <td class="text-[#666]">{{ product.category?.name }}</td>
                   <td class="font-bold">{{ product.name }}</td>
-                  <td class="text-accent">{{ product.price }} ฿</td>
+                  <td class="text-[var(--color-action)] font-bold">{{ product.price }} ฿</td>
                   <td>{{ product.stock_qty }}</td>
                   <td>
                     <span :class="['status-badge', product.is_active ? 'available' : 'inactive']">
                       {{ product.is_active ? 'เปิดให้บริการ' : 'ปิดให้บริการ' }}
                     </span>
                   </td>
-                  <td class="action-cell">
-                    <button @click="editProduct(product)" class="action-btn edit-btn">
+                  <td class="flex gap-2">
+                    <button @click="editProduct(product)" class="action-btn hover:text-[#1976D2] hover:border-[#1976D2] hover:bg-[#E3F2FD]">
                       <Pencil :size="14" />
                     </button>
-                    <button @click="deleteProduct(product.id)" class="action-btn delete-btn">
+                    <button @click="deleteProduct(product.id)" class="action-btn hover:text-[#D32F2F] hover:border-[#D32F2F] hover:bg-[#FFEBEE]">
                       <Trash2 :size="14" />
                     </button>
                   </td>
@@ -172,31 +172,30 @@
     </div>
 
     <!-- Global Processing Overlay -->
-    <div v-if="isSaving" class="processing-overlay">
-      <div class="loader-content shadow-2xl">
+    <div v-if="isSaving" class="fixed inset-0 bg-white/80 flex items-center justify-center z-[9999] backdrop-blur-[4px] cursor-wait">
+      <div class="text-center bg-white py-7.5 px-12 rounded-2xl shadow-2xl">
         <div class="spinner"></div>
-        <p class="loader-text">กำลังบันทึกข้อมูล...</p>
+        <p class="font-bold text-[var(--color-primary)] text-lg m-0">กำลังบันทึกข้อมูล...</p>
       </div>
     </div>
 
-    <!-- Modals -->
     <!-- Modal เพิ่ม/แก้ไขสินค้า -->
-    <div v-if="showModal" class="modal-overlay" @click.self="showModal = false">
-      <div class="modal-content-custom shadow-xl">
-        <h3 class="modal-title">{{ editingId ? 'แก้ไขสินค้า' : 'เพิ่มสินค้าใหม่' }}</h3>
+    <div v-if="showModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-[1000]" @click.self="showModal = false">
+      <div class="bg-white p-7.5 rounded-2xl w-[90%] max-w-[500px] max-h-[90vh] overflow-y-auto shadow-xl">
+        <h3 class="mt-0 mb-5 text-xl font-bold">{{ editingId ? 'แก้ไขสินค้า' : 'เพิ่มสินค้าใหม่' }}</h3>
         
         <div class="form-group">
           <label>รูปภาพสินค้า:</label>
           <div class="image-upload-wrapper">
-            <div v-if="imagePreview || form.image_url" class="preview-container-large">
-              <img :src="imagePreview || form.image_url" class="image-preview-large">
-              <button @click="clearImage" class="clear-img-btn-large">×</button>
+            <div v-if="imagePreview || form.image_url" class="relative inline-block w-full">
+              <img :src="imagePreview || form.image_url" class="w-full max-h-[250px] object-contain rounded-lg bg-white">
+              <button @click="clearImage" class="absolute top-2.5 right-2.5 bg-[#ff4444] text-white border-none rounded-full w-7.5 h-7.5 cursor-pointer flex items-center justify-center font-bold shadow-[0_2px_4px_rgba(0,0,0,0.2)]">×</button>
             </div>
-            <div v-else class="upload-placeholder" @click="$refs.fileInput.click()">
+            <div v-else class="py-10 px-5 cursor-pointer flex flex-col items-center gap-2.5 text-[#666] hover:bg-[#f0f0f0]" @click="$refs.fileInput.click()">
               <ImageOff :size="48" />
               <span>คลิกเพื่อเลือกรูปภาพ</span>
             </div>
-            <input type="file" @change="onFileChange" accept="image/*" ref="fileInput" class="file-input-hidden">
+            <input type="file" @change="onFileChange" accept="image/*" ref="fileInput" class="hidden">
           </div>
         </div>
 
@@ -230,15 +229,15 @@
         </div>
 
         <div class="form-group">
-          <label class="checkbox-label-inline">
-            <input type="checkbox" v-model="form.is_active"> 
+          <label class="flex! items-center gap-2.5 cursor-pointer select-none mt-2.5">
+            <input type="checkbox" v-model="form.is_active" class="w-5! h-5! m-0! cursor-pointer"> 
             <span>เปิดใช้งานสินค้านี้</span>
           </label>
         </div>
 
-        <div class="modal-actions">
-          <button @click="showModal = false" class="cancel-btn" :disabled="savingProduct">ยกเลิก</button>
-          <button @click="saveProduct" class="save-btn" :disabled="savingProduct">
+        <div class="flex justify-end gap-2.5 mt-5">
+          <button @click="showModal = false" class="py-2.5 px-5 bg-[#eee] border-none rounded-lg cursor-pointer font-semibold" :disabled="savingProduct">ยกเลิก</button>
+          <button @click="saveProduct" class="py-2.5 px-6 bg-[var(--color-action)] text-white border-none rounded-lg font-semibold cursor-pointer flex items-center gap-2" :disabled="savingProduct">
             {{ savingProduct ? 'กำลังบันทึก...' : 'บันทึก' }}
           </button>
         </div>
@@ -246,9 +245,9 @@
     </div>
 
     <!-- Modal เพิ่ม/แก้ไขโต๊ะ -->
-    <div v-if="showTableModal" class="modal-overlay" @click.self="showTableModal = false">
-      <div class="modal-content-custom shadow-xl">
-        <h3 class="modal-title">{{ editingTableId ? 'แก้ไขโต๊ะ' : 'เพิ่มโต๊ะใหม่' }}</h3>
+    <div v-if="showTableModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-[1000]" @click.self="showTableModal = false">
+      <div class="bg-white p-7.5 rounded-2xl w-[90%] max-w-[500px] max-h-[90vh] overflow-y-auto shadow-xl">
+        <h3 class="mt-0 mb-5 text-xl font-bold">{{ editingTableId ? 'แก้ไขโต๊ะ' : 'เพิ่มโต๊ะใหม่' }}</h3>
         
         <div class="form-group">
           <label>ชื่อโต๊ะ:</label>
@@ -261,15 +260,15 @@
         </div>
 
         <div class="form-group">
-          <label class="checkbox-label-inline">
-            <input type="checkbox" v-model="tableForm.is_active"> 
+          <label class="flex! items-center gap-2.5 cursor-pointer select-none mt-2.5">
+            <input type="checkbox" v-model="tableForm.is_active" class="w-5! h-5! m-0! cursor-pointer"> 
             <span>เปิดใช้งานโต๊ะนี้</span>
           </label>
         </div>
 
-        <div class="modal-actions">
-          <button @click="showTableModal = false" class="cancel-btn" :disabled="savingTable">ยกเลิก</button>
-          <button @click="saveTable" class="save-btn" :disabled="savingTable">
+        <div class="flex justify-end gap-2.5 mt-5">
+          <button @click="showTableModal = false" class="py-2.5 px-5 bg-[#eee] border-none rounded-lg cursor-pointer font-semibold" :disabled="savingTable">ยกเลิก</button>
+          <button @click="saveTable" class="py-2.5 px-6 bg-[var(--color-action)] text-white border-none rounded-lg font-semibold cursor-pointer flex items-center gap-2" :disabled="savingTable">
             {{ savingTable ? 'กำลังบันทึก...' : 'บันทึก' }}
           </button>
         </div>
@@ -335,7 +334,7 @@ export default {
         dataTable = $(tableId).DataTable({
           language: { url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/th.json' },
           pageLength: 10,
-          order: [[2, 'asc']], // Order by product name (index 2)
+          order: [[2, 'asc']],
           responsive: true
         });
       });
@@ -392,11 +391,7 @@ export default {
 
     const editTable = (table) => {
       editingTableId.value = table.id;
-      tableForm.value = { 
-        name: table.name, 
-        seat_count: table.seat_count,
-        is_active: !!table.is_active 
-      };
+      tableForm.value = { name: table.name, seat_count: table.seat_count, is_active: !!table.is_active };
       showTableModal.value = true;
     };
 
@@ -470,15 +465,10 @@ export default {
         const token = localStorage.getItem('token');
         const formData = new FormData();
         
-        // กรองเอาเฉพาะข้อมูลที่จำเป็นส่งไป
         Object.keys(form.value).forEach(key => {
-          // ข้าม image_url เพราะเป็นค่าที่ได้มาจาก backend สำหรับแสดงผลเท่านั้น
           if (key === 'image_url') return;
-
           const value = form.value[key];
-
           if (key === 'image_path' && (value === null || value === '')) {
-            // ส่งค่าว่างไปเพื่อให้ backend รู้ว่าต้องการลบรูป
             formData.append(key, '');
           } else if (value !== null) {
             formData.append(key, value);
@@ -525,132 +515,13 @@ export default {
 </script>
 
 <style scoped>
-/* Processing Overlay */
-.processing-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(255, 255, 255, 0.8);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-  backdrop-filter: blur(4px);
-  cursor: wait;
-}
-
-.loader-content {
-  text-align: center;
-  background: white;
-  padding: 30px 50px;
-  border-radius: 20px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-}
-
-.spinner {
-  width: 50px;
-  height: 50px;
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid var(--color-primary);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin: 0 auto 15px;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-.loader-text {
-  font-weight: 700;
-  color: var(--color-primary);
-  font-size: 18px;
-  margin: 0;
-}
-
-.product-manage-container {
-  min-height: 100vh;
-  background-color: var(--color-bg-primary);
-  padding-bottom: 50px;
-  font-family: 'Sarabun', sans-serif;
-  color: #000000; /* บังคับตัวอักษรสีดำเป็นค่าเริ่มต้น */
-}
-
-/* บังคับสีตัวอักษรสำหรับ Input และ Form ต่างๆ */
+/* Force input/select/textarea colors */
 input, select, textarea {
   color: #000000 !important;
   background-color: #ffffff !important;
 }
 
-.page-header {
-  background-color: var(--color-primary);
-  padding: 20px 40px;
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  min-height: 100px;
-  box-sizing: border-box;
-}
-
-.back-button {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.2);
-  border: none;
-  color: #ffffff;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.page-title {
-  font-size: 28px;
-  font-weight: 700;
-  color: var(--color-highlight-light);
-  margin: 0 0 4px 0;
-}
-
-.page-subtitle {
-  font-size: 14px;
-  color: rgba(255, 255, 255, 0.8);
-  margin: 0;
-}
-
-.main-content-wrapper {
-  max-width: 1200px;
-  margin: 30px auto;
-  padding: 0 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 40px;
-}
-
-.manage-section {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.section-header-main {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.section-title-main {
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--color-primary);
-  margin: 0;
-  flex: 1;
-}
-
+/* Section Card */
 .section-card {
   background: white;
   border-radius: 16px;
@@ -660,171 +531,55 @@ input, select, textarea {
   color: #000000;
 }
 
-.settings-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
-  margin-bottom: 20px;
-}
-
-.setting-label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 8px; color: #333333; }
 .setting-input { width: 100%; padding: 10px 15px; border: 1px solid #ddd; border-radius: 8px; color: #000000; }
 
-.save-btn {
-  padding: 10px 25px;
-  background: var(--color-action);
-  color: #ffffff;
-  border: none;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.add-btn-small {
-  padding: 8px 16px;
-  background: var(--color-action);
-  color: #ffffff;
-  border: none;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.table-container { overflow-x: auto; color: #000000; }
+/* Data Table */
 .data-table { width: 100%; border-collapse: collapse; color: #000000; }
 .data-table th { text-align: left; padding: 12px; border-bottom: 2px solid #eee; font-size: 14px; color: #000000; font-weight: 700; }
 .data-table td { padding: 12px; border-bottom: 1px solid #eee; font-size: 14px; color: #000000; }
 
-/* แก้ไขสีของ DataTable Components (Search, Info, Pagination) */
-:deep(.dataTables_wrapper) {
-  color: #000000 !important;
-}
+/* DataTable Overrides */
+:deep(.dataTables_wrapper) { color: #000000 !important; }
 :deep(.dataTables_filter input), :deep(.dataTables_length select) {
-  color: #000000 !important;
-  background-color: #ffffff !important;
-  border: 1px solid #ddd !important;
-  padding: 5px !important;
-  border-radius: 4px !important;
+  color: #000000 !important; background-color: #ffffff !important;
+  border: 1px solid #ddd !important; padding: 5px !important; border-radius: 4px !important;
 }
-:deep(.dataTables_info), :deep(.dataTables_paginate) {
-  color: #000000 !important;
-  margin-top: 15px !important;
-}
+:deep(.dataTables_info), :deep(.dataTables_paginate) { color: #000000 !important; margin-top: 15px !important; }
 
+/* Status Badge */
 .status-badge { padding: 4px 10px; border-radius: 10px; font-size: 12px; font-weight: 600; }
 .status-badge.available { background: #E8F5E9; color: #2E7D32; }
 .status-badge.busy { background: #FFEBEE; color: #C62828; }
 .status-badge.inactive { background: #F5F5F5; color: #757575; }
 
-.action-cell { display: flex; gap: 8px; }
-.action-btn { width: 32px; height: 32px; border-radius: 6px; border: 1px solid #ddd; background-color: #ffffff; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; }
+/* Action Button */
+.action-btn {
+  width: 32px; height: 32px; border-radius: 6px; border: 1px solid #ddd;
+  background-color: #ffffff; cursor: pointer; display: flex; align-items: center;
+  justify-content: center; transition: all 0.2s ease;
+}
 .action-btn:hover:not(:disabled) { transform: scale(1.1); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
 .action-btn:disabled { opacity: 0.4; cursor: not-allowed; background-color: #f5f5f5; border-color: #eee; }
 
-.edit-btn:hover:not(:disabled) { color: #1976D2; border-color: #1976D2; background-color: #E3F2FD; }
-.delete-btn:hover:not(:disabled) { color: #D32F2F; border-color: #D32F2F; background-color: #FFEBEE; }
-
-.filter-bar { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+/* Filter Button */
 .filter-btn { padding: 6px 15px; border-radius: 15px; border: 1px solid #ddd; background: white; cursor: pointer; font-size: 13px; }
 .filter-btn.active { background: var(--color-action); color: white; border-color: var(--color-action); }
 
-.product-img-mini { width: 40px; height: 40px; border-radius: 6px; object-fit: cover; }
-.no-img-mini { width: 40px; height: 40px; background: #eee; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #999; }
-
-.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-.modal-content-custom { background: white; padding: 30px; border-radius: 16px; width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto; }
-.modal-title { margin-top: 0; margin-bottom: 20px; font-size: 20px; font-weight: 700; }
+/* Form Group */
 .form-group { margin-bottom: 15px; }
 .form-group label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 14px; }
 .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; }
-.modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
-.cancel-btn { padding: 10px 20px; background: #eee; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; }
 
-/* New Image Upload Styles */
+/* Image Upload */
 .image-upload-wrapper {
-  border: 2px dashed #ddd;
-  border-radius: 12px;
-  padding: 10px;
-  background: #fafafa;
-  text-align: center;
+  border: 2px dashed #ddd; border-radius: 12px; padding: 10px; background: #fafafa; text-align: center;
 }
 
-.preview-container-large {
-  position: relative;
-  display: inline-block;
-  width: 100%;
+/* Spinner */
+.spinner {
+  width: 50px; height: 50px; border: 4px solid #f3f3f3;
+  border-top: 4px solid var(--color-primary); border-radius: 50%;
+  animation: spin 1s linear infinite; margin: 0 auto 15px;
 }
-
-.image-preview-large {
-  width: 100%;
-  max-height: 250px;
-  object-fit: contain;
-  border-radius: 8px;
-  background: #fff;
-}
-
-.clear-img-btn-large {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background: #ff4444;
-  color: white;
-  border: none;
-  border-radius: 50%;
-  width: 30px;
-  height: 30px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-}
-
-.upload-placeholder {
-  padding: 40px 20px;
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  color: #666;
-}
-
-.upload-placeholder:hover {
-  background: #f0f0f0;
-}
-
-.file-input-hidden {
-  display: none;
-}
-
-/* Inline Checkbox Styles */
-.checkbox-label-inline {
-  display: flex !important;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
-  user-select: none;
-  margin-top: 10px;
-}
-
-.checkbox-label-inline input[type="checkbox"] {
-  width: 20px !important;
-  height: 20px !important;
-  margin: 0 !important;
-  cursor: pointer;
-}
-
-.font-bold { font-weight: 700; }
-.text-primary { color: var(--color-primary); }
-.text-accent { color: var(--color-action); font-weight: 700; }
-.text-secondary { color: #666; }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 </style>

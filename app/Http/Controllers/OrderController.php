@@ -75,6 +75,64 @@ class OrderController extends Controller
         }
     }
 
+    public function callStaff(Request $request)
+    {
+        $request->validate([
+            'token' => 'required|exists:sessions,guest_token',
+        ]);
+
+        $session = Session::where('guest_token', $request->token)
+                          ->where('status', 'ongoing')
+                          ->first();
+
+        if (!$session) {
+            return response()->json(['message' => 'รอบการใช้งานไม่ถูกต้องหรือสิ้นสุดแล้ว'], 400);
+        }
+
+        // เช็คว่ามีรายการเรียกพนักงานที่ยังไม่ได้รับอยู่แล้วหรือไม่ (เพื่อไม่ให้ส่งซ้ำรัวๆ)
+        $existingCall = Order::where('session_id', $session->id)
+                             ->where('status', 'confirming')
+                             ->whereHas('product', function($q) {
+                                 $q->where('name', 'เรียกพนักงาน');
+                             })
+                             ->first();
+
+        if ($existingCall) {
+            return response()->json(['message' => 'ส่งการเรียกพนักงานไปแล้ว กรุณารอสักครู่']);
+        }
+
+        try {
+            DB::beginTransaction();
+            
+            // หาหรือสร้างสินค้า "เรียกพนักงาน"
+            $category = \App\Models\Category::where('type', 'service')->first();
+            $product = Product::firstOrCreate(
+                ['name' => 'เรียกพนักงาน'],
+                [
+                    'category_id' => $category->id,
+                    'price' => 0,
+                    'stock_qty' => 999999,
+                    'description' => 'ลูกค้าเรียกพนักงานจากโต๊ะ'
+                ]
+            );
+
+            Order::create([
+                'session_id' => $session->id,
+                'product_id' => $product->id,
+                'quantity' => 1,
+                'unit_price' => 0,
+                'total_price' => 0,
+                'status' => 'confirming'
+            ]);
+
+            DB::commit();
+            return response()->json(['message' => 'เรียกพนักงานเรียบร้อยแล้ว']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['message' => 'เกิดข้อผิดพลาด: ' . $e->getMessage()], 500);
+        }
+    }
+
     public function updateStatus(Request $request, $id)
     {
         $order = Order::with(['product.category', 'session'])->findOrFail($id);

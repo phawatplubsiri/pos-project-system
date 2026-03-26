@@ -34,6 +34,16 @@ class Handler extends ExceptionHandler
      */
     public function register()
     {
+        $this->renderable(function (\Illuminate\Http\Exceptions\ThrottleRequestsException $e, $request) {
+            if ($request->is('api/*')) {
+                $seconds = $e->getHeaders()['Retry-After'] ?? 60;
+                return response()->json([
+                    'message' => "เข้าใช้งานบ่อยเกินไป กรุณาลองใหม่ภายใน $seconds วินาที",
+                    'retry_after' => $seconds
+                ], 429);
+            }
+        });
+
         $this->reportable(function (Throwable $e) {
             //
         });
