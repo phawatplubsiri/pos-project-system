@@ -141,10 +141,19 @@
 
           <!-- Order History -->
           <div class="bg-white rounded-[var(--radius-lg)] p-5 shadow-[var(--shadow-sm)]">
-            <h3 class="text-lg font-bold text-black m-0 mb-4 flex items-center gap-2.5">
-              <ClipboardList :size="20" />
-              ประวัติการสั่ง
-            </h3>
+            <div class="flex justify-between items-center mb-4">
+              <h3 class="text-lg font-bold text-black m-0 flex items-center gap-2.5">
+                <ClipboardList :size="20" />
+                ประวัติการสั่ง
+              </h3>
+              <button 
+                v-if="hasPendingOrders"
+                @click="handleCompleteAll" 
+                class="btn-complete"
+              >
+                <Check :size="14" /> เสร็จสิ้นทั้งหมด
+              </button>
+            </div>
             <div class="max-h-[300px] overflow-y-auto flex flex-col gap-3">
               <div
                 v-for="order in activeAndPastOrders"
@@ -321,6 +330,18 @@ export default {
     const totalPrice = computed(() => cart.value.reduce((sum, item) => sum + (item.price * item.qty), 0));
     const awaitingConfirmOrders = computed(() => orderHistory.value.filter(o => o.status.toLowerCase() === 'confirming'));
     const activeAndPastOrders = computed(() => orderHistory.value.filter(o => o.status.toLowerCase() !== 'confirming'));
+    const hasPendingOrders = computed(() => orderHistory.value.some(o => o.status.toLowerCase() === 'pending'));
+
+    const handleCompleteAll = async () => {
+        const isConfirmed = await confirm('ยืนยันทำรายการเสร็จสิ้นทั้งหมด?', 'รายการที่กำลังทำอยู่ทั้งหมดจะถูกเปลี่ยนเป็นเสร็จสิ้น');
+        if (!isConfirmed) return;
+        try {
+            const token = localStorage.getItem('token');
+            await axios.post(`/api/tables/${tableId}/orders/complete-all`, {}, { headers: { Authorization: `Bearer ${token}` } });
+            success('รายการทั้งหมดเสร็จสมบูรณ์');
+            fetchOrderHistory();
+        } catch (err) { error('เกิดข้อผิดพลาด', err.response?.data?.message || err.message); }
+    };
 
     const fetchOrderHistory = async () => {
         try {
@@ -441,8 +462,8 @@ export default {
       tableId, tableName, products, cart, categories, currentTab, filteredProducts, totalPrice,
       addToCart, decreaseQty, increaseQty, removeFromCart, submitOrder,
       handleCheckout, guestToken, showQrModal, qrUrl, formatDuration, sessionStartTime,
-      orderHistory, updateOrderStatus, confirmCancelOrder,
-      awaitingConfirmOrders, activeAndPastOrders, formatPrice, printQr
+      orderHistory, updateOrderStatus, confirmCancelOrder, handleCompleteAll,
+      awaitingConfirmOrders, activeAndPastOrders, hasPendingOrders, formatPrice, printQr
     };
   }
 };

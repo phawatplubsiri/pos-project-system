@@ -62,6 +62,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/orders/pending-confirmations', [OrderController::class, 'getPendingConfirmations']);
     Route::post('/orders', [OrderController::class, 'store']);
     Route::put('/orders/{id}/status', [OrderController::class, 'updateStatus']);
+    Route::post('/tables/{id}/orders/complete-all', [OrderController::class, 'completeAll']);
 
     // -------- Reports --------
     Route::get('/reports/daily', [ReportController::class, 'index']);

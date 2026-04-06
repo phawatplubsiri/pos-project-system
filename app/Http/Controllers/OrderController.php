@@ -192,6 +192,23 @@ class OrderController extends Controller
         }
     }
 
+    public function completeAll($tableId)
+    {
+        $session = Session::where('table_id', $tableId)
+                          ->where('status', 'ongoing')
+                          ->first();
+
+        if (!$session) {
+            return response()->json(['message' => 'ไม่พบรอบการใช้งาน'], 400);
+        }
+
+        Order::where('session_id', $session->id)
+             ->where('status', 'pending')
+             ->update(['status' => 'completed']);
+
+        return response()->json(['message' => 'ทำรายการทั้งหมดเสร็จสมบูรณ์แล้ว']);
+    }
+
     public function store(Request $request)
     {
         // 1. รับค่าที่ส่งมาจากหน้าบ้าน
