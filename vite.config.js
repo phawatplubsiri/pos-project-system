@@ -28,4 +28,6 @@ export default defineConfig({
             input: 'index.html',
         },
     },
+    // เพิ่ม base เพื่อให้ Vite เข้าถึงไฟล์ได้ถูกต้องบน Vercel
+    base: '/'
 });
