@@ -20,9 +20,10 @@ return [
     'allowed_methods' => ['*'],
 
     'allowed_origins' => [
-        'https://pos-project-system.vercel.app', // URL ของ Vercel คุณ
-        'http://localhost:5173',               // สำหรับรัน Dev ในเครื่อง
-        'http://localhost:3000'
+        'https://pos-project-system.vercel.app',
+        'https://pos-project-system.vercel.app/',
+        'http://localhost:5173',
+        'http://localhost:5173/',
     ],
 
     'allowed_origins_patterns' => [],
