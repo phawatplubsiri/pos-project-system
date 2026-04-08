@@ -52,16 +52,10 @@ export default defineConfig({
             '@': '/resources/js',
         },
     },
-    server: {
-        host: '0.0.0.0', // ให้ Docker เข้าถึงได้
-        port: 5173,      // พอร์ตภายใน Container
-        strictPort: true, // บังคับใช้พอร์ตนี้
-        hmr: {
-            host: 'localhost', // พอร์ตที่ Browser จะใช้เชื่อมต่อ
-            clientPort: 5173,  // บังคับให้ Client ใช้พอร์ต 5173 สำหรับ WebSocket
-        },
-        watch: {
-            usePolling: true, // แก้ปัญหา Hot Reload ไม่ทำงานใน Docker/Windows
+    build: {
+        outDir: 'dist', // ให้ Vite build ไฟล์ไปไว้ที่โฟลเดอร์ dist สำหรับ Vercel
+        rollupOptions: {
+            input: 'index.html', // บังคับให้ Vite ใช้ index.html เป็นจุดเริ่มต้น
         },
     },
 });
