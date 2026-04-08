@@ -119,7 +119,7 @@
 
 <script>
 import { reactive, ref, watch } from 'vue';
-import axios from 'axios';
+import axios from 'axios'; // Axios จะใช้ค่า defaults จาก bootstrap.js หากถูกนำเข้าอย่างถูกต้อง
 import { useRouter } from 'vue-router';
 import { Dices } from 'lucide-vue-next';
 
