@@ -1,6 +1,6 @@
 FROM php:8.2-fpm-alpine
 
-# ติดตั้ง System Dependencies ที่จำเป็น
+# ติดตั้ง System Dependencies
 RUN apk add --no-cache \
     nginx \
     wget \
@@ -29,11 +29,17 @@ RUN composer install --no-dev --optimize-autoloader
 # ตั้งค่าสิทธิ์ไฟล์
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 
-# ก๊อปปี้ไฟล์คอนฟิก Nginx (เดี๋ยวเราจะสร้างในขั้นตอนถัดไป)
+# ก๊อปปี้ไฟล์คอนฟิก Nginx
 COPY docker/nginx/render.conf /etc/nginx/http.d/default.conf
 
-# เปิดพอร์ต 80
-EXPOSE 80
+# เปิดพอร์ต 10000 (Render default)
+EXPOSE 10000
 
-# คำสั่งรัน: สั่ง Migrate อัตโนมัติ แล้วค่อยเปิด PHP-FPM และ Nginx
-CMD php artisan migrate --force && php-fpm -D && nginx -g "daemon off;"
+# สร้าง Script สำหรับรันตอนเริ่มต้น
+RUN echo "#!/bin/sh" > /start.sh && \
+    echo "php artisan migrate --force" >> /start.sh && \
+    echo "php-fpm -D" >> /start.sh && \
+    echo "nginx -g 'daemon off;'" >> /start.sh && \
+    chmod +x /start.sh
+
+CMD ["/start.sh"]
