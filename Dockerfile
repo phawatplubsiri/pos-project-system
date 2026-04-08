@@ -35,9 +35,10 @@ COPY docker/nginx/render.conf /etc/nginx/http.d/default.conf
 # เปิดพอร์ต 10000 (Render default)
 EXPOSE 10000
 
-# สร้าง Script สำหรับรันตอนเริ่มต้น
+# สร้าง Script สำหรับรันตอนเริ่มต้น (เพิ่มคำสั่ง Seed เข้าไป)
 RUN echo "#!/bin/sh" > /start.sh && \
     echo "php artisan migrate --force" >> /start.sh && \
+    echo "php artisan db:seed --force" >> /start.sh && \
     echo "php-fpm -D" >> /start.sh && \
     echo "nginx -g 'daemon off;'" >> /start.sh && \
     chmod +x /start.sh
