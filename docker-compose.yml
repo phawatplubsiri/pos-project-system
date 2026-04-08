@@ -1,0 +1,79 @@
+version: '3'
+services:
+
+  # PHP Service
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        user: dev
+        uid: 1000
+    image: pos-project-app
+    container_name: pos-app
+    restart: unless-stopped
+    tty: true
+    environment:
+      SERVICE_NAME: app
+      SERVICE_TAGS: dev
+    working_dir: /var/www
+    volumes:
+      - ./:/var/www
+    networks:
+      - pos-network
+
+  # Nginx Service
+  nginx:
+    image: nginx:alpine
+    container_name: pos-nginx
+    restart: unless-stopped
+    ports:
+      - "8000:80"
+    volumes:
+      - ./:/var/www
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - pos-network
+
+  # MySQL Service
+  db:
+    image: mysql:8.0
+    container_name: pos-db
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "3307:3306"
+
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-pos_db}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-secret}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-secret}
+      MYSQL_USER: ${DB_USERNAME:-pos_user}
+      SERVICE_TAGS: dev
+      SERVICE_NAME: mysql
+    volumes:
+      - dbdata:/var/lib/mysql
+    networks:
+      - pos-network
+
+  # Node Service (for Vite)
+  node:
+    image: node:20-alpine
+    container_name: pos-node
+    working_dir: /var/www
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./:/var/www
+    networks:
+      - pos-network
+    # Run dev server by default or keep it alive
+    command: sh -c "npm install && npm run dev"
+
+networks:
+  pos-network:
+    driver: bridge
+
+volumes:
+  dbdata:
+    driver: local

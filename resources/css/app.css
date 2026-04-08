@@ -1,6 +1,6 @@
 @import "tailwindcss";
-@plugin "daisyui";
 @import './theme.css';
+@plugin "daisyui";
 
 /* ========================================
    Tailwind Theme — Map project colors
