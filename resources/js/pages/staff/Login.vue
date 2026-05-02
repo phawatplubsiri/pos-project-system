@@ -246,6 +246,7 @@ export default {
       loading.value = true;
 
       try {
+        await axios.get('/sanctum/csrf-cookie');
         const { data } = await axios.post('/api/login-pin', pinForm);
         processLoginSuccess(data);
       } catch (error) {

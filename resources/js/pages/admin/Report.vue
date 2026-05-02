@@ -1,15 +1,6 @@
 <template>
   <div class="min-h-screen bg-[var(--color-bg-primary)]">
-    <!-- Header Section -->
-    <header class="bg-[var(--color-primary)] py-5 px-10 flex items-center gap-6 shadow-[var(--shadow-md)] min-h-[100px] box-border">
-      <button class="w-10 h-10 rounded-full bg-white/20 border-none text-white cursor-pointer flex items-center justify-center transition-all duration-300 hover:bg-white/30 hover:scale-105" @click="$router.push('/admin/dashboard')">
-        <ArrowLeft :size="24" />
-      </button>
-      <div>
-        <h1 class="text-[28px] font-bold text-[var(--color-highlight-light)] m-0 mb-1">รายงานรายได้</h1>
-        <p class="text-sm text-white/80 m-0">Revenue Report</p>
-      </div>
-    </header>
+    <AdminHeader title="รายงานรายได้" subtitle="Revenue Report" />
 
     <main class="py-7.5 px-10 max-w-[1400px] mx-auto">
       <!-- Filter Bar -->
@@ -153,15 +144,16 @@
 <script>
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
+import AdminHeader from '../../components/AdminHeader.vue';
 import { 
-  ArrowLeft, Calendar, Download, Loader2, CircleDollarSign, 
+  Calendar, Download, Loader2, CircleDollarSign, 
   LayoutGrid, UserCheck, MonitorOff, Users, User, FolderOpen 
 } from 'lucide-vue-next';
 
 export default {
   name: 'DailyReport',
   components: {
-    ArrowLeft, Calendar, Download, Loader2, CircleDollarSign, 
+    AdminHeader, Calendar, Download, Loader2, CircleDollarSign, 
     LayoutGrid, UserCheck, MonitorOff, Users, User, FolderOpen
   },
   setup() {

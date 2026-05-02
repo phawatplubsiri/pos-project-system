@@ -59,6 +59,7 @@
 <script>
 import { useRouter } from 'vue-router';
 import axios from 'axios';
+import { useAlert } from '../../composables/useAlert';
 import { 
   UserCog, 
   ShoppingCart, 
@@ -79,8 +80,10 @@ export default {
   },
   setup() {
     const router = useRouter();
+    const { loading: showAlertLoading, close: closeAlert } = useAlert();
 
     const logout = async () => {
+        showAlertLoading('กำลังออกจากระบบ...');
         try {
             await axios.post('/api/logout', {}, {
                 headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
@@ -88,7 +91,10 @@ export default {
         } catch (e) {}
         
         localStorage.clear();
-        router.push('/');
+        setTimeout(() => {
+            router.push('/');
+            closeAlert();
+        }, 800);
     };
 
     return { logout };

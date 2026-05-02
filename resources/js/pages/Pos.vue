@@ -418,7 +418,16 @@ export default {
 
     const closeQrModal = () => { showQrModal.value = false; targetTable.value = null; };
     const printQr = () => { window.print(); };
-    const logout = () => { localStorage.removeItem('token'); localStorage.removeItem('user'); localStorage.removeItem('role'); router.push('/staff/login'); };
+    const logout = () => {
+        showAlertLoading('กำลังออกจากระบบ...');
+        setTimeout(() => {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            localStorage.removeItem('role');
+            router.push('/staff/login');
+            closeAlert();
+        }, 800);
+    };
 
     const staffCalls = computed(() => {
       return pendingOrders.value.filter(o => o.product?.name === 'เรียกพนักงาน');
