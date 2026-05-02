@@ -11,6 +11,7 @@ import StaffManage from '../pages/admin/StaffManage.vue';
 import ProductManage from '../pages/admin/ProductManage.vue';
 import Report from '../pages/admin/Report.vue'; // <--- Import หน้า Report
 import LandingPage from '../pages/customer/LandingPage.vue';
+import Swal from 'sweetalert2';
 
 const routes = [
     // 1. หน้าแรก เป็น Login เลย
@@ -64,8 +65,11 @@ const router = createRouter({
     routes
 });
 
-// (Optional) เพิ่ม Guard ป้องกันคนไม่ได้ Login เข้ามา
+// เพิ่ม Guard ป้องกันคนไม่ได้ Login เข้ามา
 router.beforeEach((to, from, next) => {
+    // ปิด SweetAlert ทุกชนิดเมื่อมีการเปลี่ยนหน้า
+    Swal.close();
+
     const publicPages = ['/', '/customer/menu'];
     const authRequired = !publicPages.includes(to.path);
     const loggedIn = localStorage.getItem('token');
