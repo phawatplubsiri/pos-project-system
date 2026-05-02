@@ -18,8 +18,8 @@ use App\Http\Controllers\ReportController;
 */
 
 // Authentication
-Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:login');
-Route::post('/login-pin', [AuthController::class, 'loginWithPin'])->middleware('throttle:login');
+Route::post('/login', [AuthController::class, 'login']);
+Route::post('/login-pin', [AuthController::class, 'loginWithPin']);
 
 // Public Data
 Route::get('/products', [ProductController::class, 'index']);

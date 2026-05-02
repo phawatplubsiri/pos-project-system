@@ -187,11 +187,6 @@ export default {
     const appendPin = (num) => {
       if (pinForm.pin.length < 6) {
         pinForm.pin += num;
-        // ล้าง error เมื่อผู้ใช้พิมพ์ PIN ใหม่ (ถ้าไม่ได้ติด countdown)
-        if (pinError.value && !countdownInterval) {
-          pinError.value = false;
-          pinErrorMessage.value = '';
-        }
         
         // Show the number briefly
         lastTypedIndex.value = pinForm.pin.length - 1;
@@ -205,11 +200,21 @@ export default {
     const clearPin = () => {
       pinForm.pin = '';
       lastTypedIndex.value = -1;
+      // ล้าง error message เมื่อกด clear
+      if (!countdownInterval) {
+        pinError.value = false;
+        pinErrorMessage.value = '';
+      }
     };
 
     const backspacePin = () => {
       pinForm.pin = pinForm.pin.slice(0, -1);
       lastTypedIndex.value = -1;
+      // ล้าง error message เมื่อกด backspace
+      if (!countdownInterval) {
+        pinError.value = false;
+        pinErrorMessage.value = '';
+      }
     };
 
     // Auto-login when PIN reaches 6 digits
@@ -228,11 +233,17 @@ export default {
         processLoginSuccess(data);
       } catch (error) {
         console.error('Login error:', error);
+        const data = error.response?.data;
+        
         if (error.response?.status === 429) {
-          const retryAfter = error.response.data.retry_after || 60;
+          const retryAfter = data?.retry_after || 60;
           startCountdown(retryAfter, 'email');
         } else {
-          errorMessage.value = error.response?.data?.message || 'อีเมลหรือรหัสผ่านไม่ถูกต้อง';
+          let msg = data?.message || 'อีเมลหรือรหัสผ่านไม่ถูกต้อง';
+          if (data?.attempts !== undefined && data?.max_attempts) {
+            msg += ` (${data.attempts}/${data.max_attempts})`;
+          }
+          errorMessage.value = msg;
         }
       } finally {
         loading.value = false;
@@ -251,16 +262,23 @@ export default {
         processLoginSuccess(data);
       } catch (error) {
         console.error('PIN Login error:', error);
+        const data = error.response?.data;
+
         if (error.response?.status === 429) {
-          const retryAfter = error.response.data.retry_after || 60;
+          const retryAfter = data?.retry_after || 60;
           startCountdown(retryAfter, 'pin');
         } else {
           pinError.value = true;
-          pinErrorMessage.value = error.response?.data?.message || 'PIN ไม่ถูกต้อง';
+          let msg = data?.message || 'PIN ไม่ถูกต้อง';
+          if (data?.attempts !== undefined && data?.max_attempts) {
+            msg += ` (${data.attempts}/${data.max_attempts})`;
+          }
+          pinErrorMessage.value = msg;
+          
+          // ล้างจุด (PIN) ออกอัตโนมัติเพื่อให้พิมพ์ใหม่ได้ง่าย
+          // แต่เก็บข้อความ Error ไว้
           setTimeout(() => {
             pinForm.pin = '';
-            pinError.value = false;
-            pinErrorMessage.value = '';
           }, 1000);
         }
       } finally {

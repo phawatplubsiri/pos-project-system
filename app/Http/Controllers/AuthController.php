@@ -12,13 +12,19 @@ class AuthController extends Controller
 {
     public function login(Request $request)
     {
-        $throttleKey = strtolower($request->input('email')) . '|' . $request->ip();
+        $email = strtolower($request->input('email'));
+        $attemptsKey = 'login_attempts|' . $email;
+        $lockoutKey = 'login_lockout|' . $email;
+        $maxAttempts = 5;
 
-        if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
-            $seconds = RateLimiter::availableIn($throttleKey);
+        // 1. ตรวจสอบก่อนว่าติด Lockout 30 วินาทีอยู่หรือไม่
+        if (RateLimiter::tooManyAttempts($lockoutKey, 1)) {
+            $seconds = RateLimiter::availableIn($lockoutKey);
             return response()->json([
                 'message' => "พยายามเข้าสู่ระบบมากเกินไป กรุณาลองใหม่ภายใน $seconds วินาที",
-                'retry_after' => $seconds
+                'retry_after' => $seconds,
+                'attempts' => $maxAttempts,
+                'max_attempts' => $maxAttempts
             ], 429);
         }
 
@@ -28,13 +34,26 @@ class AuthController extends Controller
         ]);
 
         if (!Auth::attempt($fields)) {
-            RateLimiter::hit($throttleKey, 60);
+            // 2. บันทึกความผิด (จำไว้ 1 ชม.)
+            RateLimiter::hit($attemptsKey, 3600);
+            $attempts = RateLimiter::attempts($attemptsKey);
+            
+            // 3. ถ้าผิดครบโควต้า (ทุกๆ 5 ครั้ง หรือตั้งแต่ครั้งที่ 5 เป็นต้นไป) ให้ติด Lockout
+            if ($attempts >= $maxAttempts) {
+                RateLimiter::hit($lockoutKey, 180);
+            }
+
             return response()->json([
-                'message' => 'อีเมลหรือรหัสผ่านไม่ถูกต้อง'
+                'message' => 'อีเมลหรือรหัสผ่านไม่ถูกต้อง',
+                'attempts' => $attempts > $maxAttempts ? $maxAttempts : $attempts,
+                'max_attempts' => $maxAttempts
             ], 401);
         }
 
-        RateLimiter::clear($throttleKey);
+        // 4. เข้าสู่ระบบสำเร็จ ล้างทั้งคู่ออก
+        RateLimiter::clear($attemptsKey);
+        RateLimiter::clear($lockoutKey);
+        
         $user = Auth::user();
         $token = $user->createToken('staff-token')->plainTextToken;
 
@@ -47,13 +66,19 @@ class AuthController extends Controller
 
     public function loginWithPin(Request $request)
     {
-        $throttleKey = 'pin_login|' . $request->ip();
+        $ip = $request->ip();
+        $attemptsKey = 'pin_attempts|' . $ip;
+        $lockoutKey = 'pin_lockout|' . $ip;
+        $maxAttempts = 5;
 
-        if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
-            $seconds = RateLimiter::availableIn($throttleKey);
+        // 1. ตรวจสอบ Lockout 30 วินาที
+        if (RateLimiter::tooManyAttempts($lockoutKey, 1)) {
+            $seconds = RateLimiter::availableIn($lockoutKey);
             return response()->json([
                 'message' => "กรอก PIN ผิดบ่อยเกินไป กรุณาลองใหม่ภายใน $seconds วินาที",
-                'retry_after' => $seconds
+                'retry_after' => $seconds,
+                'attempts' => $maxAttempts,
+                'max_attempts' => $maxAttempts
             ], 429);
         }
 
@@ -61,22 +86,32 @@ class AuthController extends Controller
             'pin' => 'required|string|size:6',
         ]);
 
-        // ค้นหา User ทั้งหมดที่มี PIN แล้วตรวจสอบด้วย Hash::check
-        // กรองเฉพาะ User ที่ไม่ถูกลบ
         $users = User::whereNotNull('pin')->get();
-        
         $user = $users->first(function ($u) use ($request) {
             return Hash::check($request->pin, $u->pin);
         });
 
         if (!$user) {
-            RateLimiter::hit($throttleKey, 60);
+            // 2. บันทึกความผิด (จำไว้ 1 ชม.)
+            RateLimiter::hit($attemptsKey, 3600);
+            $attempts = RateLimiter::attempts($attemptsKey);
+
+            // 3. ติด Lockout
+            if ($attempts >= $maxAttempts) {
+                RateLimiter::hit($lockoutKey, 180);
+            }
+
             return response()->json([
-                'message' => 'PIN ไม่ถูกต้อง'
+                'message' => 'PIN ไม่ถูกต้อง',
+                'attempts' => $attempts > $maxAttempts ? $maxAttempts : $attempts,
+                'max_attempts' => $maxAttempts
             ], 401);
         }
 
-        RateLimiter::clear($throttleKey);
+        // 4. สำเร็จ ล้างทั้งคู่ออก
+        RateLimiter::clear($attemptsKey);
+        RateLimiter::clear($lockoutKey);
+        
         $token = $user->createToken('staff-token')->plainTextToken;
 
         return response()->json([
