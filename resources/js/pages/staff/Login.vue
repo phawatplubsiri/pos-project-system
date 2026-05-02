@@ -3,8 +3,8 @@
     <div class="bg-[var(--color-bg-card)] border-2 border-[var(--color-border)] rounded-[var(--radius-lg)] p-10 max-w-[400px] w-full shadow-[var(--shadow-md)] text-center text-black">
       <!-- Icon Section -->
       <div class="flex justify-center mb-6">
-        <div class="w-[100px] h-[100px] bg-gradient-to-br from-[var(--color-action)] to-[var(--color-action-hover)] rounded-full flex items-center justify-center text-[50px] shadow-[0_4px_12px_rgba(76,175,142,0.3)] text-white">
-          <Dices :size="50" />
+        <div class="w-[100px] h-[100px] bg-white rounded-full flex items-center justify-center shadow-[0_4px_12px_rgba(0,0,0,0.1)] overflow-hidden">
+          <img src="/dice-logo.png" alt="Logo" class="w-full h-full object-contain p-2" />
         </div>
       </div>
 
@@ -12,7 +12,7 @@
       <header>
         <h1 class="text-[28px] font-bold text-black m-0 mb-2">Board Game Cafe</h1>
         <p class="text-sm text-black mb-8 flex items-center justify-center gap-1.5">
-          <Dices :size="16" class="brand-icon" />
+          <img src="/dice-logo.png" alt="Icon" class="w-4 h-4 object-contain" />
           Staff Login • POS System
         </p>
       </header>

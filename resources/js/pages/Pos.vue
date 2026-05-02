@@ -4,9 +4,9 @@
     <div class="bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-primary-dark)] shadow-[0_4px_12px_rgba(0,0,0,0.15)] sticky top-0 z-[100]">
       <div class="max-w-[1600px] mx-auto py-5 px-8 flex justify-between items-center gap-6">
         <div class="flex items-center gap-3">
+          <img src="/dice-logo.png" alt="Logo" class="w-10 h-10 object-contain" />
           <h1 class="text-[28px] font-bold text-[var(--color-highlight-light)] m-0 flex items-center gap-3">
-            <Coffee :size="32" class="text-[var(--color-highlight)]" />
-            Board Game Cafe
+            BOARD GAME CAFE
           </h1>
         </div>
         
