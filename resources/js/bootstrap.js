@@ -10,6 +10,9 @@ window._ = _;
 import axios from 'axios';
 window.axios = axios;
 
+import $ from 'jquery';
+window.$ = window.jQuery = $;
+
 // ตั้งค่า URL เริ่มต้นสำหรับการเรียก API
 if (import.meta.env.VITE_API_URL) {
     axios.defaults.baseURL = import.meta.env.VITE_API_URL;
