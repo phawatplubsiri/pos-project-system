@@ -2,7 +2,7 @@
 
 ## ภาพรวมโปรเจค
 
-ระบบจุดขายที่ทันสมัยและใช้งานง่าย ออกแบบมาเพื่อการจัดการการขายและสินค้าแบบเรียลไทม์ โปรเจคนี้สร้างด้วยเฟรมเวิร์ก PHP สำหรับส่วนหลังบ้าน และเฟรมเวิร์ก JavaScript สำหรับส่วนหน้าบ้าน
+ระบบจุดขายที่ทันสมัยและใช้งานง่าย ออกแบบมาเพื่อการจัดการการขายและสินค้าแบบเรียลไทม์ โปรเจคนี้สร้างด้วย Laravel สำหรับส่วนหลังบ้าน และ Vue 3 สำหรับส่วนหน้าบ้าน
 
 ---
 
@@ -36,80 +36,80 @@
 ## เทคโนโลยีที่ใช้
 
 ### ส่วนหลังบ้าน
-- ลาราเวล 8 - เฟรมเวิร์กเว็บแอปพลิเคชัน
-- พีเอชพี 8.2 ขึ้นไป - ภาษาโปรแกรมมิ่ง
-- เมจแคว่ล หรือ โพสต์เกรเซส - ฐานข้อมูล
-- ลาราเวล แซงแคตัม - ระบบรับรองความถูกต้อง
+- Laravel 8 - เฟรมเวิร์กเว็บแอปพลิเคชัน
+- PHP 8.2 ขึ้นไป - ภาษาโปรแกรมมิ่ง
+- MySQL / PostgreSQL - ฐานข้อมูล
+- Laravel Sanctum - ระบบรับรองความถูกต้อง
 
 ### ส่วนหน้าบ้าน
-- วิว 3 - เฟรมเวิร์ก JavaScript
-- ไวท์ - เครื่องมือสร้าง
-- เทลวินด์ ซีเอสเอส - จัดแต่งหน้า
-- ดेยซี ยูไอ - ส่วนประกอบอินเตอร์เฟส
-- ดาตาเทเบิล - ฟังก์ชันตารางขึ้นตอน
-- คิวอาร์โค้ด - การสร้างและสแกน คิวอาร์โค้ด
+- Vue 3 - เฟรมเวิร์ก JavaScript
+- Vite - เครื่องมือสร้าง
+- Tailwind CSS - จัดแต่งหน้า
+- DaisyUI - ส่วนประกอบอินเตอร์เฟส
+- DataTables - ฟังก์ชันตารางข้อมูล
+- QR Code - การสร้างและสแกน QR Code
 
 ### ไลบรารี่เพิ่มเติม
-- แอกโซส - ไคลเอนต์ เอชทีทีพี
-- สวีท อะเลิร์ท 2 - การแจ้งเตือน
-- คลาวดินารี่ - ที่เก็บรูปภาพ
-- เจคิวรี่ - การจัดการ ดีโอเอม
+- Axios - ไคลเอนต์ HTTP
+- SweetAlert2 - การแจ้งเตือน
+- Cloudinary - ที่เก็บรูปภาพ
+- jQuery - การจัดการ DOM
 
 ---
 
 ## โครงสร้างโปรเจค
 
 ```
-ระบบจุดขายสินค้า/
-├── app/                 # ไฟล์ลอจิกของลาราเวล
-│   ├── ส่วนเอชทีทีพี/   # ตัวควบคุม กลไกการติดกลั่น
-│   ├── โมเดล/          # โมเดลฐานข้อมูล
-│   └── คอนโซล/         # คำสั่งเมื่อยี
-├── ฐานข้อมูล/          # การโยกย้ายและดูแล
-├── ทรัพยากร/          # ทรัพยากรส่วนหน้าบ้าน
-│   ├── จาวาสคริปต์/    # ส่วนประกอบวิว
-│   ├── ซีเอสเอส/       # แผ่นสไตล์
-│   └── มุมมอง/         # แม่แบบเบลด
-├── เส้นทาง/            # นิยามเส้นทาง
-├── การตั้งค่า/         # ไฟล์การตั้งค่า
-├── สาธารณะ/          # รูทเว็บ
-├── ที่เก็บ/           # ที่เก็บไฟล์
-├── ทดสอบ/            # ทดสอบยูนิต และ ฟีเจอร์
-└── ผู้ขาย/            # การพึ่งพา
+pos-project-app/
+├── app/                 # ไฟล์โค้ด Laravel
+│   ├── Http/            # Controllers, Middleware
+│   ├── Models/          # Database Models
+│   └── Console/         # Artisan Commands
+├── database/            # Migrations และ Seeders
+├── resources/           # ทรัพยากรส่วนหน้าบ้าน
+│   ├── js/              # Vue Components
+│   ├── css/             # Stylesheets
+│   └── views/           # Blade Templates
+├── routes/              # นิยามเส้นทาง
+├── config/              # ไฟล์การตั้งค่า
+├── public/              # Web Root
+├── storage/             # ที่เก็บไฟล์
+├── tests/               # ทดสอบ Unit และ Feature
+└── vendor/              # Dependencies
 ```
 
 ---
 
-## ตัวแบบข้อมูล
+## ตัวแบบข้อมูล (Models)
 
-- **ผู้ใช้** - ผู้ใช้งานระบบ
-- **สินค้า** - สินค้า
-- **หมวดหมู่** - ประเภทสินค้า
-- **ใบเสร็จ** - ใบเสร็จการขาย
-- **รายการสินค้า** - รายการสินค้าในใบเสร็จ
-- **โต๊ะ** - โต๊ะอาหาร
-- **เซสชัน** - เซสชันผู้ใช้
-- **การตั้งค่า** - ค่าตั้งค่าระบบ
+- **User** - ผู้ใช้งานระบบ
+- **Product** - สินค้า
+- **Category** - ประเภทสินค้า
+- **Order** - ใบเสร็จการขาย
+- **OrderDetail** - รายการสินค้าในใบเสร็จ
+- **Table** - โต๊ะอาหาร
+- **Session** - เซสชันผู้ใช้
+- **Setting** - ค่าตั้งค่าระบบ
 
 ---
 
 ## วิธีการติดตั้ง
 
 ### ข้อกำหนดเบื้องต้น
-- พีเอชพี 8.2 ขึ้นไป
-- คอมโพเซอร์
-- โหนด.จาวาสคริปต์ และ เอ็นพีเอ็ม
-- เมจแคว่ล หรือ ฐานข้อมูลอื่น
+- PHP 8.2 ขึ้นไป
+- Composer
+- Node.js และ npm
+- MySQL / PostgreSQL หรือฐานข้อมูลอื่น
 
 ### ขั้นตอนการติดตั้ง
 
-1. ดาวน์โหลดหรือโคลนโปรเจค
-2. ติดตั้งการพึ่งพา พีเอชพี:
+1. ดาวน์โหลดหรือ clone โปรเจค
+2. ติดตั้ง PHP Dependencies:
    ```bash
    composer install
    ```
 
-3. ติดตั้งการพึ่งพา ส่วนหน้าบ้าน:
+3. ติดตั้ง Frontend Dependencies:
    ```bash
    npm install
    ```
@@ -119,17 +119,17 @@
    cp .env.example .env
    ```
 
-5. สร้างคีย์แอปพลิเคชัน:
+5. สร้าง Application Key:
    ```bash
    php artisan key:generate
    ```
 
-6. ตั้งค่าฐานข้อมูล ใน .env และ ย้ายข้อมูล:
+6. ตั้งค่าฐานข้อมูล ใน .env และ Migrate:
    ```bash
    php artisan migrate
    ```
 
-7. ปลูกข้อมูลตัวอย่าง (ถ้ามี):
+7. Seed ข้อมูลตัวอย่าง (ถ้ามี):
    ```bash
    php artisan db:seed
    ```
@@ -138,22 +138,22 @@
 
 ## วิธีการใช้งาน
 
-### รัน เซิร์ฟเวอร์พัฒนา
+### รัน Development Server
 
-เปิด ปลายทาง 2 หน้าต่าง:
+เปิด Terminal 2 หน้าต่าง:
 
-**ปลายทาง 1 - ส่วนหลังบ้าน:**
+**Terminal 1 - Backend (Laravel):**
 ```bash
 php artisan serve
 ```
 เข้าที่ http://localhost:8000
 
-**ปลายทาง 2 - ส่วนหน้าบ้าน:**
+**Terminal 2 - Frontend (Vite):**
 ```bash
 npm run dev
 ```
 
-### สร้าง สำหรับการใช้งานจริง
+### Build สำหรับ Production
 ```bash
 npm run build
 ```
@@ -162,21 +162,21 @@ npm run build
 
 ## ไฟล์สำคัญ
 
-- [vite.config.js](vite.config.js) - การตั้งค่าไวท์
-- [composer.json](composer.json) - การพึ่งพาพีเอชพี
-- [package.json](package.json) - การพึ่งพาจาวาสคริปต์
-- [.env.example](.env.example) - แม่แบบการตั้งค่าสภาพแวดล้อม
-- [routes/api.php](routes/api.php) - เส้นทางเอพีไอ
-- [routes/web.php](routes/web.php) - เส้นทางเว็บ
+- [vite.config.js](vite.config.js) - Vite Configuration
+- [composer.json](composer.json) - PHP Dependencies
+- [package.json](package.json) - JavaScript Dependencies
+- [.env.example](.env.example) - Environment Configuration Template
+- [routes/api.php](routes/api.php) - API Routes
+- [routes/web.php](routes/web.php) - Web Routes
 
 ---
 
 ## หมายเหตุการพัฒนา
 
-- ระบบนี้ใช้ไวท์ สำหรับการรีโหลดโมดูลร้อน
-- สามารถปรับใช้ได้บนดอกเกอร์ โดยใช้ [Dockerfile](Dockerfile)
-- รองรับการปรับใช้ บน เวอร์เซล ผ่าน [vercel.json](vercel.json)
-- ใช้ นิกซ์แพกส์ สำหรับสภาพแวดล้อมการสร้าง
+- ระบบนี้ใช้ Vite สำหรับ Fast HMR (Hot Module Replacement)
+- สามารถ Deploy ได้บน Docker โดยใช้ [Dockerfile](Dockerfile)
+- รองรับ Vercel Deployment ผ่าน [vercel.json](vercel.json)
+- ใช้ NixPacks สำหรับ Build Environment
 
 ---
 
@@ -186,8 +186,4 @@ npm run build
 
 ## ลิขสิทธิ์
 
-ใบอนุญาต เอ็มไอที
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+MIT License
