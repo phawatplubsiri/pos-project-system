@@ -1,63 +1,192 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400"></a></p>
+# ระบบจุดขายสินค้า
 
-<p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## ภาพรวมโปรเจค
 
-## About Laravel
+ระบบจุดขายที่ทันสมัยและใช้งานง่าย ออกแบบมาเพื่อการจัดการการขายและสินค้าแบบเรียลไทม์ โปรเจคนี้สร้างด้วยเฟรมเวิร์ก PHP สำหรับส่วนหลังบ้าน และเฟรมเวิร์ก JavaScript สำหรับส่วนหน้าบ้าน
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## คุณสมบัติหลัก
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### การจัดการสินค้า
+- เพิ่ม แก้ไข และลบสินค้า
+- จัดเรียงสินค้าตามประเภท
+- ติดตามปริมาณสินค้าคงคลัง
+- อัปโหลดรูปภาพสินค้า
 
-## Learning Laravel
+### การจัดการการขาย
+- สร้างใบเสร็จขายแบบรีเซลเวอร์ (POS)
+- ค้นหาและเพิ่มสินค้าลงในตะกร้า
+- คำนวณราคารวม ภาษี และส่วนลด
+- พิมพ์ใบเสร็จ
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### การจัดการโต๊ะ
+- จัดการโต๊ะอาหารหลายโต๊ะ
+- ติดตามสถานะการใช้งาน
+- บันทึกออร์เดอร์ต่อเนื่อง
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 1500 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### อื่น ๆ
+- ระบบตรวจสอบสิทธิ์ (Authentication)
+- จัดการผู้ใช้งานและบทบาท
+- ติดตามเซสชันผู้ใช้
+- บันทึกการตั้งค่าระบบ
 
-## Laravel Sponsors
+---
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+## เทคโนโลยีที่ใช้
 
-### Premium Partners
+### ส่วนหลังบ้าน
+- ลาราเวล 8 - เฟรมเวิร์กเว็บแอปพลิเคชัน
+- พีเอชพี 8.2 ขึ้นไป - ภาษาโปรแกรมมิ่ง
+- เมจแคว่ล หรือ โพสต์เกรเซส - ฐานข้อมูล
+- ลาราเวล แซงแคตัม - ระบบรับรองความถูกต้อง
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
+### ส่วนหน้าบ้าน
+- วิว 3 - เฟรมเวิร์ก JavaScript
+- ไวท์ - เครื่องมือสร้าง
+- เทลวินด์ ซีเอสเอส - จัดแต่งหน้า
+- ดेยซี ยูไอ - ส่วนประกอบอินเตอร์เฟส
+- ดาตาเทเบิล - ฟังก์ชันตารางขึ้นตอน
+- คิวอาร์โค้ด - การสร้างและสแกน คิวอาร์โค้ด
 
-## Contributing
+### ไลบรารี่เพิ่มเติม
+- แอกโซส - ไคลเอนต์ เอชทีทีพี
+- สวีท อะเลิร์ท 2 - การแจ้งเตือน
+- คลาวดินารี่ - ที่เก็บรูปภาพ
+- เจคิวรี่ - การจัดการ ดีโอเอม
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+---
 
-## Code of Conduct
+## โครงสร้างโปรเจค
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```
+ระบบจุดขายสินค้า/
+├── app/                 # ไฟล์ลอจิกของลาราเวล
+│   ├── ส่วนเอชทีทีพี/   # ตัวควบคุม กลไกการติดกลั่น
+│   ├── โมเดล/          # โมเดลฐานข้อมูล
+│   └── คอนโซล/         # คำสั่งเมื่อยี
+├── ฐานข้อมูล/          # การโยกย้ายและดูแล
+├── ทรัพยากร/          # ทรัพยากรส่วนหน้าบ้าน
+│   ├── จาวาสคริปต์/    # ส่วนประกอบวิว
+│   ├── ซีเอสเอส/       # แผ่นสไตล์
+│   └── มุมมอง/         # แม่แบบเบลด
+├── เส้นทาง/            # นิยามเส้นทาง
+├── การตั้งค่า/         # ไฟล์การตั้งค่า
+├── สาธารณะ/          # รูทเว็บ
+├── ที่เก็บ/           # ที่เก็บไฟล์
+├── ทดสอบ/            # ทดสอบยูนิต และ ฟีเจอร์
+└── ผู้ขาย/            # การพึ่งพา
+```
 
-## Security Vulnerabilities
+---
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## ตัวแบบข้อมูล
+
+- **ผู้ใช้** - ผู้ใช้งานระบบ
+- **สินค้า** - สินค้า
+- **หมวดหมู่** - ประเภทสินค้า
+- **ใบเสร็จ** - ใบเสร็จการขาย
+- **รายการสินค้า** - รายการสินค้าในใบเสร็จ
+- **โต๊ะ** - โต๊ะอาหาร
+- **เซสชัน** - เซสชันผู้ใช้
+- **การตั้งค่า** - ค่าตั้งค่าระบบ
+
+---
+
+## วิธีการติดตั้ง
+
+### ข้อกำหนดเบื้องต้น
+- พีเอชพี 8.2 ขึ้นไป
+- คอมโพเซอร์
+- โหนด.จาวาสคริปต์ และ เอ็นพีเอ็ม
+- เมจแคว่ล หรือ ฐานข้อมูลอื่น
+
+### ขั้นตอนการติดตั้ง
+
+1. ดาวน์โหลดหรือโคลนโปรเจค
+2. ติดตั้งการพึ่งพา พีเอชพี:
+   ```bash
+   composer install
+   ```
+
+3. ติดตั้งการพึ่งพา ส่วนหน้าบ้าน:
+   ```bash
+   npm install
+   ```
+
+4. สร้างไฟล์ .env:
+   ```bash
+   cp .env.example .env
+   ```
+
+5. สร้างคีย์แอปพลิเคชัน:
+   ```bash
+   php artisan key:generate
+   ```
+
+6. ตั้งค่าฐานข้อมูล ใน .env และ ย้ายข้อมูล:
+   ```bash
+   php artisan migrate
+   ```
+
+7. ปลูกข้อมูลตัวอย่าง (ถ้ามี):
+   ```bash
+   php artisan db:seed
+   ```
+
+---
+
+## วิธีการใช้งาน
+
+### รัน เซิร์ฟเวอร์พัฒนา
+
+เปิด ปลายทาง 2 หน้าต่าง:
+
+**ปลายทาง 1 - ส่วนหลังบ้าน:**
+```bash
+php artisan serve
+```
+เข้าที่ http://localhost:8000
+
+**ปลายทาง 2 - ส่วนหน้าบ้าน:**
+```bash
+npm run dev
+```
+
+### สร้าง สำหรับการใช้งานจริง
+```bash
+npm run build
+```
+
+---
+
+## ไฟล์สำคัญ
+
+- [vite.config.js](vite.config.js) - การตั้งค่าไวท์
+- [composer.json](composer.json) - การพึ่งพาพีเอชพี
+- [package.json](package.json) - การพึ่งพาจาวาสคริปต์
+- [.env.example](.env.example) - แม่แบบการตั้งค่าสภาพแวดล้อม
+- [routes/api.php](routes/api.php) - เส้นทางเอพีไอ
+- [routes/web.php](routes/web.php) - เส้นทางเว็บ
+
+---
+
+## หมายเหตุการพัฒนา
+
+- ระบบนี้ใช้ไวท์ สำหรับการรีโหลดโมดูลร้อน
+- สามารถปรับใช้ได้บนดอกเกอร์ โดยใช้ [Dockerfile](Dockerfile)
+- รองรับการปรับใช้ บน เวอร์เซล ผ่าน [vercel.json](vercel.json)
+- ใช้ นิกซ์แพกส์ สำหรับสภาพแวดล้อมการสร้าง
+
+---
+
+## ผู้เขียน
+
+ทีมงานระบบจุดขายสินค้า
+
+## ลิขสิทธิ์
+
+ใบอนุญาต เอ็มไอที
 
 ## License
 
