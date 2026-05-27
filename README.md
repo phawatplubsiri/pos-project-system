@@ -1,4 +1,4 @@
-# ระบบจุดขายสินค้า
+# ระบบจุดขายสินค้า (POS System)
 
 ## ภาพรวมโปรเจค
 
@@ -11,11 +11,11 @@
 ### การจัดการสินค้า
 - เพิ่ม แก้ไข และลบสินค้า
 - จัดเรียงสินค้าตามประเภท
-- ติดตามปริมาณสินค้าคงคลัง
+- ติดตามปริมาณสินค้า
 - อัปโหลดรูปภาพสินค้า
 
 ### การจัดการการขาย
-- สร้างใบเสร็จขายแบบรีเซลเวอร์ (POS)
+- สร้างใบเสร็จขาย
 - ค้นหาและเพิ่มสินค้าลงในตะกร้า
 - คำนวณราคารวม ภาษี และส่วนลด
 - พิมพ์ใบเสร็จ
@@ -36,24 +36,22 @@
 ## เทคโนโลยีที่ใช้
 
 ### ส่วนหลังบ้าน
-- Laravel 8 - เฟรมเวิร์กเว็บแอปพลิเคชัน
-- PHP 8.2 ขึ้นไป - ภาษาโปรแกรมมิ่ง
-- MySQL / PostgreSQL - ฐานข้อมูล
-- Laravel Sanctum - ระบบรับรองความถูกต้อง
+- Laravel 8
+- PHP 8.2 ขึ้นไป
+- MySQL
+- Laravel Sanctum
 
 ### ส่วนหน้าบ้าน
-- Vue 3 - เฟรมเวิร์ก JavaScript
-- Vite - เครื่องมือสร้าง
-- Tailwind CSS - จัดแต่งหน้า
-- DaisyUI - ส่วนประกอบอินเตอร์เฟส
-- DataTables - ฟังก์ชันตารางข้อมูล
-- QR Code - การสร้างและสแกน QR Code
+- Vue 3
+- Tailwind CSS
+- DataTables
+- QR Code
 
 ### ไลบรารี่เพิ่มเติม
-- Axios - ไคลเอนต์ HTTP
-- SweetAlert2 - การแจ้งเตือน
-- Cloudinary - ที่เก็บรูปภาพ
-- jQuery - การจัดการ DOM
+- Axios
+- SweetAlert2
+- Cloudinary
+- jQuery
 
 ---
 
@@ -157,33 +155,3 @@ npm run dev
 ```bash
 npm run build
 ```
-
----
-
-## ไฟล์สำคัญ
-
-- [vite.config.js](vite.config.js) - Vite Configuration
-- [composer.json](composer.json) - PHP Dependencies
-- [package.json](package.json) - JavaScript Dependencies
-- [.env.example](.env.example) - Environment Configuration Template
-- [routes/api.php](routes/api.php) - API Routes
-- [routes/web.php](routes/web.php) - Web Routes
-
----
-
-## หมายเหตุการพัฒนา
-
-- ระบบนี้ใช้ Vite สำหรับ Fast HMR (Hot Module Replacement)
-- สามารถ Deploy ได้บน Docker โดยใช้ [Dockerfile](Dockerfile)
-- รองรับ Vercel Deployment ผ่าน [vercel.json](vercel.json)
-- ใช้ NixPacks สำหรับ Build Environment
-
----
-
-## ผู้เขียน
-
-ทีมงานระบบจุดขายสินค้า
-
-## ลิขสิทธิ์
-
-MIT License
