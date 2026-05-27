@@ -126,7 +126,7 @@
         </div>
         <div class="p-6 overflow-y-auto">
           <div class="flex flex-col gap-3">
-            <div v-for="order in pendingOrders" :key="order.id" class="bg-[var(--color-bg-primary)] border border-[var(--color-secondary-dark)] rounded-xl p-4 flex justify-between items-center gap-4">
+            <div v-for="order in regularPendingOrders" :key="order.id" class="bg-[var(--color-bg-primary)] border border-[var(--color-secondary-dark)] rounded-xl p-4 flex justify-between items-center gap-4">
               <div>
                 <div class="font-bold text-black">โต๊ะ {{ order.session?.table?.name }}</div>
                 <div class="text-black text-sm">{{ order.product?.name }} × {{ order.quantity }}</div>

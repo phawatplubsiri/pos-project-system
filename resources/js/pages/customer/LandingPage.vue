@@ -2,7 +2,17 @@
   <div class="landing-page">
     <!-- Header -->
     <div class="page-header">
-      <div class="text-center">
+      <div class="max-w-[540px] mx-auto px-4 relative text-center">
+        <!-- Bell Ring Button strictly in top-right of the header/page container -->
+        <button 
+          v-if="sessionValid"
+          @click="callStaff" 
+          :disabled="callingStaff" 
+          class="absolute top-1/2 -translate-y-1/2 right-4 z-10 w-12 h-12 bg-[var(--lp-highlight)] text-white border-none rounded-full shadow-[0_4px_15px_rgba(0,0,0,0.15)] flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 disabled:opacity-50 disabled:grayscale cursor-pointer"
+        >
+          <BellRing :size="24" :class="{ 'animate-bounce': callingStaff }" />
+        </button>
+
         <h1 class="text-2xl font-extrabold text-white m-0 mb-1.5 tracking-tight">รายการเมนู</h1>
         <p class="text-sm text-white/80 m-0 font-medium">เครื่องดื่ม • ของทานเล่น • บอร์ดเกม</p>
       </div>
@@ -150,7 +160,7 @@
               <button @click="decreaseQty(item.id)" class="btn-qty-small">
                 <Minus :size="14" />
               </button>
-              <span class="min-w-[20px] text-center font-bold text-sm">{{ item.qty }}</span>
+              <span class="min-w-[20px] text-center font-bold text-sm text-black">{{ item.qty }}</span>
               <button @click="addToCart(item)" class="btn-qty-small">
                 <Plus :size="14" />
               </button>
@@ -172,15 +182,7 @@
       </div>
     </div>
 
-    <!-- Floating Call Staff Button -->
-    <button 
-      v-if="sessionValid"
-      @click="callStaff" 
-      :disabled="callingStaff" 
-      class="fixed bottom-6 right-6 z-[110] w-14 h-14 bg-[var(--lp-highlight)] text-white border-none rounded-full shadow-[0_4px_15px_rgba(0,0,0,0.3)] flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 disabled:opacity-50 disabled:grayscale"
-    >
-      <BellRing :size="28" :class="{ 'animate-bounce': callingStaff }" />
-    </button>
+
   </div>
 </template>
 
@@ -559,7 +561,7 @@ export default {
 @media (max-width: 380px) {
   .menu-card { grid-template-columns: 60px 1fr; }
   .product-image { width: 60px; height: 60px; }
-  .price-badge { position: relative; top: auto; right: auto; margin-top: 4px; display: block; font-size: 15px; }
+  .price-badge { position: relative; top: auto; right: auto; margin-top: 4px; display: block; font-size: 14px; justify-content: center; }
   .product-actions { margin-top: 8px; }
 }
 </style>

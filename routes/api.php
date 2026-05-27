@@ -63,6 +63,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/orders', [OrderController::class, 'store']);
     Route::put('/orders/{id}/status', [OrderController::class, 'updateStatus']);
     Route::post('/tables/{id}/orders/complete-all', [OrderController::class, 'completeAll']);
+    Route::post('/tables/{id}/dismiss-staff-call', [OrderController::class, 'dismissStaffCall']);
 
     // -------- Reports --------
     Route::get('/reports/daily', [ReportController::class, 'index']);

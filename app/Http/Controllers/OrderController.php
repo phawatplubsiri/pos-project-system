@@ -21,6 +21,9 @@ class OrderController extends Controller
         }
 
         $orders = Order::where('session_id', $session->id)
+                       ->whereHas('product.category', function($q) {
+                           $q->where('type', '!=', 'service');
+                       })
                        ->with('product')
                        ->orderBy('created_at', 'desc')
                        ->get();
@@ -194,6 +197,11 @@ class OrderController extends Controller
 
     public function completeAll($tableId)
     {
+        // ... (existing code)
+    }
+
+    public function dismissStaffCall($tableId)
+    {
         $session = Session::where('table_id', $tableId)
                           ->where('status', 'ongoing')
                           ->first();
@@ -203,10 +211,13 @@ class OrderController extends Controller
         }
 
         Order::where('session_id', $session->id)
-             ->where('status', 'pending')
+             ->where('status', 'confirming')
+             ->whereHas('product', function($q) {
+                 $q->where('name', 'เรียกพนักงาน');
+             })
              ->update(['status' => 'completed']);
 
-        return response()->json(['message' => 'ทำรายการทั้งหมดเสร็จสมบูรณ์แล้ว']);
+        return response()->json(['message' => 'รับทราบการเรียกพนักงานแล้ว']);
     }
 
     public function store(Request $request)

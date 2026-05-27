@@ -21,14 +21,26 @@ class TableController extends Controller
         $tables->each(function ($table) {
             if ($table->sessions->isNotEmpty()) {
                 $session = $table->sessions->first();
+                
+                // Check if this table is calling staff
+                $isCallingStaff = \App\Models\Order::where('session_id', $session->id)
+                    ->where('status', 'confirming')
+                    ->whereHas('product', function($q) {
+                        $q->where('name', 'เรียกพนักงาน');
+                    })->exists();
+
                 $table->active_session = [
+                    'id' => $session->id, // Added session ID
                     'customer_name' => $session->user ? $session->user->name : 'ลูกค้า',
                     'staff_name' => $session->user ? $session->user->name : 'ไม่ระบุ',
-                    'user_id' => $session->user_id, // เพิ่ม user_id เข้าไปด้วย
+                    'user_id' => $session->user_id,
                     'start_time' => $session->start_time,
                     'guest_amount' => $session->guest_amount,
-                    'day_pass_count' => $session->day_pass_count ?? 0
+                    'day_pass_count' => $session->day_pass_count ?? 0,
+                    'calling_staff' => $isCallingStaff // Flag added here
                 ];
+                
+                $table->calling_staff = $isCallingStaff; // Also add to table root for convenience
             }
         });
 
@@ -213,6 +225,17 @@ class TableController extends Controller
 
         if (!$table) {
             return response()->json(['message' => 'ไม่พบโต๊ะนี้'], 404);
+        }
+
+        if ($table->sessions->isNotEmpty()) {
+            $session = $table->sessions->first();
+            $table->calling_staff = \App\Models\Order::where('session_id', $session->id)
+                ->where('status', 'confirming')
+                ->whereHas('product', function($q) {
+                    $q->where('name', 'เรียกพนักงาน');
+                })->exists();
+        } else {
+            $table->calling_staff = false;
         }
 
         return response()->json($table);

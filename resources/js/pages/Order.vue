@@ -31,6 +31,20 @@
 
     <!-- Main Content -->
     <div class="max-w-[1600px] mx-auto p-8">
+      <!-- Staff Call Alert -->
+      <transition name="fade">
+        <div v-if="isCallingStaff" class="mb-6 flex items-center gap-4 bg-[#FFF3CD] border-2 border-[#FFE69C] p-4 px-6 rounded-2xl shadow-sm animate-pulse">
+          <BellRing class="text-[#856404]" :size="24" />
+          <div class="flex-1">
+            <h4 class="m-0 text-[#856404] font-bold text-lg">โต๊ะนี้กำลังเรียกพนักงาน!</h4>
+            <p class="m-0 text-[#856404]/80 text-sm">ลูกค้าต้องการความช่วยเหลือที่โต๊ะ</p>
+          </div>
+          <button @click="handleDismissCall" class="bg-[#856404] text-white border-none py-2 px-6 rounded-xl font-bold cursor-pointer hover:bg-[#6d5203] transition-colors">
+            รับทราบ
+          </button>
+        </div>
+      </transition>
+
       <div class="content-grid">
         <!-- Products Section -->
         <div class="flex flex-col gap-6">
@@ -252,14 +266,14 @@ import { useAlert } from '../composables/useAlert';
 import { 
   ArrowLeft, ShoppingCart, Clock, QrCode, Banknote, 
   Coffee, Utensils, Package, Bell, Trash2, 
-  Plus, Minus, Check, X, ClipboardList, RotateCcw, Printer
+  Plus, Minus, Check, X, ClipboardList, RotateCcw, Printer, BellRing
 } from 'lucide-vue-next';
 
 export default {
   components: {
     QrcodeVue, ArrowLeft, ShoppingCart, Clock, QrCode, Banknote,
     Coffee, Utensils, Package, Bell, Trash2,
-    Plus, Minus, Check, X, ClipboardList, RotateCcw, Printer
+    Plus, Minus, Check, X, ClipboardList, RotateCcw, Printer, BellRing
   },
   setup() {
     const route = useRoute();
@@ -275,6 +289,7 @@ export default {
     const showQrModal = ref(false);
     const currentTime = ref(new Date());
     const sessionStartTime = ref(null);
+    const isCallingStaff = ref(false);
     let timerInterval = null;
     let pollingInterval = null;
 
@@ -352,6 +367,9 @@ export default {
             const newConfirmingCount = newOrders.filter(o => o.status.toLowerCase() === 'confirming').length;
             if (newConfirmingCount > currentConfirmingCount) success('🔔 มีออเดอร์ใหม่จากลูกค้า!');
             orderHistory.value = newOrders;
+            
+            // Also update calling staff status silently
+            checkTableStatus(false);
         } catch (err) { console.error('Fetch history error:', err); }
     };
 
@@ -364,6 +382,17 @@ export default {
             else warning('ยกเลิกรายการแล้ว');
             fetchOrderHistory();
         } catch (err) { error('ไม่สามารถอัปเดตสถานะได้', err.response?.data?.message || err.message); }
+    };
+
+    const handleDismissCall = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        await axios.post(`/api/tables/${tableId}/dismiss-staff-call`, {}, { headers: { Authorization: `Bearer ${token}` } });
+        isCallingStaff.value = false;
+        success('รับทราบการเรียกพนักงาน');
+      } catch (err) {
+        console.error("Dismiss call error", err);
+      }
     };
 
     const confirmCancelOrder = async (orderId) => {
@@ -424,14 +453,16 @@ export default {
       } catch (err) { error('เกิดข้อผิดพลาด', err.response?.data?.message || err.message); }
     };
 
-    const checkTableStatus = async () => {
+    const checkTableStatus = async (initial = true) => {
       try {
           const token = localStorage.getItem('token');
           const response = await axios.get(`/api/tables/${tableId}`, { headers: { Authorization: `Bearer ${token}` } });
           const tableData = response.data;
           tableName.value = tableData.name;
-          if (tableData.is_available) { error('โต๊ะนี้ยังไม่ได้เปิด', `สถานะปัจจุบัน: ว่าง`); router.push('/pos'); }
-          else {
+          isCallingStaff.value = tableData.calling_staff;
+
+          if (initial && tableData.is_available) { error('โต๊ะนี้ยังไม่ได้เปิด', `สถานะปัจจุบัน: ว่าง`); router.push('/pos'); }
+          else if (initial) {
               const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
               const activeSession = tableData.sessions ? tableData.sessions[0] : null;
               if (currentUser.role !== 'admin' && activeSession && activeSession.user_id !== currentUser.id) {
@@ -442,7 +473,7 @@ export default {
                   sessionStartTime.value = tableData.sessions[0].start_time;
               }
           }
-      } catch (err) { console.error(err); router.push('/pos'); }
+      } catch (err) { if (initial) { console.error(err); router.push('/pos'); } }
     };
 
     const printQr = () => { window.print(); };
