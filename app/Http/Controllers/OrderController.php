@@ -197,7 +197,19 @@ class OrderController extends Controller
 
     public function completeAll($tableId)
     {
-        // ... (existing code)
+        $session = Session::where('table_id', $tableId)
+                          ->where('status', 'ongoing')
+                          ->first();
+
+        if (!$session) {
+            return response()->json(['message' => 'ไม่พบรอบการใช้งาน'], 400);
+        }
+
+        Order::where('session_id', $session->id)
+             ->where('status', 'pending')
+             ->update(['status' => 'completed']);
+
+        return response()->json(['message' => 'อัปเดตสถานะเสร็จสิ้นทั้งหมดเรียบร้อยแล้ว']);
     }
 
     public function dismissStaffCall($tableId)

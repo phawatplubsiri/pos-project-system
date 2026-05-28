@@ -230,7 +230,7 @@
         <teleport to="body">
           <div v-if="showQrModal" id="receipt-print-area" class="print-only">
             <div class="receipt-header">
-              <h2 class="receipt-shop-name">☕ Board Game Cafe</h2>
+              <h2 class="receipt-shop-name">Board Game Cafe</h2>
               <div class="receipt-divider">--------------------------------</div>
               <h1 class="receipt-table-num">โต๊ะ: {{ tableName || tableId }}</h1>
               <div class="receipt-divider">--------------------------------</div>
@@ -365,7 +365,7 @@ export default {
             const newOrders = response.data;
             const currentConfirmingCount = awaitingConfirmOrders.value.length;
             const newConfirmingCount = newOrders.filter(o => o.status.toLowerCase() === 'confirming').length;
-            if (newConfirmingCount > currentConfirmingCount) success('🔔 มีออเดอร์ใหม่จากลูกค้า!');
+            if (newConfirmingCount > currentConfirmingCount) success('มีออเดอร์ใหม่จากลูกค้า!');
             orderHistory.value = newOrders;
             
             // Also update calling staff status silently
@@ -396,7 +396,7 @@ export default {
     };
 
     const confirmCancelOrder = async (orderId) => {
-        const isConfirmed = await confirm('⚠️ ยืนยันการยกเลิกรายการนี้?', '(สต็อกจะถูกคืน และยอดเงินจะถูกหักออกจากบิล)');
+        const isConfirmed = await confirm('ยืนยันการยกเลิกรายการนี้?', '(สต็อกจะถูกคืน และยอดเงินจะถูกหักออกจากบิล)');
         if (isConfirmed) updateOrderStatus(orderId, 'cancelled');
     };
 
@@ -410,10 +410,10 @@ export default {
             await axios.post('/api/orders', {
                 table_id: tableId, items: cart.value.map(item => ({ id: item.id, qty: item.qty }))
             }, { headers: { Authorization: `Bearer ${token}` } });
-            success('✅ สั่งอาหารสำเร็จ!');
+            success('สั่งอาหารสำเร็จ!');
             cart.value = []; 
             fetchOrderHistory();
-        } catch (err) { error('❌ สั่งอาหารไม่สำเร็จ', err.response?.data?.message || 'โปรดลองใหม่'); }
+        } catch (err) { error('สั่งอาหารไม่สำเร็จ', err.response?.data?.message || 'โปรดลองใหม่'); }
     };
 
     const handleCheckout = async () => {
@@ -430,18 +430,18 @@ export default {
         const data = response.data;
         let serviceBreakdown = '';
         if (data.day_pass_count > 0) {
-          serviceBreakdown += `<div style="display: flex; justify-content: space-between;"><span>🎟️ Day Pass (${data.day_pass_count} คน):</span><strong>${formatPrice(data.costs.day_pass)} ฿</strong></div>`;
+          serviceBreakdown += `<div style="display: flex; justify-content: space-between;"><span>Day Pass (${data.day_pass_count} คน):</span><strong>${formatPrice(data.costs.day_pass)} ฿</strong></div>`;
         }
         if (data.regular_count > 0) {
-          serviceBreakdown += `<div style="display: flex; justify-content: space-between;"><span>⏱️ ค่าชั่วโมง (${data.regular_count} คน):</span><strong>${formatPrice(data.costs.regular_time)} ฿</strong></div>`;
+          serviceBreakdown += `<div style="display: flex; justify-content: space-between;"><span>ค่าชั่วโมง (${data.regular_count} คน):</span><strong>${formatPrice(data.costs.regular_time)} ฿</strong></div>`;
         }
         const htmlContent = `
             <div style="text-align: left; font-family: 'Sarabun', sans-serif;">
-                <p><strong>👥 รวมลูกค้า:</strong> ${data.pax} คน</p><hr>
+                <p><strong>รวมลูกค้า:</strong> ${data.pax} คน</p><hr>
                 ${serviceBreakdown}
                 <div style="display: flex; justify-content: space-between;"><span>ค่าบริการรวม:</span><strong>${formatPrice(data.costs.time)} ฿</strong></div>
-                <div style="display: flex; justify-content: space-between;"><span>🍔 ค่าอาหาร/น้ำ:</span><strong>${formatPrice(data.costs.food)} ฿</strong></div><hr>
-                <div style="display: flex; justify-content: space-between; font-size: 1.2em; color: #4B3621;"><span>💰 ยอดสุทธิ:</span><strong>${formatPrice(data.costs.total)} ฿</strong></div>
+                <div style="display: flex; justify-content: space-between;"><span>ค่าอาหาร/น้ำ:</span><strong>${formatPrice(data.costs.food)} ฿</strong></div><hr>
+                <div style="display: flex; justify-content: space-between; font-size: 1.2em; color: #4B3621;"><span>ยอดสุทธิ:</span><strong>${formatPrice(data.costs.total)} ฿</strong></div>
             </div>`;
         const isConfirmed = await confirm(`สรุปยอดเงิน (โต๊ะ ${tableName.value || tableId})`, htmlContent, 'เช็คบิล & ปิดโต๊ะ');
         if (isConfirmed) {
